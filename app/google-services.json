@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "848819986187",
+    "project_id": "fitnessbalance-e477b",
+    "storage_bucket": "fitnessbalance-e477b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848819986187:android:e8f800cb1bd7265ae9cc0e",
+        "android_client_info": {
+          "package_name": "com.example.fitnessbalance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfApOV7tDeJyRpPRgG21B15-jLRsaoYNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

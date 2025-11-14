@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">FitnessBalance</string>
+    <string name="welcome_back">Welcome Back!</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forget_password">Forget Password?</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="login">Login</string>
+    <string name="ask_sign_up">Don\'t have an account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="create_account">Create Account</string>
+    <string name="full_name">Full Name</string>
+    <string name="register_weight">Weight (kg)</string>
+    <string name="register_fitness_level">Fitness Level</string>
+    <string name="login_redirect">Already have an account? Login</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="forget_password_link">Enter your email address and we\'ll send you a link to reset your password.</string>
+    <string name="send_reset_link">Send Reset Link</string>
+</resources>

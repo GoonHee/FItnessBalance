@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="primary_color">#4CAF50</color>
+    <color name="calorie_surplus">#FF6B6B</color>
+    <color name="calorie_deficit">#4ECDC4</color>
+    <color name="calorie_balanced">#45B7D1</color>
+    <color name="bmi_underweight">#4ECDC4</color>  <!-- Teal -->
+    <color name="bmi_normal">#45B7D1</color>      <!-- Blue -->
+    <color name="bmi_overweight">#FFA726</color>  <!-- Orange -->
+    <color name="bmi_obese">#FF6B6B</color>       <!-- Red -->
+</resources>

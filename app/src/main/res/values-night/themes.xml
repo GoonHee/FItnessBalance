@@ -1,0 +1,22 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme for Dark Mode -->
+    <style name="Base.Theme.FitnessBalance" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <!-- Primary brand color for Dark Mode. -->
+        <!-- We'll use your 'teal_200' which is a lighter, more vibrant color suitable for dark backgrounds. -->
+        <item name="colorPrimary">@color/teal_200</item>
+        <item name="colorOnPrimary">@color/black</item>
+
+        <!-- Secondary brand color for Dark Mode. -->
+        <!-- Let's use the same 'teal_200' for simplicity. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <!-- Status bar color for Dark Mode. -->
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+
+        <!-- You can add more customizations here later. -->
+    </style>
+
+    <style name="Theme.FitnessBalance" parent="Base.Theme.FitnessBalance" />
+</resources>
