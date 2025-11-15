@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select Preferred Exercises"
+        android:text="@string/exercise_selection_title"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -26,12 +26,11 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Popular Exercises -->
             <CheckBox
                 android:id="@+id/runningCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Running"
+                android:text="@string/exercise_running"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -39,7 +38,7 @@
                 android:id="@+id/cyclingCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Cycling"
+                android:text="@string/exercise_cycling"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -47,7 +46,7 @@
                 android:id="@+id/swimmingCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Swimming"
+                android:text="@string/exercise_swimming"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -55,7 +54,7 @@
                 android:id="@+id/weightliftingCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Weight Lifting"
+                android:text="@string/exercise_weight_lifting"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -63,7 +62,7 @@
                 android:id="@+id/yogaCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Yoga"
+                android:text="@string/exercise_yoga"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -71,7 +70,7 @@
                 android:id="@+id/pilatesCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Pilates"
+                android:text="@string/exercise_pilates"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -79,7 +78,7 @@
                 android:id="@+id/basketballCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Basketball"
+                android:text="@string/exercise_basketball"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -87,7 +86,7 @@
                 android:id="@+id/footballCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Football"
+                android:text="@string/exercise_football"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -95,7 +94,7 @@
                 android:id="@+id/tennisCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tennis"
+                android:text="@string/exercise_tennis"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -103,7 +102,7 @@
                 android:id="@+id/hiitCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="HIIT"
+                android:text="@string/exercise_hiit"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -111,7 +110,7 @@
                 android:id="@+id/dancingCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Dancing"
+                android:text="@string/exercise_dancing"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -119,7 +118,7 @@
                 android:id="@+id/hikingCheckbox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Hiking"
+                android:text="@string/exercise_hiking"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
 
@@ -139,7 +138,7 @@
             android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="Cancel"
+            android:text="@string/cancel"
             android:textSize="14sp"
             android:backgroundTint="#666666"
             android:textColor="@color/white" />
@@ -150,7 +149,7 @@
             android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="Save"
+            android:text="@string/save"
             android:textSize="14sp"
             android:backgroundTint="#45B7D1"
             android:textColor="@color/white" />
