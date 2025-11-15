@@ -3,44 +3,25 @@ package com.example.fitnessbalance;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    // UI Components
     private TextView welcomeText, calorieBalanceText, dateText;
     private TextView consumedCaloriesText, burnedCaloriesText, netCaloriesText;
     private CardView foodLogCard, exerciseCard, profileCard;
-
-    // Firebase
-    private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
-
-    // User data - It's okay to cache this as it changes less frequently
     private String userName;
-
-    // FIX: Removed today's metrics from instance variables to prevent using stale data
-    // private int caloriesConsumed = 0;
-    // private int caloriesBurned = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Initialize Firebase
-        auth = FirebaseAuth.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
         currentUser = auth.getCurrentUser();
 
