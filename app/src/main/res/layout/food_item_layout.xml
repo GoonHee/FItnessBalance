@@ -19,7 +19,7 @@
             android:id="@+id/foodNameText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Food Name"
+            android:text="@string/food_name"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="@color/black" />
@@ -28,7 +28,7 @@
             android:id="@+id/foodCaloriesText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="0 cal"
+            android:text="@string/default_calories_result"
             android:textSize="12sp"
             android:textColor="#666666" />
 
@@ -40,7 +40,7 @@
         android:layout_height="48dp"
         android:src="@drawable/ic_close_small"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Remove"
+        android:contentDescription="@string/remove"
         app:tint="#FF6B6B" />
 
 </LinearLayout>

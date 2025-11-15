@@ -21,14 +21,14 @@
             android:layout_height="48dp"
             android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/back_button_description"
             app:tint="@color/white" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Exercise Tracking"
+            android:text="@string/exercise_tracking_title"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/white"
@@ -57,7 +57,7 @@
                 android:id="@+id/dateText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Today's Date"
+                android:text="@string/todays_date_placeholder"
                 android:textSize="16sp"
                 android:textColor="#666666"
                 android:layout_marginBottom="24dp"
@@ -81,7 +81,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Suggested Exercises"
+                        android:text="@string/suggested_exercises_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
@@ -91,7 +91,7 @@
                         android:id="@+id/suggestedExercisesText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Based on your preferences: Loading..."
+                        android:text="@string/suggested_exercises_loading"
                         android:textSize="14sp"
                         android:textColor="#666666"
                         android:layout_marginBottom="12dp" />
@@ -126,7 +126,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Add Exercise"
+                        android:text="@string/add_exercise_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
@@ -142,7 +142,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Exercise"
+                            android:text="@string/exercise_label"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginBottom="4dp" />
@@ -167,7 +167,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Duration (minutes)"
+                            android:text="@string/duration_label"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginBottom="4dp" />
@@ -185,7 +185,7 @@
                                 android:id="@+id/durationInput"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Enter duration in minutes"
+                                android:hint="@string/duration_hint"
                                 android:inputType="number"
                                 android:textSize="14sp" />
 
@@ -198,7 +198,7 @@
                         android:id="@+id/calculateCaloriesButton"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:text="Calculate Calories"
+                        android:text="@string/calculate_calories_button"
                         android:textSize="14sp"
                         android:backgroundTint="#45B7D1"
                         android:textColor="@color/white"
@@ -219,7 +219,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Estimated Calories:"
+                            android:text="@string/estimated_calories_label"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="@color/black" />
@@ -228,7 +228,7 @@
                             android:id="@+id/caloriesResultText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 cal"
+                            android:text="@string/default_calories_result"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="#4ECDC4" />
@@ -240,7 +240,7 @@
                         android:id="@+id/addExerciseButton"
                         android:layout_width="match_parent"
                         android:layout_height="45dp"
-                        android:text="Add Exercise +"
+                        android:text="@string/add_exercise_button"
                         android:textSize="14sp"
                         android:backgroundTint="#4ECDC4"
                         android:textColor="@color/white"
@@ -269,7 +269,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Today's Exercises"
+                        android:text="@string/todays_exercises_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
@@ -289,7 +289,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:text="Exercise"
+                            android:text="@string/exercise_label"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:textColor="#666666" />
@@ -298,7 +298,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="2"
-                            android:text="Duration"
+                            android:text="@string/header_duration"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:textColor="#666666"
@@ -308,7 +308,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="2"
-                            android:text="Calories"
+                            android:text="@string/header_calories"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:textColor="#666666"
@@ -318,7 +318,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Done"
+                            android:text="@string/header_done"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:textColor="#666666"
@@ -351,7 +351,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Total Calories Burned Today:"
+                            android:text="@string/total_calories_burned_label"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="@color/black" />
@@ -360,7 +360,7 @@
                             android:id="@+id/totalCaloriesBurnedText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/default_total_calories"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="#4ECDC4" />
@@ -372,7 +372,7 @@
                         android:id="@+id/saveExercisesButton"
                         android:layout_width="match_parent"
                         android:layout_height="45dp"
-                        android:text="Save Exercises Log"
+                        android:text="@string/save_exercises_log_button"
                         android:textSize="14sp"
                         android:backgroundTint="#45B7D1"
                         android:textColor="@color/white"

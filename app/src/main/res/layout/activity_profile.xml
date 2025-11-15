@@ -21,14 +21,14 @@
             android:layout_height="50dp"
             android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/back"
             app:tint="@color/white" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="My Profile"
+            android:text="@string/profile_title"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/white"
@@ -76,7 +76,7 @@
                     android:id="@+id/profileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="User Name"
+                    android:text="@string/profile_user_name_placeholder"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@color/black" />
@@ -85,7 +85,7 @@
                     android:id="@+id/profileEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="user@email.com"
+                    android:text="@string/profile_user_email_placeholder"
                     android:textSize="14sp"
                     android:textColor="#666666"
                     android:layout_marginTop="4dp" />
@@ -110,7 +110,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Personal Information"
+                        android:text="@string/profile_personal_info_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
@@ -126,7 +126,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Full Name"
+                            android:text="@string/full_name"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginBottom="4dp" />
@@ -144,7 +144,7 @@
                                 android:id="@+id/fullNameEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Enter your full name"
+                                android:hint="@string/profile_full_name_hint"
                                 android:textSize="14sp" />
 
                         </com.google.android.material.textfield.TextInputLayout>
@@ -160,7 +160,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Weight (kg)"
+                            android:text="@string/profile_weight_label"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginBottom="4dp" />
@@ -178,7 +178,7 @@
                                 android:id="@+id/weightEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Enter your weight"
+                                android:hint="@string/profile_weight_hint"
                                 android:inputType="numberDecimal"
                                 android:textSize="14sp" />
 
@@ -195,7 +195,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Height (cm)"
+                            android:text="@string/profile_height_label"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginBottom="4dp" />
@@ -213,7 +213,7 @@
                                 android:id="@+id/heightEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Enter your height in cm"
+                                android:hint="@string/profile_height_hint"
                                 android:inputType="numberDecimal"
                                 android:textSize="14sp" />
 
@@ -229,7 +229,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Fitness Level"
+                            android:text="@string/register_fitness_level"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginBottom="4dp" />
@@ -266,7 +266,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="BMI Calculator"
+                        android:text="@string/profile_bmi_calculator_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
@@ -287,7 +287,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Your BMI Results"
+                            android:text="@string/profile_bmi_results_title"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="@color/black"
@@ -311,7 +311,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="BMI"
+                                    android:text="@string/profile_bmi_label"
                                     android:textSize="14sp"
                                     android:textColor="#666666"
                                     android:layout_marginBottom="4dp" />
@@ -320,7 +320,7 @@
                                     android:id="@+id/bmiValueText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="--"
+                                    android:text="@string/profile_bmi_placeholder"
                                     android:textSize="24sp"
                                     android:textStyle="bold"
                                     android:textColor="#45B7D1" />
@@ -338,7 +338,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Category"
+                                    android:text="@string/profile_bmi_category_label"
                                     android:textSize="14sp"
                                     android:textColor="#666666"
                                     android:layout_marginBottom="4dp" />
@@ -347,7 +347,7 @@
                                     android:id="@+id/bmiCategoryText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="--"
+                                    android:text="@string/profile_bmi_placeholder"
                                     android:textSize="16sp"
                                     android:textStyle="bold"
                                     android:textColor="#666666"
@@ -362,7 +362,7 @@
                             android:id="@+id/bmiScaleInfo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="BMI Scale: Underweight (&lt;18.5), Normal (18.5-24.9), Overweight (25-29.9), Obese (≥30)"
+                            android:text="@string/profile_bmi_scale_info"
                             android:textSize="10sp"
                             android:textColor="#666666"
                             android:gravity="center"

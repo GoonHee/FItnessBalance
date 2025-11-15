@@ -3,36 +3,36 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="#F5F5F5"
+    android:orientation="vertical">
 
     <!-- Header with Back Button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="#45B7D1"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
 
         <ImageButton
             android:id="@+id/backButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/back_button_description"
+            android:src="@drawable/ic_arrow_back"
             app:tint="@color/white" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Calorie Calculator"
-            android:textSize="20sp"
-            android:textStyle="bold"
+            android:gravity="center"
+            android:text="@string/calorie_calculator_title"
             android:textColor="@color/white"
-            android:gravity="center" />
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <View
             android:layout_width="40dp"
@@ -57,9 +57,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -70,35 +70,35 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Food Calorie Calculator"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"
+                        android:text="@string/food_calorie_calculator_title"
                         android:textColor="@color/black"
-                        android:layout_marginBottom="16dp" />
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
                     <!-- Food Selection -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="12dp"
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Select Food"
-                            android:textSize="12sp"
+                            android:layout_marginBottom="4dp"
+                            android:text="@string/select_food_label"
                             android:textColor="#666666"
-                            android:layout_marginBottom="4dp" />
+                            android:textSize="12sp" />
 
                         <Spinner
                             android:id="@+id/foodCategorySpinner"
                             android:layout_width="match_parent"
                             android:layout_height="48dp"
+                            android:layout_marginBottom="8dp"
                             android:background="@drawable/spinner_background"
                             android:paddingStart="12dp"
-                            android:paddingEnd="12dp"
-                            android:layout_marginBottom="8dp" />
+                            android:paddingEnd="12dp" />
 
                         <Spinner
                             android:id="@+id/foodItemSpinner"
@@ -114,16 +114,16 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="12dp"
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Portion Size"
-                            android:textSize="12sp"
+                            android:layout_marginBottom="4dp"
+                            android:text="@string/portion_size_label"
                             android:textColor="#666666"
-                            android:layout_marginBottom="4dp" />
+                            android:textSize="12sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -133,8 +133,8 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
                                 android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
                                 app:boxBackgroundMode="outline"
                                 app:boxCornerRadiusBottomEnd="8dp"
                                 app:boxCornerRadiusBottomStart="8dp"
@@ -145,10 +145,10 @@
                                     android:id="@+id/portionSizeInput"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:hint="Amount"
+                                    android:hint="@string/portion_amount_hint"
                                     android:inputType="numberDecimal"
-                                    android:textSize="14sp"
-                                    android:text="1" />
+                                    android:text="@string/default_portion_amount"
+                                    android:textSize="14sp" />
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -170,19 +170,19 @@
                         android:id="@+id/calculateFoodCaloriesButton"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:text="Calculate Food Calories"
-                        android:textSize="14sp"
+                        android:layout_marginBottom="16dp"
                         android:backgroundTint="#45B7D1"
+                        android:text="@string/calculate_food_calories_button"
                         android:textColor="@color/white"
-                        android:layout_marginBottom="16dp" />
+                        android:textSize="14sp" />
 
                     <!-- Food Result -->
                     <LinearLayout
                         android:id="@+id/foodResultLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:background="#f8f9fa"
+                        android:orientation="vertical"
                         android:padding="16dp"
                         android:visibility="gone"
                         app:cardCornerRadius="8dp">
@@ -190,230 +190,42 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Calorie Calculation"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black"
                             android:layout_marginBottom="8dp"
-                            android:gravity="center" />
+                            android:gravity="center"
+                            android:text="@string/calculation_result_title"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/foodCalculationText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:gravity="center"
                             android:text=""
-                            android:textSize="14sp"
                             android:textColor="#666666"
-                            android:layout_marginBottom="8dp" />
+                            android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/foodCaloriesResult"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="0 calories"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:text="@string/default_calorie_result"
                             android:textColor="#FF6B6B"
-                            android:gravity="center" />
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
 
                         <Button
                             android:id="@+id/addToFoodLogButton"
                             android:layout_width="match_parent"
                             android:layout_height="40dp"
-                            android:text="Add to Food Log"
-                            android:textSize="14sp"
+                            android:layout_marginTop="8dp"
                             android:backgroundTint="#4ECDC4"
+                            android:text="@string/add_to_food_log_button"
                             android:textColor="@color/white"
-                            android:layout_marginTop="8dp" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </androidx.cardview.widget.CardView>
-
-            <!-- Exercise Calorie Calculator Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/white">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Exercise Calorie Calculator"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black"
-                        android:layout_marginBottom="16dp" />
-
-                    <!-- Exercise Selection -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="12px">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Select Exercise"
-                            android:textSize="12sp"
-                            android:textColor="#666666"
-                            android:layout_marginBottom="4dp" />
-
-                        <Spinner
-                            android:id="@+id/exerciseSpinner"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:background="@drawable/spinner_background"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp" />
-
-                    </LinearLayout>
-
-                    <!-- Duration Input -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Duration (minutes)"
-                            android:textSize="12sp"
-                            android:textColor="#666666"
-                            android:layout_marginBottom="4dp" />
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:boxBackgroundMode="outline"
-                            app:boxCornerRadiusBottomEnd="8dp"
-                            app:boxCornerRadiusBottomStart="8dp"
-                            app:boxCornerRadiusTopEnd="8dp"
-                            app:boxCornerRadiusTopStart="8dp">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/exerciseDurationInput"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:hint="Enter duration in minutes"
-                                android:inputType="number"
-                                android:textSize="14sp"
-                                android:text="30" />
-
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                    </LinearLayout>
-
-                    <!-- Weight Input (for more accurate calculation) -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Your Weight (kg) - Optional"
-                            android:textSize="12sp"
-                            android:textColor="#666666"
-                            android:layout_marginBottom="4dp" />
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:boxBackgroundMode="outline"
-                            app:boxCornerRadiusBottomEnd="8dp"
-                            app:boxCornerRadiusBottomStart="8dp"
-                            app:boxCornerRadiusTopEnd="8dp"
-                            app:boxCornerRadiusTopStart="8dp">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/userWeightInput"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:hint="Enter your weight for accurate calculation"
-                                android:inputType="numberDecimal"
-                                android:textSize="14sp" />
-
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                    </LinearLayout>
-
-                    <!-- Calculate Exercise Calories Button -->
-                    <Button
-                        android:id="@+id/calculateExerciseCaloriesButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="45dp"
-                        android:text="Calculate Exercise Calories"
-                        android:textSize="14sp"
-                        android:backgroundTint="#4ECDC4"
-                        android:textColor="@color/white"
-                        android:layout_marginBottom="16dp" />
-
-                    <!-- Exercise Result -->
-                    <LinearLayout
-                        android:id="@+id/exerciseResultLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:background="#f8f9fa"
-                        android:padding="16dp"
-                        android:visibility="gone"
-                        app:cardCornerRadius="8dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Calories Burned"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black"
-                            android:layout_marginBottom="8dp"
-                            android:gravity="center" />
-
-                        <TextView
-                            android:id="@+id/exerciseCalculationText"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textSize="14sp"
-                            android:textColor="#666666"
-                            android:layout_marginBottom="8dp" />
-
-                        <TextView
-                            android:id="@+id/exerciseCaloriesResult"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="0 calories burned"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="#4ECDC4"
-                            android:gravity="center" />
-
-                        <Button
-                            android:id="@+id/addToExerciseLogButton"
-                            android:layout_width="match_parent"
-                            android:layout_height="40dp"
-                            android:text="Add to Exercise Log"
-                            android:textSize="14sp"
-                            android:backgroundTint="#45B7D1"
-                            android:textColor="@color/white"
-                            android:layout_marginTop="8dp" />
+                            android:textSize="14sp" />
 
                     </LinearLayout>
 

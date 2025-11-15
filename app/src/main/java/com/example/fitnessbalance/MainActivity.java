@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
     // UI Components
     private TextView welcomeText, calorieBalanceText, dateText;
     private TextView consumedCaloriesText, burnedCaloriesText, netCaloriesText;
-    // FIX 1: Removed historyCard from this line
     private CardView foodLogCard, exerciseCard, profileCard;
 
     // Firebase
@@ -36,14 +35,12 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
 
-    // User data
+    // User data - It's okay to cache this as it changes less frequently
     private String userName;
-    private double userWeight;
-    private String fitnessLevel;
 
-    // Today's metrics (these would come from database)
-    private int caloriesConsumed = 0;
-    private int caloriesBurned = 0;
+    // FIX: Removed today's metrics from instance variables to prevent using stale data
+    // private int caloriesConsumed = 0;
+    // private int caloriesBurned = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
         initializeViews();
         setupClickListeners();
+
+        // Initial data load
         loadUserData();
         updateDate();
     }
@@ -79,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
     private void setupClickListeners() {
         // Navigation Cards
         foodLogCard.setOnClickListener(v -> {
+            // Using startActivityForResult can be more robust for immediate UI updates,
+            // but onResume is also a common pattern.
             startActivity(new Intent(MainActivity.this, FoodLogActivity.class));
         });
 
@@ -97,91 +98,75 @@ public class MainActivity extends AppCompatActivity {
 
             firestore.collection("users").document(userId)
                     .get()
-                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            if (documentSnapshot.exists()) {
-                                // Get user data
-                                userName = documentSnapshot.getString("fullName");
-                                // Make sure to handle potential null values for weight
-                                if (documentSnapshot.contains("weight")) {
-                                    userWeight = documentSnapshot.getDouble("weight");
-                                }
-                                fitnessLevel = documentSnapshot.getString("fitnessLevel");
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            // Get user data
+                            userName = documentSnapshot.getString("fullName");
+                            updateWelcomeMessage();
 
-                                // Update UI with user data
-                                updateWelcomeMessage();
-                                loadTodayMetrics(); // Load today's calorie data
-                            } else {
-                                Log.w("MainActivity", "User document doesn't exist");
-                            }
+                            // Chain the next data load here to ensure sequence
+                            loadTodayMetrics();
+                        } else {
+                            Log.w("MainActivity", "User document doesn't exist");
+                            // If user doc doesn't exist, show default values
+                            updateCalorieDisplay(0, 0);
                         }
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e("MainActivity", "Error loading user data", e);
-                            Toast.makeText(MainActivity.this, "Error loading user data", Toast.LENGTH_SHORT).show();
-                        }
+                    .addOnFailureListener(e -> {
+                        Log.e("MainActivity", "Error loading user data", e);
+                        Toast.makeText(MainActivity.this, "Error loading user data", Toast.LENGTH_SHORT).show();
                     });
+        } else {
+            // Handle signed-out state
+            welcomeText.setText("Welcome!");
+            updateCalorieDisplay(0, 0);
         }
     }
 
     private void updateWelcomeMessage() {
         if (userName != null && !userName.isEmpty()) {
-            String welcomeMessage = "Hello, " + userName + "!";
-            welcomeText.setText(welcomeMessage);
+            welcomeText.setText("Hello, " + userName + "!");
         } else {
-            welcomeText.setText("Welcome to FitnessBalance+!");
+            welcomeText.setText("Welcome to FitnessBalance!");
         }
     }
 
     private void loadTodayMetrics() {
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
-            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        if (currentUser == null) return;
 
-            // Load today's data from Firestore
-            firestore.collection("users").document(userId)
-                    .collection("dailyData").document(todayDate)
-                    .get()
-                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            if (documentSnapshot.exists()) {
-                                if (documentSnapshot.contains("caloriesConsumed")) {
-                                    caloriesConsumed = documentSnapshot.getLong("caloriesConsumed").intValue();
-                                } else {
-                                    caloriesConsumed = 0;
-                                }
+        String userId = currentUser.getUid();
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-                                if (documentSnapshot.contains("caloriesBurned")) {
-                                    caloriesBurned = documentSnapshot.getLong("caloriesBurned").intValue();
-                                } else {
-                                    caloriesBurned = 0;
-                                }
-                            } else {
-                                // Default values if no data
-                                caloriesConsumed = 0;
-                                caloriesBurned = 0;
-                            }
-
-                            updateCalorieDisplay();
+        firestore.collection("users").document(userId)
+                .collection("dailyData").document(todayDate)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    int consumed = 0;
+                    int burned = 0;
+                    if (documentSnapshot.exists()) {
+                        // Use .get() which returns an Object, then safely cast
+                        Object consumedObj = documentSnapshot.get("caloriesConsumed");
+                        if (consumedObj instanceof Number) {
+                            consumed = ((Number) consumedObj).intValue();
                         }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e("MainActivity", "Error loading today's metrics", e);
-                            caloriesConsumed = 0;
-                            caloriesBurned = 0;
-                            updateCalorieDisplay();
+
+                        Object burnedObj = documentSnapshot.get("caloriesBurned");
+                        if (burnedObj instanceof Number) {
+                            burned = ((Number) burnedObj).intValue();
                         }
-                    });
-        }
+                    }
+                    // FIX: Pass the newly fetched data directly to the update method
+                    updateCalorieDisplay(consumed, burned);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("MainActivity", "Error loading today's metrics", e);
+                    // On failure, update the UI with 0s to avoid showing stale data
+                    updateCalorieDisplay(0, 0);
+                });
     }
 
-    private void updateCalorieDisplay() {
+    // FIX: Modified this method to accept calorie values as parameters
+    private void updateCalorieDisplay(int caloriesConsumed, int caloriesBurned) {
         int netCalories = caloriesConsumed - caloriesBurned;
 
         // Update individual metrics
@@ -195,13 +180,13 @@ public class MainActivity extends AppCompatActivity {
 
         if (netCalories > 0) {
             balanceMessage = "You have a surplus of " + netCalories + " calories";
-            balanceColor = getColor(R.color.calorie_surplus); // Assumes you have this color
+            balanceColor = getColor(R.color.calorie_surplus);
         } else if (netCalories < 0) {
             balanceMessage = "You have a deficit of " + Math.abs(netCalories) + " calories";
-            balanceColor = getColor(R.color.calorie_deficit); // Assumes you have this color
+            balanceColor = getColor(R.color.calorie_deficit);
         } else {
             balanceMessage = "Perfect balance!";
-            balanceColor = getColor(R.color.calorie_balanced); // Assumes you have this color
+            balanceColor = getColor(R.color.calorie_balanced);
         }
 
         calorieBalanceText.setText(balanceMessage);
@@ -216,10 +201,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data when returning to this activity
-        if (currentUser != null) {
-            // It's better to reload all user data in case it changed
-            loadUserData();
-        }
+        // Refresh all data when returning to this activity
+        loadUserData();
     }
 }

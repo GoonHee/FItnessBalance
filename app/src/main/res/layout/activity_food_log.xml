@@ -21,14 +21,14 @@
             android:layout_height="48dp"
             android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/back"
             app:tint="@color/white" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Log Food"
+            android:text="@string/log_food"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/white"
@@ -57,7 +57,7 @@
                 android:id="@+id/dateText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Today's Date"
+                android:text="@string/today_date"
                 android:textSize="16sp"
                 android:textColor="#666666"
                 android:layout_marginBottom="24dp"
@@ -81,7 +81,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Add Food Item"
+                        android:text="@string/add_food_item"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
@@ -97,7 +97,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Food Name"
+                            android:text="@string/food_name"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginBottom="4dp" />
@@ -115,7 +115,7 @@
                                 android:id="@+id/foodNameInput"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="e.g., Apple, Chicken Breast"
+                                android:hint="@string/food_example"
                                 android:textSize="14sp" />
 
                         </com.google.android.material.textfield.TextInputLayout>
@@ -131,7 +131,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Calories"
+                            android:text="@string/header_calories"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginBottom="4dp" />
@@ -149,7 +149,7 @@
                                 android:id="@+id/caloriesInput"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Enter calories"
+                                android:hint="@string/enter_calories"
                                 android:inputType="number"
                                 android:textSize="14sp" />
 
@@ -161,7 +161,7 @@
                         android:id="@+id/addFoodButton"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:text="Add Food +"
+                        android:text="@string/add_food"
                         android:textSize="14sp"
                         android:backgroundTint="#FF6B6B"
                         android:textColor="@color/white" />
@@ -169,8 +169,8 @@
                     <Button
                         android:id="@+id/calculateCaloriesButton"
                         android:layout_width="match_parent"
-                        android:layout_height="45dp"
-                        android:text="Calculate Calories"
+                        android:layout_height="48dp"
+                        android:text="@string/calculate_calories_button"
                         android:textSize="14sp"
                         android:backgroundTint="#45B7D1"
                         android:textColor="@color/white"
@@ -199,7 +199,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Today's Food Log"
+                        android:text="@string/today_food_log"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
@@ -230,7 +230,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Total Calories:"
+                            android:text="@string/total_calories"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="@color/black" />
@@ -239,7 +239,7 @@
                             android:id="@+id/totalCaloriesText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/default_total_calories"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="#FF6B6B" />
@@ -255,7 +255,7 @@
                 android:id="@+id/saveLogButton"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="Save Food Log"
+                android:text="@string/save_food_log"
                 android:textSize="16sp"
                 android:backgroundTint="#4ECDC4"
                 android:textColor="@color/white" />

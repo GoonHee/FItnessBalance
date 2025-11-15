@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -436,19 +437,9 @@ public class ExerciseActivity extends AppCompatActivity {
 
         firestore.collection("users").document(userId)
                 .collection("dailyData").document(currentDate)
-                .set(updateData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("ExerciseActivity", "Main calories burned updated successfully");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e("ExerciseActivity", "Error updating main calories burned", e);
-                    }
-                });
+                .set(updateData, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> Log.d("ExerciseActivity", "Main calories burned updated successfully"))
+                .addOnFailureListener(e -> Log.e("ExerciseActivity", "Error updating main calories burned", e));
     }
 
     // Exercise data class

@@ -151,7 +151,7 @@
                             android:id="@+id/netCaloriesText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="@string/default_total_calories"
                             android:textSize="20sp"
                             android:textStyle="bold"
                             android:textColor="#45B7D1" />
@@ -209,7 +209,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Log Food"
+                        android:text="@string/log_food"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/white" />
@@ -245,7 +245,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Exercise"
+                        android:text="@string/exercise_label"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/white" />
@@ -287,7 +287,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Profile"
+                    android:text="@string/profile"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/white" />
