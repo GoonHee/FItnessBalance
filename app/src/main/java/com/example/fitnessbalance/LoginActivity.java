@@ -8,19 +8,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText; // Changed from EditText
-import com.google.firebase.auth.AuthResult;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
-    // It's better to use the more specific TextInputEditText class
     private TextInputEditText emailEditText, passwordEditText;
     private Button loginButton;
     private ProgressBar progressBar;
@@ -46,12 +39,10 @@ public class LoginActivity extends AppCompatActivity {
     private void setupClickListeners() {
         loginButton.setOnClickListener(v -> attemptLogin());
 
-        // Forgot password
         findViewById(R.id.forgotPasswordText).setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, ForgetPasswordActivity.class));
         });
 
-        // Registration
         findViewById(R.id.signUpText).setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegistrationActivity.class));
         });

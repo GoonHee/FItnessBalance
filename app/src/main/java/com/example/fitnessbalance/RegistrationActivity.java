@@ -24,12 +24,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RegistrationActivity extends AppCompatActivity {
-
     private EditText fullNameEditText, emailEditText, passwordEditText, confirmPasswordEditText, weightEditText;
     private AutoCompleteTextView fitnessLevelSpinner;
     private Button signUpButton;
     private ProgressBar progressBar;
-
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
 

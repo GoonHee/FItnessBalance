@@ -28,8 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public class CalorieCalculatorActivity extends AppCompatActivity {
-
-    // UI Components
     private ImageButton backButton;
 
     // Food UI
@@ -41,11 +39,7 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
 
     private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
-
-    // Calculator data
     private Map<String, List<FoodItem>> foodDatabase;
-
-    // Current calculations
     private double currentFoodCalories = 0;
     private String currentFoodName = "";
 
@@ -54,7 +48,6 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calorie_calculator);
 
-        // Initialize Firebase
         FirebaseAuth auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
         currentUser = auth.getCurrentUser();
@@ -67,8 +60,6 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
 
     private void initializeViews() {
         backButton = findViewById(R.id.backButton);
-
-        // --- INITIALIZE ALL FOOD COMPONENTS ---
         foodCategorySpinner = findViewById(R.id.foodCategorySpinner);
         foodItemSpinner = findViewById(R.id.foodItemSpinner);
         portionUnitSpinner = findViewById(R.id.portionUnitSpinner);
@@ -86,12 +77,8 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         addToFoodLogButton.setOnClickListener(v -> addToFoodLog());
     }
 
-    // In CalorieCalculatorActivity.java
-
     private void initializeDatabases() {
         foodDatabase = new HashMap<>();
-
-        // --- Fruits ---
         FoodItem apple = new FoodItem("Apple", 52);
         apple.addConversion("medium piece", 182);
         apple.addConversion("cup, sliced", 125);
@@ -108,7 +95,6 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
 
         foodDatabase.put("Fruits", Arrays.asList(apple, banana, strawberries, avocado));
 
-        // --- Vegetables ---
         FoodItem carrot = new FoodItem("Carrot", 41);
         carrot.addConversion("medium piece", 61);
         carrot.addConversion("cup, chopped", 122);
@@ -125,13 +111,10 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         bellPepper.addConversion("cup, chopped", 149);
 
         foodDatabase.put("Vegetables", Arrays.asList(carrot, spinach, broccoli, bellPepper));
-
-        // --- Proteins ---
         FoodItem egg = new FoodItem("Eggs", 155);
         egg.addConversion("large egg", 50);
 
         FoodItem chickenBreast = new FoodItem("Chicken Breast (Cooked)", 165);
-        // Universal units are handled by default
 
         FoodItem salmon = new FoodItem("Salmon (Cooked)", 208);
 
@@ -142,7 +125,6 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
 
         foodDatabase.put("Proteins", Arrays.asList(egg, chickenBreast, salmon, beefSteak, tofu));
 
-        // --- Grains ---
         FoodItem oats = new FoodItem("Oats (Dry)", 389);
         oats.addConversion("cup, dry", 81);
 
@@ -160,7 +142,6 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
 
         foodDatabase.put("Grains", Arrays.asList(oats, bread, whiteRice, quinoa, pasta));
 
-        // --- NEW: Dairy & Alternatives ---
         FoodItem milk = new FoodItem("Milk (Whole)", 61);
         milk.addConversion("cup", 244);
         milk.addConversion("tbsp", 15);
@@ -176,11 +157,8 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         almondMilk.addConversion("cup", 240);
 
         foodDatabase.put("Dairy & Alternatives", Arrays.asList(milk, cheddarCheese, greekYogurt, almondMilk));
-
-        // --- NEW: Nuts & Seeds ---
         FoodItem almonds = new FoodItem("Almonds", 579);
         almonds.addConversion("cup", 143);
-        // oz is a default unit
 
         FoodItem peanutButter = new FoodItem("Peanut Butter", 588);
         peanutButter.addConversion("tbsp", 16);
@@ -192,21 +170,17 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        // Food category spinner setup remains the same
         List<String> categories = new ArrayList<>(foodDatabase.keySet());
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         foodCategorySpinner.setAdapter(categoryAdapter);
 
-        // --- REVISED: This listener now updates BOTH the item and unit spinners ---
         AdapterView.OnItemSelectedListener selectionListener = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent.getId() == R.id.foodCategorySpinner) {
-                    // If the category changes, update the list of foods
                     updateFoodItemsSpinner();
                 }
-                // Anytime the selection changes, update the available portion units
                 updatePortionUnitSpinner();
             }
             @Override
@@ -214,13 +188,12 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         };
 
         foodCategorySpinner.setOnItemSelectedListener(selectionListener);
-        foodItemSpinner.setOnItemSelectedListener(selectionListener); // Also listen for changes on the item spinner
+        foodItemSpinner.setOnItemSelectedListener(selectionListener);
 
         // Initial setup
         updateFoodItemsSpinner();
     }
 
-    // This method remains mostly the same
     private void updateFoodItemsSpinner() {
         String selectedCategory = foodCategorySpinner.getSelectedItem().toString();
         List<FoodItem> foodItems = foodDatabase.get(selectedCategory);
@@ -235,23 +208,18 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         foodItemSpinner.setAdapter(foodItemAdapter);
     }
 
-    // --- NEW METHOD: Dynamically updates the units based on the selected food ---
     private void updatePortionUnitSpinner() {
         FoodItem selectedItem = findSelectedFoodItem();
         if (selectedItem == null) {
-            // Clear the units spinner if no item is selected
             portionUnitSpinner.setAdapter(null);
             return;
         }
-
-        // Get only the valid units for this specific food from the FoodItem object
         List<String> units = selectedItem.getAvailableUnits();
         ArrayAdapter<String> portionUnitAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, units);
         portionUnitAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         portionUnitSpinner.setAdapter(portionUnitAdapter);
     }
 
-    // --- REVISED: This now uses the improved object-oriented logic ---
     private void calculateFoodCalories() {
         String portionSizeStr = portionSizeInput.getText().toString().trim();
         if (TextUtils.isEmpty(portionSizeStr)) {
@@ -267,22 +235,17 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
             }
 
             FoodItem selectedItem = findSelectedFoodItem();
-            // Make sure a unit is actually selected in the spinner
             if (selectedItem != null && portionUnitSpinner.getSelectedItem() != null) {
                 String portionUnit = portionUnitSpinner.getSelectedItem().toString();
-
-                // The conversion logic is now handled by the FoodItem object itself
                 double totalGrams = selectedItem.convertToGrams(portionSize, portionUnit);
 
-                if (totalGrams < 0) { // Error case from our convertToGrams method
+                if (totalGrams < 0) {
                     Toast.makeText(this, "Cannot convert " + portionUnit + " for " + selectedItem.name, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 currentFoodCalories = (totalGrams / 100.0) * selectedItem.caloriesPer100g;
                 currentFoodName = selectedItem.name;
-
-                // Show result
                 foodCalculationText.setText(String.format(Locale.getDefault(),
                         "%.1f %s of %s", portionSize, portionUnit, currentFoodName)); // Use %.1f for better display
                 foodCaloriesResult.setText(String.format(Locale.getDefault(), "%.0f calories", currentFoodCalories));
@@ -309,17 +272,15 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         }
     }
 
-    // --- HELPER to get the currently selected food item object ---
     private FoodItem findSelectedFoodItem() {
         if (foodCategorySpinner.getSelectedItem() == null || foodItemSpinner.getSelectedItem() == null) {
             return null;
         }
         String category = foodCategorySpinner.getSelectedItem().toString();
         String name = foodItemSpinner.getSelectedItem().toString();
-        return findFoodItem(category, name); // Your existing findFoodItem method works perfectly
+        return findFoodItem(category, name);
     }
 
-    // --- CORRECT: This method is now correctly placed within the Activity class ---
     private FoodItem findFoodItem(String category, String name) {
         List<FoodItem> items = foodDatabase.get(category);
         if (items != null) {
@@ -332,39 +293,33 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         return null;
     }
 
-    // --- Simplified FoodItem class and helper method ---
     private static class FoodItem {
-        final String name; // Made final for good practice
-        final double caloriesPer100g; // Made final
+        final String name;
+        final double caloriesPer100g;
         private final Map<String, Double> conversionMap = new HashMap<>();
 
         FoodItem(String name, double caloriesPer100g) {
             this.name = name;
             this.caloriesPer100g = caloriesPer100g;
-            // Add universal conversions that apply to all food items
             this.addConversion("g", 1.0);
             this.addConversion("oz", 28.35);
             this.addConversion("lb", 453.59);
         }
 
-        // Method to add a specific conversion for this food (e.g., "piece", "cup", "slice")
         public void addConversion(String unitName, double grams) {
             this.conversionMap.put(unitName, grams);
         }
 
-        // The new, improved conversion logic lives inside the object itself
         public double convertToGrams(double amount, String unit) {
             if (conversionMap.containsKey(unit)) {
-                // Safely get the conversion factor and calculate the grams
                 Double conversionFactor = conversionMap.get(unit);
                 if (conversionFactor != null) {
                     return amount * conversionFactor;
                 }
             }
-            return -1; // Return -1 to indicate the conversion is not available or failed
+            return -1;
         }
 
-        // A helper to get all valid units for this specific food
         public List<String> getAvailableUnits() {
             return new ArrayList<>(conversionMap.keySet());
         }

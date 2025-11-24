@@ -15,10 +15,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
-import android.widget.CheckBox;
 import android.app.Dialog;
 import android.view.LayoutInflater;
-import android.widget.CheckBox;
 import com.google.android.flexbox.FlexboxLayout;
 
 import androidx.activity.OnBackPressedCallback;
@@ -40,8 +38,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
-
-    // UI Components
     private TextView profileName, profileEmail;
     private TextInputEditText fullNameEditText, weightEditText, heightEditText;
     private Spinner fitnessLevelSpinner;
@@ -50,25 +46,14 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView bmiValueText, bmiCategoryText;
     private ImageButton backButton;
     private FlexboxLayout exerciseTagsLayout;
-
-    // Exercise selection dialog components
-    private CheckBox runningCheckbox, cyclingCheckbox, swimmingCheckbox, weightliftingCheckbox;
-    private CheckBox yogaCheckbox, pilatesCheckbox, basketballCheckbox, footballCheckbox;
-    private CheckBox tennisCheckbox, hiitCheckbox, dancingCheckbox, hikingCheckbox;
-
-    // Firebase
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
-
-    // User data
     private String userName, userEmail;
     private double userWeight;
     private double userHeight;
     private String fitnessLevel;
     private List<String> preferredExercises;
-
-    // Mode tracking
     private boolean isEditMode = false;
 
     @Override
@@ -79,29 +64,22 @@ public class ProfileActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // This code will execute when the user presses the back button
                 if (isEditMode) {
-                    // If in edit mode, show the confirmation dialog
                     new android.app.AlertDialog.Builder(ProfileActivity.this)
                             .setTitle("Discard Changes?")
                             .setMessage("Are you sure you want to go back? All unsaved changes will be lost.")
                             .setPositiveButton("Discard", (dialog, which) -> {
-                                // If the user chooses to discard, revert the UI and then finish.
-                                // This prevents a flash of unsaved content.
                                 updateProfileDisplay();
                                 setEditMode(false);
-                                finish(); // Now, safely finish the activity.
+                                finish();
                             })
-                            .setNegativeButton("Cancel", null) // 'null' correctly dismisses the dialog
+                            .setNegativeButton("Cancel", null)
                             .show();
                 } else {
-                    // If not in edit mode, just finish the activity as normal
                     finish();
                 }
             }
         });
-
-        // Initialize Firebase
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
         currentUser = auth.getCurrentUser();
@@ -110,34 +88,28 @@ public class ProfileActivity extends AppCompatActivity {
         setupSpinner();
         loadUserData();
         setupClickListeners();
-        setEditMode(false); // Start in view mode
+        setEditMode(false);
     }
 
     private void initializeViews() {
-        // TextViews
         profileName = findViewById(R.id.profileName);
         profileEmail = findViewById(R.id.profileEmail);
 
-        // EditTexts
         fullNameEditText = findViewById(R.id.fullNameEditText);
         weightEditText = findViewById(R.id.weightEditText);
         heightEditText = findViewById(R.id.heightEditText);
 
         backButton = findViewById(R.id.backButton);
 
-        // Spinner
         fitnessLevelSpinner = findViewById(R.id.fitnessLevelSpinner);
 
-        // BMI Components
         bmiResultsLayout = findViewById(R.id.bmiResultsLayout);
         bmiValueText = findViewById(R.id.bmiValueText);
         bmiCategoryText = findViewById(R.id.bmiCategoryText);
 
-        // Exercise Preferences
         exerciseTagsLayout = findViewById(R.id.exerciseTagsLayout);
         addExerciseButton = findViewById(R.id.addExerciseButton);
 
-        // Buttons
         editProfileButton = findViewById(R.id.editProfileButton);
         saveProfileButton = findViewById(R.id.saveProfileButton);
         cancelButton = findViewById(R.id.cancelButton);
@@ -145,7 +117,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupSpinner() {
-        // Create ArrayAdapter for fitness levels
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.fitness_levels,
@@ -168,7 +139,6 @@ public class ProfileActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             if (documentSnapshot.exists()) {
-                                // Get user data
                                 userName = documentSnapshot.getString("fullName");
                                 if (documentSnapshot.contains("weight")) {
                                     userWeight = documentSnapshot.getDouble("weight");
@@ -177,19 +147,15 @@ public class ProfileActivity extends AppCompatActivity {
                                     userHeight = documentSnapshot.getDouble("height");
                                 }
                                 fitnessLevel = documentSnapshot.getString("fitnessLevel");
-
-                                // Get exercise preferences
                                 if (documentSnapshot.contains("preferredExercises")) {
                                     preferredExercises = (List<String>) documentSnapshot.get("preferredExercises");
                                 } else {
                                     preferredExercises = new ArrayList<>();
                                 }
 
-                                // Update UI with user data
                                 updateProfileDisplay();
                             } else {
                                 Log.w("ProfileActivity", "User document doesn't exist");
-                                // If no profile exists, start in edit mode
                                 setEditMode(true);
                             }
                         }
@@ -205,7 +171,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void updateProfileDisplay() {
-        // Set user name
         if (userName != null && !userName.isEmpty()) {
             profileName.setText(userName);
             fullNameEditText.setText(userName);
@@ -213,21 +178,17 @@ public class ProfileActivity extends AppCompatActivity {
             profileName.setText("Welcome!");
         }
 
-        // Set weight
         if (userWeight > 0) {
             weightEditText.setText(String.valueOf(userWeight));
         } else {
             weightEditText.setText("");
         }
 
-        // Set height
         if (userHeight > 0) {
             heightEditText.setText(String.valueOf(userHeight));
         } else {
             heightEditText.setText("");
         }
-
-        // Set fitness level in spinner
         if (fitnessLevel != null && !fitnessLevel.isEmpty()) {
             ArrayAdapter adapter = (ArrayAdapter) fitnessLevelSpinner.getAdapter();
             int position = adapter.getPosition(fitnessLevel);
@@ -235,11 +196,8 @@ public class ProfileActivity extends AppCompatActivity {
                 fitnessLevelSpinner.setSelection(position);
             }
         }
-
-        // Set exercise preferences
         updateExercisePreferencesDisplay();
 
-        // Auto-calculate BMI if both weight and height are available
         if (userWeight > 0 && userHeight > 0) {
             calculateBMI();
         }
@@ -294,7 +252,6 @@ public class ProfileActivity extends AppCompatActivity {
         isEditMode = editMode;
 
         if (editMode) {
-            // Edit mode - make fields editable and show save/cancel buttons
             fullNameEditText.setEnabled(true);
             weightEditText.setEnabled(true);
             heightEditText.setEnabled(true);
@@ -305,10 +262,8 @@ public class ProfileActivity extends AppCompatActivity {
             saveProfileButton.setVisibility(View.VISIBLE);
             cancelButton.setVisibility(View.VISIBLE);
 
-            // Make sure exercise tags are updated for edit mode
             updateExerciseTags();
         } else {
-            // View mode - make fields static and show edit button
             fullNameEditText.setEnabled(false);
             weightEditText.setEnabled(false);
             heightEditText.setEnabled(false);
@@ -319,7 +274,6 @@ public class ProfileActivity extends AppCompatActivity {
             saveProfileButton.setVisibility(View.GONE);
             cancelButton.setVisibility(View.GONE);
 
-            // Make sure exercise tags are updated for view mode
             updateExerciseTags();
         }
     }
@@ -341,9 +295,6 @@ public class ProfileActivity extends AppCompatActivity {
                 bmiResultsLayout.setVisibility(View.GONE);
                 return;
             }
-
-            // Calculate BMI: weight (kg) / (height (m) * height (m))
-            // Height is in cm, so convert to meters by dividing by 100
             double heightInMeters = height / 100.0;
             double bmi = weight / (heightInMeters * heightInMeters);
 
@@ -355,11 +306,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void displayBMIResult(double bmi) {
-        // Format BMI to 1 decimal place
         String bmiFormatted = String.format(Locale.getDefault(), "%.1f", bmi);
         bmiValueText.setText(bmiFormatted);
 
-        // Determine BMI category
         String category;
         int color;
 
@@ -389,7 +338,6 @@ public class ProfileActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialog_exercise_input);
         dialog.setCancelable(true);
 
-        // Get dialog views
         FlexboxLayout quickAddLayout = dialog.findViewById(R.id.quickAddLayout);
         FlexboxLayout selectedExercisesLayout = dialog.findViewById(R.id.selectedExercisesLayout);
         TextInputEditText customExerciseInput = dialog.findViewById(R.id.customExerciseInput);
@@ -397,13 +345,11 @@ public class ProfileActivity extends AppCompatActivity {
         Button cancelButton = dialog.findViewById(R.id.cancelExerciseButton);
         Button saveButton = dialog.findViewById(R.id.saveExerciseButton);
 
-        // Temporary list for selected exercises in this dialog
         List<String> tempSelectedExercises = new ArrayList<>();
         if (preferredExercises != null) {
             tempSelectedExercises.addAll(preferredExercises);
         }
 
-        // Popular exercises for quick add
         String[] popularExercises = {
                 "Running", "Cycling", "Swimming", "Weight Lifting", "Yoga",
                 "Pilates", "Basketball", "Football", "Tennis", "HIIT",
@@ -411,7 +357,6 @@ public class ProfileActivity extends AppCompatActivity {
                 "Boxing", "Martial Arts", "Skating", "Skiing", "Climbing"
         };
 
-        // Add quick add buttons
         for (String exercise : popularExercises) {
             Button quickButton = (Button) LayoutInflater.from(this).inflate(R.layout.quick_exercise_button, quickAddLayout, false);
             quickButton.setText(exercise);
@@ -432,10 +377,8 @@ public class ProfileActivity extends AppCompatActivity {
             quickAddLayout.addView(quickButton);
         }
 
-        // Update selected exercises display
         updateSelectedExercisesInDialog(selectedExercisesLayout, tempSelectedExercises);
 
-        // Custom exercise input
         addCustomExerciseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -454,7 +397,6 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        // Handle Enter key in custom input
         customExerciseInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
                 addCustomExerciseButton.performClick();
@@ -463,7 +405,6 @@ public class ProfileActivity extends AppCompatActivity {
             return false;
         });
 
-        // Button actions
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -482,7 +423,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         dialog.show();
 
-        // Show keyboard for custom input
         customExerciseInput.requestFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(customExerciseInput, InputMethodManager.SHOW_IMPLICIT);
@@ -513,7 +453,6 @@ public class ProfileActivity extends AppCompatActivity {
                         updateSelectedExercisesInDialog(layout, exercises);
                     }
                 });
-
                 layout.addView(tagView);
             }
         }
@@ -523,31 +462,30 @@ public class ProfileActivity extends AppCompatActivity {
         exerciseTagsLayout.removeAllViews();
 
         if (preferredExercises != null && !preferredExercises.isEmpty()) {
-            for (String exercise : new ArrayList<>(preferredExercises)) {                View tagView = LayoutInflater.from(this).inflate(R.layout.exercise_tag_item, exerciseTagsLayout, false);
+            for (String exercise : new ArrayList<>(preferredExercises)) {
+                View tagView = LayoutInflater.from(this).inflate(R.layout.exercise_tag_item, exerciseTagsLayout, false);
                 TextView tagText = tagView.findViewById(R.id.tagText);
                 ImageButton removeButton = tagView.findViewById(R.id.removeTagButton);
 
                 tagText.setText(exercise);
 
                 if (isEditMode) {
-                    removeButton.setVisibility(View.VISIBLE); // Make the button visible
+                    removeButton.setVisibility(View.VISIBLE);
                     removeButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            // This logic is now only active during edit mode
+
                             preferredExercises.remove(exercise);
-                            updateExerciseTags(); // Redraw the tags for this screen
+                            updateExerciseTags();
                         }
                     });
                 } else {
-                    // Ensure the button is hidden if not in edit mode
                     removeButton.setVisibility(View.GONE);
                 }
 
                 exerciseTagsLayout.addView(tagView);
             }
         } else {
-            // Show empty state message
             TextView emptyText = new TextView(this);
             emptyText.setText("No exercises selected yet");
             emptyText.setTextSize(12);
@@ -567,13 +505,11 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        // Get input values
         String fullName = fullNameEditText.getText().toString().trim();
         String weightStr = weightEditText.getText().toString().trim();
         String heightStr = heightEditText.getText().toString().trim();
         String selectedFitnessLevel = fitnessLevelSpinner.getSelectedItem().toString();
 
-        // Validate inputs
         if (fullName.isEmpty()) {
             fullNameEditText.setError("Full name is required");
             return;
@@ -610,7 +546,6 @@ public class ProfileActivity extends AppCompatActivity {
         final double finalWeight = weight;
         final double finalHeight = height;
 
-        // Save to Firestore
         String userId = currentUser.getUid();
         Map<String, Object> userData = new HashMap<>();
         userData.put("fullName", fullName);
@@ -626,22 +561,17 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(ProfileActivity.this, "Profile saved successfully!", Toast.LENGTH_SHORT).show();
 
-                        // Update local variables
                         userName = fullName;
                         userWeight = finalWeight;
                         userHeight = finalHeight;
                         fitnessLevel = selectedFitnessLevel;
                         ProfileActivity.this.preferredExercises = preferredExercises;
 
-                        // Update the display name
                         profileName.setText(userName);
 
-                        // Calculate and show BMI if both weight and height are provided
                         if (finalWeight > 0 && finalHeight > 0) {
                             calculateBMI();
                         }
-
-                        // Switch back to view mode
                         setEditMode(false);
                     }
                 })
@@ -661,7 +591,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .setPositiveButton("Yes", (dialog, which) -> {
                     auth.signOut();
                     startActivity(new Intent(ProfileActivity.this, LoginActivity.class));
-                    finishAffinity(); // Use finishAffinity to clear all previous activities
+                    finishAffinity();
                 })
                 .setNegativeButton("No", null)
                 .show();

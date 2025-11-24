@@ -39,7 +39,6 @@ import java.util.Map;
 
 public class ExerciseActivity extends AppCompatActivity {
 
-    // UI Components
     private ImageButton backButton;
     private TextView dateText, suggestedExercisesText, totalCaloriesBurnedText;
     private FlexboxLayout suggestedExercisesLayout;
@@ -48,27 +47,18 @@ public class ExerciseActivity extends AppCompatActivity {
     private Button calculateCaloriesButton, addExerciseButton, saveExercisesButton;
     private LinearLayout caloriesResultLayout, exercisesListLayout;
     private TextView caloriesResultText;
-
-    // Firebase
-    private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
-
-    // Exercise data
     private List<ExerciseItem> todayExercises;
     private int totalCaloriesBurned = 0;
-    private double userWeight = 70.0; // Default weight
+    private double userWeight = 70.0;
     private List<String> userPreferredExercises;
-
-    // Current exercise calculation
     private String currentExerciseName = "";
     private int currentExerciseDuration = 0;
     private int currentExerciseCalories = 0;
 
     // Date
     private String currentDate;
-
-    // Exercise database
     private Map<String, ExerciseData> exerciseDatabase;
 
     @Override
@@ -76,8 +66,7 @@ public class ExerciseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exercise);
 
-        // Initialize Firebase
-        auth = FirebaseAuth.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
         currentUser = auth.getCurrentUser();
 
@@ -117,8 +106,6 @@ public class ExerciseActivity extends AppCompatActivity {
 
     private void initializeExerciseDatabase() {
         exerciseDatabase = new HashMap<>();
-
-        // MET values (Metabolic Equivalent of Task)
         exerciseDatabase.put("Running", new ExerciseData("Running", 7.0, "moderate pace"));
         exerciseDatabase.put("Cycling", new ExerciseData("Cycling", 6.0, "moderate pace"));
         exerciseDatabase.put("Swimming", new ExerciseData("Swimming", 5.8, "moderate pace"));
@@ -135,7 +122,6 @@ public class ExerciseActivity extends AppCompatActivity {
         exerciseDatabase.put("Jump Rope", new ExerciseData("Jump Rope", 8.8, "moderate pace"));
         exerciseDatabase.put("Rowing", new ExerciseData("Rowing", 6.0, "moderate pace"));
 
-        // Setup exercise spinner
         List<String> exercises = new ArrayList<>(exerciseDatabase.keySet());
         ArrayAdapter<String> exerciseAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, exercises);
         exerciseAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -188,8 +174,6 @@ public class ExerciseActivity extends AppCompatActivity {
 
         if (userPreferredExercises != null && !userPreferredExercises.isEmpty()) {
             suggestedExercisesText.setText("Based on your preferences: " + String.join(", ", userPreferredExercises));
-
-            // Show buttons for preferred exercises
             for (String exercise : userPreferredExercises) {
                 if (exerciseDatabase.containsKey(exercise)) {
                     Button exerciseButton = (Button) LayoutInflater.from(this)
@@ -199,7 +183,6 @@ public class ExerciseActivity extends AppCompatActivity {
                     exerciseButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            // Auto-select this exercise in spinner
                             String selectedExercise = ((Button) v).getText().toString();
                             int position = ((ArrayAdapter) exerciseSpinner.getAdapter()).getPosition(selectedExercise);
                             if (position >= 0) {
@@ -208,7 +191,6 @@ public class ExerciseActivity extends AppCompatActivity {
                             durationInput.requestFocus();
                         }
                     });
-
                     suggestedExercisesLayout.addView(exerciseButton);
                 }
             }
@@ -236,26 +218,20 @@ public class ExerciseActivity extends AppCompatActivity {
             ExerciseData exercise = exerciseDatabase.get(selectedExercise);
 
             if (exercise != null) {
-                // Calculate calories burned: MET * weight * time(hours)
                 double hours = duration / 60.0;
                 double calories = exercise.metValue * userWeight * hours;
 
                 currentExerciseName = selectedExercise;
                 currentExerciseDuration = duration;
                 currentExerciseCalories = (int) Math.round(calories);
-
-                // Show result
                 caloriesResultText.setText(currentExerciseCalories + " cal");
                 caloriesResultLayout.setVisibility(View.VISIBLE);
                 addExerciseButton.setVisibility(View.VISIBLE);
 
-                // Show accuracy note
                 Toast.makeText(this,
                         "Note: Calorie estimates may vary by ±30% based on intensity and individual factors",
                         Toast.LENGTH_LONG).show();
-
             }
-
         } catch (NumberFormatException e) {
             durationInput.setError("Invalid duration");
         }
@@ -267,13 +243,11 @@ public class ExerciseActivity extends AppCompatActivity {
                     currentExerciseName,
                     currentExerciseDuration,
                     currentExerciseCalories,
-                    false // not completed by default
+                    false
             );
 
             todayExercises.add(exerciseItem);
             updateExercisesListDisplay();
-
-            // Reset form
             durationInput.setText("");
             caloriesResultLayout.setVisibility(View.GONE);
             addExerciseButton.setVisibility(View.GONE);
@@ -300,7 +274,6 @@ public class ExerciseActivity extends AppCompatActivity {
             caloriesText.setText(exercise.calories + " cal");
             completedCheckbox.setChecked(exercise.completed);
 
-            // Only count calories for completed exercises
             if (exercise.completed) {
                 totalCaloriesBurned += exercise.calories;
             }
@@ -313,10 +286,8 @@ public class ExerciseActivity extends AppCompatActivity {
                     updateTotalCaloriesBurned();
                 }
             });
-
             exercisesListLayout.addView(exerciseView);
         }
-
         updateTotalCaloriesBurned();
     }
 
@@ -332,9 +303,7 @@ public class ExerciseActivity extends AppCompatActivity {
 
     private void loadTodayExercises() {
         if (currentUser == null) return;
-
         String userId = currentUser.getUid();
-
         firestore.collection("users").document(userId)
                 .collection("exerciseLogs").document(currentDate)
                 .get()
@@ -342,15 +311,12 @@ public class ExerciseActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.exists()) {
-                            // Load existing exercises
                             if (documentSnapshot.contains("totalCaloriesBurned")) {
                                 totalCaloriesBurned = documentSnapshot.getLong("totalCaloriesBurned").intValue();
                             }
-
                             if (documentSnapshot.contains("exercises")) {
                                 List<Map<String, Object>> exercisesData =
                                         (List<Map<String, Object>>) documentSnapshot.get("exercises");
-
                                 if (exercisesData != null) {
                                     todayExercises.clear();
                                     for (Map<String, Object> exerciseData : exercisesData) {
@@ -359,10 +325,8 @@ public class ExerciseActivity extends AppCompatActivity {
                                         long calories = (Long) exerciseData.get("calories");
                                         boolean completed = exerciseData.get("completed") != null ?
                                                 (Boolean) exerciseData.get("completed") : false;
-
                                         todayExercises.add(new ExerciseItem(name, (int) duration, (int) calories, completed));
                                     }
-
                                     // Update UI
                                     updateExercisesListDisplay();
                                 }
@@ -385,8 +349,6 @@ public class ExerciseActivity extends AppCompatActivity {
         }
 
         String userId = currentUser.getUid();
-
-        // Prepare exercises data for Firestore
         List<Map<String, Object>> exercisesData = new ArrayList<>();
         for (ExerciseItem exercise : todayExercises) {
             Map<String, Object> exerciseData = new HashMap<>();
@@ -397,21 +359,18 @@ public class ExerciseActivity extends AppCompatActivity {
             exercisesData.add(exerciseData);
         }
 
-        // Prepare the exercise log document
         Map<String, Object> exerciseLog = new HashMap<>();
         exerciseLog.put("date", currentDate);
         exerciseLog.put("totalCaloriesBurned", totalCaloriesBurned);
         exerciseLog.put("exercises", exercisesData);
         exerciseLog.put("timestamp", new Date());
 
-        // Save to Firestore
         firestore.collection("users").document(userId)
                 .collection("exerciseLogs").document(currentDate)
                 .set(exerciseLog)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        // Update main activity calories burned
                         updateMainCaloriesBurned();
                         Toast.makeText(ExerciseActivity.this, "Exercise log saved successfully!", Toast.LENGTH_SHORT).show();
                     }
@@ -427,10 +386,7 @@ public class ExerciseActivity extends AppCompatActivity {
 
     private void updateMainCaloriesBurned() {
         if (currentUser == null) return;
-
         String userId = currentUser.getUid();
-
-        // Update the main user document with today's calories burned
         Map<String, Object> updateData = new HashMap<>();
         updateData.put("caloriesBurned", totalCaloriesBurned);
         updateData.put("lastUpdated", new Date());
@@ -442,7 +398,6 @@ public class ExerciseActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.e("ExerciseActivity", "Error updating main calories burned", e));
     }
 
-    // Exercise data class
     private static class ExerciseData {
         String name;
         double metValue;
@@ -455,7 +410,6 @@ public class ExerciseActivity extends AppCompatActivity {
         }
     }
 
-    // Exercise item class
     private static class ExerciseItem {
         String name;
         int duration;

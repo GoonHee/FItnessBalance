@@ -33,24 +33,17 @@ import java.util.Locale;
 import java.util.Map;
 
 public class FoodLogActivity extends AppCompatActivity {
-
-    // UI Components
     private TextInputEditText foodNameInput, caloriesInput;
     private Button addFoodButton, saveLogButton, calculateCaloriesButton;
     private ImageButton backButton;
     private LinearLayout foodItemsLayout;
     private TextView dateText, totalCaloriesText;
-
-    // Firebase
-    private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
 
-    // Food data
     private List<FoodItem> foodItems;
     private int totalCalories = 0;
 
-    // Date
     private String currentDate;
 
     @Override
@@ -58,8 +51,7 @@ public class FoodLogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_log);
 
-        // Initialize Firebase
-        auth = FirebaseAuth.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
         currentUser = auth.getCurrentUser();
 
@@ -70,22 +62,18 @@ public class FoodLogActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        // Input fields
         foodNameInput = findViewById(R.id.foodNameInput);
         caloriesInput = findViewById(R.id.caloriesInput);
 
-        // Buttons
         addFoodButton = findViewById(R.id.addFoodButton);
         saveLogButton = findViewById(R.id.saveLogButton);
         backButton = findViewById(R.id.backButton);
         calculateCaloriesButton = findViewById(R.id.calculateCaloriesButton);
 
-        // Layouts and TextViews
         foodItemsLayout = findViewById(R.id.foodItemsLayout);
         dateText = findViewById(R.id.dateText);
         totalCaloriesText = findViewById(R.id.totalCaloriesText);
 
-        // Initialize food items list
         foodItems = new ArrayList<>();
     }
 
@@ -146,19 +134,11 @@ public class FoodLogActivity extends AppCompatActivity {
                 caloriesInput.setError("Calories must be positive");
                 return;
             }
-
-            // Create food item
             FoodItem foodItem = new FoodItem(foodName, calories);
             foodItems.add(foodItem);
-
-            // Update total calories
             totalCalories += calories;
             updateTotalCaloriesDisplay();
-
-            // Add to UI
             addFoodItemToLayout(foodItem);
-
-            // Clear inputs
             foodNameInput.setText("");
             caloriesInput.setText("");
             foodNameInput.requestFocus();
@@ -201,9 +181,7 @@ public class FoodLogActivity extends AppCompatActivity {
 
     private void loadTodayFoodLog() {
         if (currentUser == null) return;
-
         String userId = currentUser.getUid();
-
         firestore.collection("users").document(userId)
                 .collection("foodLogs").document(currentDate)
                 .get()
@@ -211,7 +189,6 @@ public class FoodLogActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.exists()) {
-                            // Load existing food log
                             if (documentSnapshot.contains("totalCalories")) {
                                 totalCalories = documentSnapshot.getLong("totalCalories").intValue();
                             }
@@ -227,8 +204,6 @@ public class FoodLogActivity extends AppCompatActivity {
                                         long calories = (Long) foodData.get("calories");
                                         foodItems.add(new FoodItem(name, (int) calories));
                                     }
-
-                                    // Update UI
                                     updateFoodItemsDisplay();
                                     updateTotalCaloriesDisplay();
                                 }
@@ -263,8 +238,6 @@ public class FoodLogActivity extends AppCompatActivity {
         }
 
         String userId = currentUser.getUid();
-
-        // Prepare food items data for Firestore
         List<Map<String, Object>> foodItemsData = new ArrayList<>();
         for (FoodItem foodItem : foodItems) {
             Map<String, Object> foodData = new HashMap<>();
@@ -273,14 +246,12 @@ public class FoodLogActivity extends AppCompatActivity {
             foodItemsData.add(foodData);
         }
 
-        // Prepare the food log document
         Map<String, Object> foodLog = new HashMap<>();
         foodLog.put("date", currentDate);
         foodLog.put("totalCalories", totalCalories);
         foodLog.put("foodItems", foodItemsData);
         foodLog.put("timestamp", new Date());
 
-        // Save to Firestore
         firestore.collection("users").document(userId)
                 .collection("foodLogs").document(currentDate)
                 .set(foodLog)
@@ -288,8 +259,6 @@ public class FoodLogActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(FoodLogActivity.this, "Food log saved successfully!", Toast.LENGTH_SHORT).show();
-
-                        // Also update the main calories consumed in user's daily data
                         updateMainCaloriesConsumed();
                     }
                 })
@@ -305,25 +274,18 @@ public class FoodLogActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             String foodName = data.getStringExtra("foodName");
             int calories = data.getIntExtra("calories", 0);
-
-            // Auto-fill the form with calculated values
             foodNameInput.setText(foodName);
             caloriesInput.setText(String.valueOf(calories));
-
             Toast.makeText(this, "Calories calculated: " + calories, Toast.LENGTH_SHORT).show();
         }
     }
 
     private void updateMainCaloriesConsumed() {
         if (currentUser == null) return;
-
         String userId = currentUser.getUid();
-
-        // Update the main user document with today's calories
         Map<String, Object> updateData = new HashMap<>();
         updateData.put("caloriesConsumed", totalCalories);
         updateData.put("lastUpdated", new Date());
@@ -345,7 +307,6 @@ public class FoodLogActivity extends AppCompatActivity {
                 });
     }
 
-    // FoodItem class to represent food data
     private static class FoodItem {
         private String name;
         private int calories;
@@ -354,11 +315,9 @@ public class FoodLogActivity extends AppCompatActivity {
             this.name = name;
             this.calories = calories;
         }
-
         public String getName() {
             return name;
         }
-
         public int getCalories() {
             return calories;
         }
