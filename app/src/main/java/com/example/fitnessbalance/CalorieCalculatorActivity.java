@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -77,97 +78,133 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         addToFoodLogButton.setOnClickListener(v -> addToFoodLog());
     }
 
+    // In CalorieCalculatorActivity.java
+
     private void initializeDatabases() {
         foodDatabase = new HashMap<>();
+
+        // The first unit added via addConversion() is now the default.
         FoodItem apple = new FoodItem("Apple", 52);
-        apple.addConversion("medium piece", 182);
+        apple.addConversion("medium piece", 182); // Default
         apple.addConversion("cup, sliced", 125);
+        apple.addUniversalUnits();
 
         FoodItem banana = new FoodItem("Banana", 89);
-        banana.addConversion("medium piece", 118);
+        banana.addConversion("medium piece", 118); // Default
+        banana.addUniversalUnits();
 
         FoodItem strawberries = new FoodItem("Strawberries", 32);
-        strawberries.addConversion("cup, whole", 152);
+        strawberries.addConversion("cup, whole", 152); // Default
+        strawberries.addUniversalUnits();
 
         FoodItem avocado = new FoodItem("Avocado", 160);
-        avocado.addConversion("medium", 200);
+        avocado.addConversion("medium", 200); // Default
         avocado.addConversion("cup, sliced", 146);
+        avocado.addUniversalUnits();
 
         foodDatabase.put("Fruits", Arrays.asList(apple, banana, strawberries, avocado));
 
         FoodItem carrot = new FoodItem("Carrot", 41);
-        carrot.addConversion("medium piece", 61);
+        carrot.addConversion("medium piece", 61); // Default
         carrot.addConversion("cup, chopped", 122);
+        carrot.addUniversalUnits();
 
         FoodItem spinach = new FoodItem("Spinach", 23);
-        spinach.addConversion("cup, raw", 30);
+        spinach.addConversion("cup, raw", 30); // Default
         spinach.addConversion("cup, cooked", 180);
+        spinach.addUniversalUnits();
 
         FoodItem broccoli = new FoodItem("Broccoli", 55);
-        broccoli.addConversion("cup, chopped", 91);
+        broccoli.addConversion("cup, chopped", 91); // Default
+        broccoli.addUniversalUnits();
 
         FoodItem bellPepper = new FoodItem("Bell Pepper", 31);
-        bellPepper.addConversion("medium", 119);
+        bellPepper.addConversion("medium", 119); // Default
         bellPepper.addConversion("cup, chopped", 149);
+        bellPepper.addUniversalUnits();
 
         foodDatabase.put("Vegetables", Arrays.asList(carrot, spinach, broccoli, bellPepper));
-        FoodItem egg = new FoodItem("Eggs", 155);
-        egg.addConversion("large egg", 50);
 
+        FoodItem egg = new FoodItem("Eggs", 155);
+        egg.addConversion("large egg", 50); // Default
+        egg.addUniversalUnits();
+
+        // For items with no specific unit, 'g' will be the default.
         FoodItem chickenBreast = new FoodItem("Chicken Breast (Cooked)", 165);
+        chickenBreast.addUniversalUnits(); // 'g' will be the first added, making it the default.
 
         FoodItem salmon = new FoodItem("Salmon (Cooked)", 208);
+        salmon.addUniversalUnits();
 
         FoodItem beefSteak = new FoodItem("Beef Steak (Cooked)", 271);
+        beefSteak.addUniversalUnits();
 
         FoodItem tofu = new FoodItem("Tofu (Firm)", 76);
-        tofu.addConversion("cup", 252);
+        tofu.addConversion("cup", 252); // Default
+        tofu.addUniversalUnits();
 
         foodDatabase.put("Proteins", Arrays.asList(egg, chickenBreast, salmon, beefSteak, tofu));
 
         FoodItem oats = new FoodItem("Oats (Dry)", 389);
-        oats.addConversion("cup, dry", 81);
+        oats.addConversion("cup, dry", 81); // Default
+        oats.addUniversalUnits();
 
         FoodItem bread = new FoodItem("Whole Wheat Bread", 265);
-        bread.addConversion("slice", 28);
+        bread.addConversion("slice", 28); // Default
+        bread.addUniversalUnits();
 
         FoodItem whiteRice = new FoodItem("White Rice (Cooked)", 130);
-        whiteRice.addConversion("cup, cooked", 158);
+        whiteRice.addConversion("cup, cooked", 158); // Default
+        whiteRice.addUniversalUnits();
 
         FoodItem quinoa = new FoodItem("Quinoa (Cooked)", 120);
-        quinoa.addConversion("cup, cooked", 185);
+        quinoa.addConversion("cup, cooked", 185); // Default
+        quinoa.addUniversalUnits();
 
         FoodItem pasta = new FoodItem("Pasta (Dry)", 371);
-        pasta.addConversion("cup, dry", 145);
+        pasta.addConversion("cup, dry", 145); // Default
+        pasta.addUniversalUnits();
 
         foodDatabase.put("Grains", Arrays.asList(oats, bread, whiteRice, quinoa, pasta));
 
         FoodItem milk = new FoodItem("Milk (Whole)", 61);
-        milk.addConversion("cup", 244);
+        milk.addConversion("cup", 244); // Default
         milk.addConversion("tbsp", 15);
+        milk.addUniversalUnits();
 
         FoodItem cheddarCheese = new FoodItem("Cheddar Cheese", 404);
-        cheddarCheese.addConversion("slice", 28);
+        cheddarCheese.addConversion("slice", 28); // Default
         cheddarCheese.addConversion("cup, shredded", 113);
+        cheddarCheese.addUniversalUnits();
 
         FoodItem greekYogurt = new FoodItem("Greek Yogurt (Plain)", 59);
-        greekYogurt.addConversion("cup", 245);
+        greekYogurt.addConversion("cup", 245); // Default
+        greekYogurt.addUniversalUnits();
 
         FoodItem almondMilk = new FoodItem("Almond Milk (Unsweetened)", 17);
-        almondMilk.addConversion("cup", 240);
+        almondMilk.addConversion("cup", 240); // Default
+        almondMilk.addUniversalUnits();
 
         foodDatabase.put("Dairy & Alternatives", Arrays.asList(milk, cheddarCheese, greekYogurt, almondMilk));
+
         FoodItem almonds = new FoodItem("Almonds", 579);
+        almonds.addConversion("oz", 28.35); // Set 'oz' as default instead of 'g'
         almonds.addConversion("cup", 143);
+        almonds.addConversion("g", 1.0);
+        almonds.addConversion("lb", 453.59);
+
 
         FoodItem peanutButter = new FoodItem("Peanut Butter", 588);
-        peanutButter.addConversion("tbsp", 16);
+        peanutButter.addConversion("tbsp", 16); // Default
+        peanutButter.addUniversalUnits();
 
         FoodItem chiaSeeds = new FoodItem("Chia Seeds", 486);
-        chiaSeeds.addConversion("tbsp", 10);
+        chiaSeeds.addConversion("tbsp", 10); // Default
+        chiaSeeds.addUniversalUnits();
 
         foodDatabase.put("Nuts & Seeds", Arrays.asList(almonds, peanutButter, chiaSeeds));
     }
+
 
     private void setupSpinners() {
         List<String> categories = new ArrayList<>(foodDatabase.keySet());
@@ -218,6 +255,16 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         ArrayAdapter<String> portionUnitAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, units);
         portionUnitAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         portionUnitSpinner.setAdapter(portionUnitAdapter);
+
+        String defaultUnit = selectedItem.getDefaultUnit();
+        if (defaultUnit != null) {
+            // Find the position of the default unit in the adapter.
+            int defaultUnitPosition = portionUnitAdapter.getPosition(defaultUnit);
+            if (defaultUnitPosition >= 0) {
+                // Set the spinner to automatically select the default unit.
+                portionUnitSpinner.setSelection(defaultUnitPosition);
+            }
+        }
     }
 
     private void calculateFoodCalories() {
@@ -293,21 +340,30 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         return null;
     }
 
+    // In CalorieCalculatorActivity.java, at the bottom of the file
+
     private static class FoodItem {
         final String name;
         final double caloriesPer100g;
-        private final Map<String, Double> conversionMap = new HashMap<>();
+        // Use a LinkedHashMap to preserve the order of insertion.
+        // The first unit added will be treated as the default.
+        private final Map<String, Double> conversionMap = new LinkedHashMap<>();
 
         FoodItem(String name, double caloriesPer100g) {
             this.name = name;
             this.caloriesPer100g = caloriesPer100g;
-            this.addConversion("g", 1.0);
-            this.addConversion("oz", 28.35);
-            this.addConversion("lb", 453.59);
+            // Universal units are added last, so they are not the default.
         }
 
         public void addConversion(String unitName, double grams) {
             this.conversionMap.put(unitName, grams);
+        }
+
+        // NEW: Method to add the universal conversions after the primary ones.
+        public void addUniversalUnits() {
+            this.addConversion("g", 1.0);
+            this.addConversion("oz", 28.35);
+            this.addConversion("lb", 453.59);
         }
 
         public double convertToGrams(double amount, String unit) {
@@ -323,5 +379,15 @@ public class CalorieCalculatorActivity extends AppCompatActivity {
         public List<String> getAvailableUnits() {
             return new ArrayList<>(conversionMap.keySet());
         }
+
+        // NEW: Method to get the first (default) unit from the ordered map.
+        public String getDefaultUnit() {
+            // Return the first key in the LinkedHashMap, or null if it's empty.
+            if (!conversionMap.isEmpty()) {
+                return conversionMap.keySet().iterator().next();
+            }
+            return null;
+        }
     }
+
 }
