@@ -106,6 +106,13 @@ public class FoodLogActivity extends AppCompatActivity {
                 startActivityForResult(intent, 1);
             }
         });
+
+        findViewById(R.id.searchFoodButton).setOnClickListener(v ->
+                startActivity(new Intent(
+                        FoodLogActivity.this,
+                        FoodSearchActivity.class
+                ))
+        );
     }
 
     private void updateDate() {

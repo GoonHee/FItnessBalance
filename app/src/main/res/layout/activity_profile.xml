@@ -372,7 +372,7 @@
 
                     <!-- Calculate BMI Button -->
                     <Button
-                        android:id="@+id/calculateBmiButton"
+                        android:id="@+id/calculateBMIButton"
                         android:layout_width="match_parent"
                         android:layout_height="45dp"
                         android:text="@string/calculate_bmi"

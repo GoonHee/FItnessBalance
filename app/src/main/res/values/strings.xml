@@ -112,4 +112,24 @@
     <string name="exercise_hiit">HIIT</string>
     <string name="exercise_dancing">Dancing</string>
     <string name="exercise_hiking">Hiking</string>
+    <string name="food_search_title">Search foods</string>
+    <string name="food_search_hint">Start of food name, e.g. barley</string>
+    <string name="food_search_more">Load more</string>
+    <string name="food_search_prompt">Enter the beginning of a food name.</string>
+    <string name="food_search_loading">Searching…</string>
+    <string name="food_search_empty">No matching foods found.</string>
+    <string name="food_search_failed">Could not load foods. Check your connection and try again.</string>
+    <string name="food_search_sign_in">Please sign in before searching.</string>
+    <string name="food_search_count">%1$d foods shown</string>
+    <string name="food_search_close">Close</string>
+    <string name="food_search_missing">Not available</string>
+    <string name="food_search_unnamed">Unnamed food</string>
+    <string name="food_search_basis">Nutrition basis: %1$s</string>
+    <string name="food_search_basis_unknown">Nutrition basis unknown. These are recorded values; portion calculations are unavailable.</string>
+    <string name="food_search_energy">Energy: %1$s kcal</string>
+    <string name="food_search_protein">Protein: %1$s g</string>
+    <string name="food_search_carbs">Carbohydrate: %1$s g</string>
+    <string name="food_search_fat">Fat: %1$s g</string>
+    <string name="food_search_fiber">Fiber: %1$s g</string>
+    <string name="food_search_sodium">Sodium: %1$s mg</string>
 </resources>

@@ -41,7 +41,9 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView profileName, profileEmail;
     private TextInputEditText fullNameEditText, weightEditText, heightEditText;
     private Spinner fitnessLevelSpinner;
-    private Button editProfileButton, saveProfileButton, cancelButton, logoutButton, addExerciseButton;
+    private Button editProfileButton, saveProfileButton,
+            cancelButton, logoutButton, addExerciseButton,
+            calculateBMIButton;
     private LinearLayout bmiResultsLayout;
     private TextView bmiValueText, bmiCategoryText;
     private ImageButton backButton;
@@ -112,6 +114,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         editProfileButton = findViewById(R.id.editProfileButton);
         saveProfileButton = findViewById(R.id.saveProfileButton);
+        calculateBMIButton = findViewById(R.id.calculateBMIButton);
         cancelButton = findViewById(R.id.cancelButton);
         logoutButton = findViewById(R.id.logoutButton);
     }
@@ -225,6 +228,11 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        calculateBMIButton.setOnClickListener(v -> {
+            Log.d("BMIDebug", "Calculate BMI button clicked");
+            calculateBMI();
+        });
+
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -283,7 +291,9 @@ public class ProfileActivity extends AppCompatActivity {
         String heightStr = heightEditText.getText().toString().trim();
 
         if (weightStr.isEmpty() || heightStr.isEmpty()) {
-            bmiResultsLayout.setVisibility(View.GONE);
+            Toast.makeText(this,
+                    "Please enter your weight and height",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -292,16 +302,21 @@ public class ProfileActivity extends AppCompatActivity {
             double height = Double.parseDouble(heightStr);
 
             if (weight <= 0 || height <= 0) {
-                bmiResultsLayout.setVisibility(View.GONE);
+                Toast.makeText(this,
+                        "Height and weight must be greater than zero",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
+
             double heightInMeters = height / 100.0;
             double bmi = weight / (heightInMeters * heightInMeters);
 
             displayBMIResult(bmi);
 
         } catch (NumberFormatException e) {
-            bmiResultsLayout.setVisibility(View.GONE);
+            Toast.makeText(this,
+                    "Please enter valid numeric values",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 

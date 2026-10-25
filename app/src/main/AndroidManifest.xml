@@ -64,6 +64,10 @@
             android:name=".ExerciseActivity"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".FoodSearchActivity"
+            android:exported="false" />
+
     </application>
 
 
