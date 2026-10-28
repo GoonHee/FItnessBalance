@@ -64,6 +64,32 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
     findViewById(R.id.exDiscard).setVisibility(draft == null ? View.GONE : View.VISIBLE);
     Date now = new Date();
     TimeZone zone = TimeZone.getDefault();
+    String activityDay = DateUtils.day(now, zone);
+    new com.example.fitnessbalance.repository.ExerciseLogRepository(uid)
+        .loadDay(activityDay)
+        .addOnSuccessListener(
+            this,
+            day -> {
+              if (!activityDay.equals(DateUtils.day(new Date(), TimeZone.getDefault()))) return;
+              text(
+                  R.id.alHomeSummary,
+                  getString(
+                          R.string.al_total_value,
+                          Values.integer(day.totals.get("caloriesBurned"), 0))
+                      + "\n"
+                      + getString(
+                          R.string.al_breakdown,
+                          Values.integer(day.totals.get("manualCaloriesBurned"), 0),
+                          Values.integer(day.totals.get("structuredCaloriesBurned"), 0))
+                      + "\n"
+                      + getString(
+                          R.string.al_time,
+                          Values.decimal(day.totals.get("exerciseActiveSeconds"), 0) / 60,
+                          Values.integer(day.totals.get("exerciseEntryCount"), 0)));
+            })
+        .addOnFailureListener(
+            this, error -> text(R.id.alHomeSummary, getString(R.string.al_summary_error)));
+
     Task<DocumentSnapshot> profile = repository.profile(),
         progress = repository.progress(path()),
         week = repository.week(DateUtils.week(now, zone));

@@ -1,5 +1,7 @@
 # Exercise module — current master integration
 
+**Activity Log update:** Manual and guided exercise logging is now integrated. See [ACTIVITY_LOG.md](ACTIVITY_LOG.md) for the new daily calorie accounting, history, compatibility and QA notes.
+
 This implementation starts from `master` commit `a7ca20f08e3eadcda9c5060aeb12dee5c8a99f60`. It does not merge or depend on the earlier exercise branch. The updated food log, serving calculations, barcode scanner, product creation and saved barcode-food code remain unchanged.
 
 ## Open and run in Android Studio
@@ -23,7 +25,7 @@ Existing edits are deliberately limited:
 
 - Dashboard Exercise card opens `ExerciseHomeActivity`.
 - Profile writes merge, preserving email, XP and fields maintained by other modules.
-- Existing ExerciseActivity is labeled Quick Exercise Log. Numeric reads accept `Number`; its `exerciseLogs` and `dailyData` write formats are preserved.
+- Existing ExerciseActivity is now Activity Log, combining manual entries and guided records. Existing `exerciseLogs` arrays remain the manual source; `dailyData` contains the combined exercise estimate.
 - App Gradle explicitly declares RecyclerView 1.2.1, already used transitively by the available dependencies. The barcode scanner dependency is retained.
 - Eight private activities are added to the existing manifest without replacing the food activities or scanner metadata.
 - New module strings/layouts/styles are separate resources. Draft preferences are excluded from backup and device transfer.
@@ -41,7 +43,7 @@ New files cover `model`, `repository`, `service`, `ui.exercise`, `adapter`, `uti
 | 5 | Profile/feedback/recovery-aware recommendations and explanations | Debug build and tests passed |
 | 6 | Rules, barcode/food regression access, duplicate-concurrency recovery, error states, accessibility/resource review and docs | Debug/release builds, JVM tests, lint and local Firestore tests passed |
 
-Final automated results: **45 JVM tests passed, 21 local Firestore tests passed, debug and unsigned release builds passed, and lint passed with 0 errors / 126 warnings.** Nonblocking lint warnings include existing app code and layout background overdraw.
+Final automated results: **70 JVM tests passed, 32 local Firestore tests passed, debug and unsigned release builds passed, and lint passed with 0 errors.** Nonblocking lint warnings include existing app code and layout background overdraw.
 
 ## Catalogue import — development only
 
@@ -107,7 +109,7 @@ npm --prefix tools/security-tests install
 tools/security-tests/node_modules/.bin/firebase emulators:exec --project demo-fitnessbalance --only firestore 'node --test tools/security-tests/rules.test.cjs'
 ```
 
-On Windows, use `tools\security-tests\node_modules\.bin\firebase.cmd` for the executable. There are 21 tests for shared and private access, food/nutrient and barcode regression paths, first-lesson/locked/recovery starts, immutable sessions/records, atomic progress, replay/concurrent submissions, repeat reductions, one-time daily/weekly bonuses, missing profiles and maximum achievement-write access limits. The JavaScript harness exercises the Firestore contract; it does not execute Android activities or the Android repository binary.
+On Windows, use `tools\security-tests\node_modules\.bin\firebase.cmd` for the executable. There are 32 tests for shared and private access, food/nutrient and barcode regression paths, first-lesson/locked/recovery starts, immutable sessions/records, atomic progress, replay/concurrent submissions, repeat reductions, one-time daily/weekly bonuses, missing profiles and maximum achievement-write access limits. The JavaScript harness exercises the Firestore contract; it does not execute Android activities or the Android repository binary.
 
 When two clients submit the same session, Firestore's immutable-record rules can reject the losing write before an SDK retry. The repository checks the authoritative saved record after an uncertain failure and returns that record if present. Otherwise it reports failure and retains the draft for a same-ID retry. It never creates a second reward record.
 
@@ -159,7 +161,7 @@ There is no new preferences editor in this MVP; optional fields can be configure
 
 Device local timezone consistently sets day/week boundaries, stored on the record. Weeks start Monday. Changing device timezone can move date buckets; a fixed home-timezone policy can be added later.
 
-Calories are estimates from active time, MET and profile weight; absent/invalid weight uses 70 kg. They never influence XP. Structured estimates are shown in results; existing manual-log/dashboard calorie fields are not overwritten. Quick logs remain independent and cannot unlock path lessons.
+Calories are estimates from active time, MET and profile weight; absent/invalid weight uses 70 kg. They never influence XP. Structured estimates appear in results and Activity Log. `dailyData.caloriesBurned` combines completed manual entries with guided records; food fields are preserved. Manual activities do not unlock path lessons or award exercise-module XP.
 
 ## Lifecycle, errors and limits
 

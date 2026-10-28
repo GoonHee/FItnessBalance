@@ -122,6 +122,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false" />
+                <LinearLayout style="@style/ExercisePanel">
+                    <TextView
+                        style="@style/ExerciseHeading"
+                        android:text="@string/al_today" />
+                    <TextView
+                        android:id="@+id/alHomeSummary"
+                        style="@style/ExerciseBody"
+                        android:text="@string/al_loading" />
+                </LinearLayout>
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/exPath"
                     style="@style/ExerciseButton"

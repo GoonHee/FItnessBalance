@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/exRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/exToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/al_title"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationContentDescription="@string/back" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/exercise_spacing">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/alDate"
+                style="@style/ExerciseButton"
+                android:text="@string/al_today" />
+            <LinearLayout style="@style/ExercisePanel">
+                <TextView
+                    style="@style/ExerciseHeading"
+                    android:text="@string/al_total" />
+                <TextView
+                    android:id="@+id/alTotal"
+                    style="@style/ExerciseHeading"
+                    android:accessibilityLiveRegion="polite" />
+                <TextView
+                    android:id="@+id/alBreakdown"
+                    style="@style/ExerciseBody" />
+                <TextView
+                    android:id="@+id/alTime"
+                    style="@style/ExerciseBody" />
+                <TextView
+                    style="@style/ExerciseBody"
+                    android:text="@string/al_note" />
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/alAdd"
+                style="@style/ExerciseButton"
+                android:text="@string/al_add"
+                android:enabled="false" />
+            <TextView
+                style="@style/ExerciseBody"
+                android:text="@string/al_auto_note" />
+            <TextView
+                style="@style/ExerciseBody"
+                android:text="@string/al_manual_rewards" />
+            <ProgressBar
+                android:id="@+id/exLoading"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/al_loading"
+                android:visibility="gone" />
+            <TextView
+                android:id="@+id/exStatus"
+                style="@style/ExerciseBody"
+                android:visibility="gone"
+                android:accessibilityLiveRegion="polite" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/exRetry"
+                style="@style/ExerciseButton"
+                android:text="@string/ex_retry"
+                android:visibility="gone" />
+            <TextView
+                style="@style/ExerciseHeading"
+                android:text="@string/al_history" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/alHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

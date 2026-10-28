@@ -37,6 +37,9 @@ public final class GamificationRepository {
               // A retried or resumed submission returns the immutable record without any writes.
               DocumentSnapshot saved = tx.get(record);
               if (saved.exists()) return session;
+              DocumentReference dailyRef = user.collection(DAILY_DATA).document(day);
+              DocumentSnapshot daily = tx.get(dailyRef),
+                  manualLog = tx.get(user.collection(MANUAL_LOGS).document(day));
               DocumentSnapshot start = tx.get(user.collection(SESSIONS).document(session)),
                   profile = tx.get(user);
               if (!start.exists() || start.getTimestamp("startedAt") == null)
@@ -141,6 +144,15 @@ public final class GamificationRepository {
               List<String> achievementList = Values.strings(profile.get("achievementIds")),
                   newUnlocks = new ArrayList<>();
               // All transaction reads are complete. Every mutation below commits together.
+              ExerciseLogRepository.creditGuided(
+                  tx,
+                  dailyRef,
+                  daily,
+                  manualLog,
+                  day,
+                  session,
+                  (int) Math.round(calories),
+                  activeDuration);
               for (int n = 0; n < 3; n++)
                 if (eligible[n] && !quests.get(n).exists())
                   tx.set(

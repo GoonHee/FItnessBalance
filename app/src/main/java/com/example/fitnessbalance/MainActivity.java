@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             Log.w("MainActivity", "User document doesn't exist");
                             updateCalorieDisplay(0, 0);
+                            loadTodayMetrics();
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -121,11 +122,25 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     updateCalorieDisplay(consumed, burned);
+                    refreshExerciseTotals(todayDate, userId);
                 })
                 .addOnFailureListener(e -> {
                     Log.e("MainActivity", "Error loading today's metrics", e);
                     updateCalorieDisplay(0, 0);
                 });
+    }
+
+
+    private void refreshExerciseTotals(String day, String userId) {
+        new com.example.fitnessbalance.repository.ExerciseLogRepository(userId)
+                .loadDay(day)
+                .addOnSuccessListener(this, result -> {
+                    com.google.firebase.auth.FirebaseUser active = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+                    if (active == null || !userId.equals(active.getUid()) || !day.equals(com.example.fitnessbalance.util.DateUtils.day(new Date(), java.util.TimeZone.getDefault()))) return;
+                    updateCalorieDisplay(result.caloriesConsumed,
+                            com.example.fitnessbalance.util.Values.integer(result.totals.get("caloriesBurned"), 0));
+                })
+                .addOnFailureListener(this, error -> Log.w("MainActivity", "Exercise totals refresh: " + error.getClass().getSimpleName()));
     }
 
     private void updateCalorieDisplay(int caloriesConsumed, int caloriesBurned) {

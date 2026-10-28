@@ -4,6 +4,8 @@ public final class FirestoreCollections {
   private FirestoreCollections() {}
 
   public static final String USERS = "users",
+      MANUAL_LOGS = "exerciseLogs",
+      DAILY_DATA = "dailyData",
       EXERCISES = "exercises",
       PATHS = "workoutPaths",
       LESSONS = "lessons",
