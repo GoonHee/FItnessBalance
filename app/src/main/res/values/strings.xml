@@ -31,7 +31,7 @@
     <string name="calculation_result_title">Calorie Calculation</string>
     <string name="default_calorie_result">0 calories</string>
     <string name="add_to_food_log_button">Add to Food Log</string>
-    <string name="exercise_tracking_title">Exercise Tracking</string>
+    <string name="exercise_tracking_title">Quick Exercise Log</string>
     <string name="todays_date_placeholder">Today\'s Date</string>
     <string name="suggested_exercises_title">Suggested Exercises</string>
     <string name="suggested_exercises_loading">Based on your preferences: Loading…</string>

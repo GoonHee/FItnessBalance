@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/exRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/exToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationContentDescription="@string/back"
+        app:title="@string/ex_feedback" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/exercise_spacing">
+            <ProgressBar
+                android:id="@+id/exLoading"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/ex_loading"
+                android:visibility="gone" />
+            <TextView
+                android:id="@+id/exStatus"
+                style="@style/ExerciseBody"
+                android:accessibilityLiveRegion="polite"
+                android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/exRetry"
+                style="@style/ExerciseButton"
+                android:text="@string/ex_retry" />
+            <LinearLayout
+                android:id="@+id/exContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout style="@style/ExercisePanel">
+                    <TextView
+                        android:id="@+id/exDifficultyLabel"
+                        style="@style/ExerciseHeading"
+                        android:text="@string/ex_difficulty" />
+                    <RadioGroup
+                        android:id="@+id/exDifficulty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <RadioButton
+                            android:id="@+id/ex_too_easy"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:text="@string/ex_too_easy" />
+                        <RadioButton
+                            android:id="@+id/ex_suitable"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:text="@string/ex_suitable" />
+                        <RadioButton
+                            android:id="@+id/ex_too_difficult"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:text="@string/ex_too_difficult" />
+                    </RadioGroup>
+                </LinearLayout>
+                <LinearLayout style="@style/ExercisePanel">
+                    <TextView
+                        android:id="@+id/exFeelingLabel"
+                        style="@style/ExerciseHeading"
+                        android:text="@string/ex_feeling" />
+                    <RadioGroup
+                        android:id="@+id/exFeeling"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <RadioButton
+                            android:id="@+id/ex_energized"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:text="@string/ex_energized" />
+                        <RadioButton
+                            android:id="@+id/ex_normal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:text="@string/ex_normal" />
+                        <RadioButton
+                            android:id="@+id/ex_tired"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:text="@string/ex_tired" />
+                        <RadioButton
+                            android:id="@+id/ex_discomfort"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:text="@string/ex_discomfort" />
+                    </RadioGroup>
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/exDiscomfortGuidance"
+                    style="@style/ExerciseBody"
+                    android:text="@string/ex_discomfort_guidance" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exSave"
+                    style="@style/ExerciseButton"
+                    android:text="@string/ex_save"
+                    android:enabled="false" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
