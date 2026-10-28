@@ -147,7 +147,7 @@ public class ExerciseActivity extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             // Load user weight
                             if (documentSnapshot.contains("weight")) {
-                                userWeight = documentSnapshot.getDouble("weight");
+                                userWeight = com.example.fitnessbalance.util.Values.decimal(documentSnapshot.get("weight"),70);
                             }
 
                             // Load preferred exercises
@@ -312,7 +312,7 @@ public class ExerciseActivity extends AppCompatActivity {
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.exists()) {
                             if (documentSnapshot.contains("totalCaloriesBurned")) {
-                                totalCaloriesBurned = documentSnapshot.getLong("totalCaloriesBurned").intValue();
+                                totalCaloriesBurned = com.example.fitnessbalance.util.Values.integer(documentSnapshot.get("totalCaloriesBurned"),0);
                             }
                             if (documentSnapshot.contains("exercises")) {
                                 List<Map<String, Object>> exercisesData =
@@ -321,8 +321,8 @@ public class ExerciseActivity extends AppCompatActivity {
                                     todayExercises.clear();
                                     for (Map<String, Object> exerciseData : exercisesData) {
                                         String name = (String) exerciseData.get("name");
-                                        long duration = (Long) exerciseData.get("duration");
-                                        long calories = (Long) exerciseData.get("calories");
+                                        long duration = com.example.fitnessbalance.util.Values.integer(exerciseData.get("duration"),0);
+                                        long calories = com.example.fitnessbalance.util.Values.integer(exerciseData.get("calories"),0);
                                         boolean completed = exerciseData.get("completed") != null ?
                                                 (Boolean) exerciseData.get("completed") : false;
                                         todayExercises.add(new ExerciseItem(name, (int) duration, (int) calories, completed));
