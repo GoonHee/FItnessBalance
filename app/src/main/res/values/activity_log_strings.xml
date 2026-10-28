@@ -1,0 +1,54 @@
+<resources>
+    <string name="al_title">Activity Log</string>
+    <string name="al_add">Add Manual Activity</string>
+    <string name="al_today">Today’s Activity</string>
+    <string name="al_day">Activity for %1$s</string>
+    <string name="al_total">Estimated calories burned</string>
+    <string name="al_total_value">%1$d kcal</string>
+    <string name="al_breakdown">Manual: %1$d kcal · Guided: %2$d kcal</string>
+    <string name="al_time">%1$.1f active minutes · %2$d recorded activities</string>
+    <string name="al_note">Calorie estimates combine manual activities and guided workouts. Guided rest time is excluded from active minutes. Calories never determine XP.</string>
+    <string name="al_auto_note">Guided workouts appear automatically. Add manual entries only for separate activities to avoid recording the same workout twice.</string>
+    <string name="al_history">Activity History</string>
+    <string name="al_empty">No activities recorded for this day. Add a manual activity or complete a guided workout.</string>
+    <string name="al_manual">Manual activity</string>
+    <string name="al_guided">Guided workout</string>
+    <string name="al_legacy">Historical activity total</string>
+    <string name="al_legacy_duration">Duration unavailable · about %1$.0f kcal</string>
+    <string name="al_row">%1$.1f minutes · about %2$.0f kcal</string>
+    <string name="al_planned">Planned · excluded from daily totals</string>
+    <string name="al_completed">Completed</string>
+    <string name="al_attempted">Attempted</string>
+    <string name="al_edit">Edit</string>
+    <string name="al_delete">Delete</string>
+    <string name="al_view">View Workout</string>
+    <string name="al_delete_confirm">Remove this manual activity and recalculate this day’s total?</string>
+    <string name="al_delete_busy">Removing activity…</string>
+    <string name="al_error">Could not refresh the activity log. Check your connection and retry.</string>
+    <string name="al_conflict">This activity changed elsewhere. Reload the log before editing it again.</string>
+    <string name="al_save_error">Could not confirm this save. Keep this form open and retry; the same entry will not be added twice.</string>
+    <string name="al_saved">Activity saved</string>
+    <string name="al_removed">Activity removed</string>
+    <string name="al_form_title">Manual Exercise Log</string>
+    <string name="al_form_edit">Edit Manual Activity</string>
+    <string name="al_type">Activity type</string>
+    <string name="al_custom">Custom activity name</string>
+    <string name="al_duration">Duration in minutes</string>
+    <string name="al_done">Activity completed</string>
+    <string name="al_estimate">About %1$d kcal · using %2$.1f kg</string>
+    <string name="al_estimate_prompt">Enter a duration to preview estimated calories.</string>
+    <string name="al_estimate_note">Estimates use activity intensity, time and profile weight. Custom activities use a general 3-MET estimate. A 70 kg reference is used when profile weight is unavailable.</string>
+    <string name="al_manual_rewards">Manual entries update activity totals. Weekly Momentum, path progress and XP follow guided workouts.</string>
+    <string name="al_save">Save Activity</string>
+    <string name="al_saving">Saving…</string>
+    <string name="al_duration_error">Enter a duration above 0 and up to 1,440 minutes.</string>
+    <string name="al_name_error">Enter an activity name of 1–100 characters.</string>
+    <string name="al_date_error">Choose today or an earlier date.</string>
+    <string name="al_summary_error">Activity totals could not be refreshed. Open Activity Log to retry.</string>
+    <string name="al_loading">Loading activities…</string>
+    <string name="al_guided_completion">%1$.0f%% complete</string>
+    <string name="al_reference_weight">A 70 kg reference weight is being used. Add your weight in Profile for a more personal estimate.</string>
+    <string-array name="al_activity_names">
+        <item>Walking</item><item>Running</item><item>Cycling</item><item>Swimming</item><item>Weight Lifting</item><item>Yoga</item><item>Pilates</item><item>Basketball</item><item>Soccer</item><item>Tennis</item><item>HIIT</item><item>Dancing</item><item>Hiking</item><item>Jump Rope</item><item>Rowing</item><item>Other / Custom</item>
+    </string-array>
+</resources>

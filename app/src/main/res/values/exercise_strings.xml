@@ -8,7 +8,7 @@
     <string name="ex_result">Workout Result</string>
     <string name="ex_progress">Exercise Progress</string>
     <string name="ex_achievements">Achievements</string>
-    <string name="ex_quick">Quick Exercise Log</string>
+    <string name="ex_quick">Activity Log</string>
     <string name="ex_start">Start Workout</string>
     <string name="ex_resume">Resume</string>
     <string name="ex_pause">Pause</string>

@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+        <TextView
+            style="@style/ExerciseBody"
+            android:text="@string/al_type"
+            android:labelFor="@id/alType" />
+        <Spinner
+            android:id="@+id/alType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp" />
+        <EditText
+            android:id="@+id/alCustom"
+            android:importantForAutofill="no"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:hint="@string/al_custom"
+            android:inputType="textCapWords"
+            android:maxLength="100"
+            android:visibility="gone" />
+        <EditText
+            android:id="@+id/alMinutes"
+            android:importantForAutofill="no"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:hint="@string/al_duration"
+            android:inputType="numberDecimal"
+            android:maxLength="8" />
+        <CheckBox
+            android:id="@+id/alDone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/al_done"
+            android:checked="true" />
+        <TextView
+            android:id="@+id/alPreview"
+            style="@style/ExerciseHeading"
+            android:accessibilityLiveRegion="polite" />
+        <TextView
+            style="@style/ExerciseBody"
+            android:text="@string/al_estimate_note" />
+        <TextView
+            android:id="@+id/alFormStatus"
+            style="@style/ExerciseBody"
+            android:visibility="gone"
+            android:accessibilityLiveRegion="polite" />
+    </LinearLayout>
+</ScrollView>
