@@ -68,6 +68,14 @@
             android:name=".FoodSearchActivity"
             android:exported="false" />
 
+            <activity android:name=".ui.exercise.ExerciseHomeActivity" android:exported="false" />
+        <activity android:name=".ui.exercise.WorkoutDetailsActivity" android:exported="false" />
+        <activity android:name=".ui.exercise.ActiveWorkoutActivity" android:exported="false" />
+        <activity android:name=".ui.exercise.WorkoutFeedbackActivity" android:exported="false" />
+        <activity android:name=".ui.exercise.WorkoutResultActivity" android:exported="false" />
+    <activity android:name=".ui.exercise.WorkoutPathActivity" android:exported="false" />
+    <activity android:name=".ui.exercise.ExerciseProgressActivity" android:exported="false" />
+<activity android:name=".ui.exercise.AchievementsActivity" android:exported="false" />
     </application>
 
 

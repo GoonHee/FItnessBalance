@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout xmlns:ns0="http://schemas.android.com/apk/res/android" ns0:id="@+id/exRoot" ns0:layout_width="match_parent" ns0:layout_height="match_parent" ns0:orientation="vertical" ns0:background="@color/ex_surface">
+    <com.google.android.material.button.MaterialButton ns0:id="@+id/exBack" style="@style/ExButton" ns0:text="@string/back" />
+    <ScrollView ns0:layout_width="match_parent" ns0:layout_height="0dp" ns0:layout_weight="1" ns0:fillViewport="true">
+        <LinearLayout ns0:layout_width="match_parent" ns0:layout_height="wrap_content" ns0:orientation="vertical" ns0:padding="@dimen/ex_space">
+            <TextView ns0:id="@+id/exTitle" style="@style/ExText" ns0:textSize="28sp" ns0:text="@string/ex_home" />
+            <ProgressBar ns0:id="@+id/exLoading" ns0:layout_width="48dp" ns0:layout_height="48dp" ns0:layout_gravity="center_horizontal" ns0:contentDescription="@string/ex_loading" />
+            <TextView ns0:id="@+id/exStatus" style="@style/ExText" ns0:textSize="16sp" />
+            <com.google.android.material.button.MaterialButton ns0:id="@+id/exRetry" style="@style/ExButton" ns0:text="@string/ex_retry" />
+            <LinearLayout ns0:id="@+id/exContent" ns0:layout_width="match_parent" ns0:layout_height="wrap_content" ns0:orientation="vertical">
+                <TextView ns0:id="@+id/exHello" style="@style/ExText" ns0:textSize="16sp" />
+                <TextView ns0:id="@+id/exStats" style="@style/ExText" ns0:textSize="16sp" />
+                <TextView ns0:id="@+id/exWeekly" style="@style/ExText" ns0:textSize="22sp" ns0:text="@string/ex_weekly" />
+                <TextView ns0:id="@+id/exMomentum" style="@style/ExText" ns0:textSize="16sp" />
+                <TextView ns0:id="@+id/exBand" style="@style/ExText" ns0:textSize="16sp" />
+                <TextView ns0:id="@+id/exRecommended" style="@style/ExText" ns0:textSize="22sp" ns0:text="@string/ex_recommended" />
+                <TextView ns0:id="@+id/exRecommendation" style="@style/ExText" ns0:textSize="16sp" />
+                <com.google.android.material.button.MaterialButton ns0:id="@+id/exStart" style="@style/ExButton" ns0:text="@string/ex_start" />
+                <com.google.android.material.button.MaterialButton ns0:id="@+id/exDiscard" style="@style/ExButton" ns0:text="@string/ex_discard" ns0:visibility="gone" />
+                <TextView ns0:id="@+id/exQuestsTitle" style="@style/ExText" ns0:textSize="22sp" ns0:text="@string/ex_quests" />
+                <androidx.recyclerview.widget.RecyclerView ns0:id="@+id/exQuests" ns0:layout_width="match_parent" ns0:layout_height="wrap_content" ns0:nestedScrollingEnabled="false" />
+                <com.google.android.material.button.MaterialButton ns0:id="@+id/exPath" style="@style/ExButton" ns0:text="@string/ex_path" />
+                <com.google.android.material.button.MaterialButton ns0:id="@+id/exQuick" style="@style/ExButton" ns0:text="@string/ex_quick" />
+                <com.google.android.material.button.MaterialButton ns0:id="@+id/exProgress" style="@style/ExButton" ns0:text="@string/ex_progress" />
+                <com.google.android.material.button.MaterialButton ns0:id="@+id/exAchievements" style="@style/ExButton" ns0:text="@string/ex_achievements" />
+                <TextView ns0:id="@+id/exNote" style="@style/ExText" ns0:textSize="16sp" ns0:text="@string/ex_progress_note" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
+<com.google.android.material.card.MaterialCardView xmlns:ns0="http://schemas.android.com/apk/res/android" xmlns:ns1="http://schemas.android.com/apk/res-auto" ns0:layout_width="match_parent" ns0:layout_height="wrap_content" ns0:layout_marginBottom="@dimen/ex_card_space" ns1:cardBackgroundColor="@color/white" ns1:cardCornerRadius="12dp">
+    <TextView ns0:id="@+id/exRowText" style="@style/ExText" ns0:minHeight="64dp" />
+</com.google.android.material.card.MaterialCardView>

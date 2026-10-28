@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signedIn() { return request.auth != null; }
+  function owner(uid) { return signedIn() && request.auth.uid == uid; }
+  function noPassword(data) { return !data.keys().hasAny(['password', 'passwordHash', 'confirmPassword']); }
+  function award(uid) {
+   let data = request.resource.data;
+   let id = data.lastRecordId;
+   let record = /databases/$(database)/documents/users/$(uid)/workoutRecords/$(id);
+   return id is string && !exists(record) && existsAfter(record)
+    && getAfter(record).data.totalXpAfter == data.totalXp
+    && getAfter(record).data.xpEarned == data.totalXp - (exists(/databases/$(database)/documents/users/$(uid)) ? resource.data.get('totalXp', 0) : 0)
+    && data.totalXp is int && data.totalXp >= 0
+    && data.level == int(data.totalXp / 100) + 1;
+  }
+  match /exercises/{id} { allow read: if signedIn(); }
+  match /workoutPaths/{path} {
+   allow read: if signedIn();
+   match /lessons/{lesson} {
+    allow read: if signedIn();
+    match /workoutExercises/{item} { allow read: if signedIn(); }
+   }
+  }
+  match /quests/{id} { allow read: if signedIn(); }
+  match /achievements/{id} { allow read: if signedIn(); }
+  // Existing food search reads this shared collection.
+  match /foods/{id} { allow read: if signedIn(); }
+  match /users/{uid} {
+   allow read: if owner(uid);
+   allow create: if owner(uid) && noPassword(request.resource.data)
+    && ((!request.resource.data.keys().hasAny(['totalXp','level','weeklyCounts','weeklyCategories','metGoalWeeks','achievementIds','feedbackCount','lastRecordId','lastWorkoutAt','lastDiscomfortAt','lastDifficulty','lastFeeling'])) || award(uid));
+   allow update: if owner(uid) && noPassword(request.resource.data)
+    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['totalXp','level','weeklyCounts','weeklyCategories','metGoalWeeks','achievementIds','feedbackCount','lastRecordId','lastWorkoutAt','lastDiscomfortAt','lastDifficulty','lastFeeling']) || award(uid));
+   match /foodLogs/{day} { allow read, write: if owner(uid); }
+   match /exerciseLogs/{day} { allow read, write: if owner(uid); }
+   match /dailyData/{day} { allow read, write: if owner(uid); }
+   match /workoutSessions/{id} {
+    allow read: if owner(uid);
+    allow create: if owner(uid) && request.resource.data.keys().hasOnly(['pathId','lessonId','plannedExercises','startedAt'])
+     && request.resource.data.pathId is string && request.resource.data.lessonId is string
+     && request.resource.data.plannedExercises is int && request.resource.data.plannedExercises > 0 && request.resource.data.plannedExercises <= 64
+     && request.resource.data.startedAt == request.time;
+   }
+   match /workoutRecords/{id} {
+    allow read: if owner(uid);
+    allow create: if owner(uid) && validRecord(uid,id);
+   }
+   match /pathProgress/{path} {
+    allow read: if owner(uid);
+    allow create, update: if owner(uid)
+     && request.resource.data.keys().hasOnly(['completionCounts','bestPercent','bestStars','updatedAt'])
+     && request.resource.data.completionCounts is map && request.resource.data.bestPercent is map && request.resource.data.bestStars is map
+     && request.resource.data.updatedAt == request.time
+     && freshRecord(uid, getAfter(/databases/$(database)/documents/users/$(uid)).data.lastRecordId);
+   }
+   match /questProgress/{id} {
+    allow read: if owner(uid);
+    allow create: if owner(uid)
+     && request.resource.data.keys().hasOnly(['day','questId','completed','xpEarned','recordId','completedAt'])
+     && request.resource.data.questId in ['planned','minutes','feedback']
+     && id == request.resource.data.day + '_' + request.resource.data.questId
+     && request.resource.data.completed == true && request.resource.data.completedAt == request.time
+     && request.resource.data.xpEarned == (request.resource.data.questId == 'feedback' ? 0 : 5)
+     && freshRecord(uid, request.resource.data.recordId);
+   }
+   match /unlockedAchievements/{id} {
+    allow read: if owner(uid);
+    allow create: if owner(uid) && id in ['first_step','routine_builder','path_explorer','welcome_back','honest_reflection','balanced_week']
+     && request.resource.data.keys().hasOnly(['unlockedAt','recordId'])
+     && request.resource.data.unlockedAt == request.time
+     && freshRecord(uid, request.resource.data.recordId);
+   }
+  }
+  function freshRecord(uid,id) {
+   let ref = /databases/$(database)/documents/users/$(uid)/workoutRecords/$(id);
+   return !exists(ref) && existsAfter(ref) && getAfter(ref).data.completedAt == request.time;
+  }
+  function validRecord(uid,id) {
+   let d = request.resource.data;
+   let session = get(/databases/$(database)/documents/users/$(uid)/workoutSessions/$(id)).data;
+   let user = getAfter(/databases/$(database)/documents/users/$(uid)).data;
+   return d.keys().hasOnly(['pathId','lessonId','lessonName','startedAt','completedAt','plannedExercises','completedExercises','skippedExercises','completionPercentage','durationSeconds','activeDurationSeconds','estimatedCaloriesBurned','xpEarned','starsEarned','difficultyFeedback','feelingFeedback','discomfortReported','firstCompletion','totalXpAfter','weeklyCompleted','weeklyTarget','unlocked','category','localDay','localWeek','timeZone'])
+    && d.pathId == session.pathId && d.lessonId == session.lessonId
+    && d.startedAt == session.startedAt && d.completedAt == request.time && d.startedAt <= d.completedAt
+    && d.plannedExercises == session.plannedExercises
+    && d.completedExercises is int && d.completedExercises >= 0 && d.completedExercises <= d.plannedExercises
+    && d.skippedExercises is int && d.skippedExercises >= 0 && d.completedExercises + d.skippedExercises <= d.plannedExercises
+    && d.completionPercentage is number && d.completionPercentage >= 0 && d.completionPercentage <= 100
+    && d.completionPercentage >= d.completedExercises * 100.0 / d.plannedExercises - 0.001
+    && d.completionPercentage <= d.completedExercises * 100.0 / d.plannedExercises + 0.001
+    && d.durationSeconds is int && d.durationSeconds >= 0 && d.durationSeconds <= 86400
+    && d.get('activeDurationSeconds',d.durationSeconds) is int && d.get('activeDurationSeconds',d.durationSeconds) >= 0 && d.get('activeDurationSeconds',d.durationSeconds) <= d.durationSeconds
+    && d.estimatedCaloriesBurned is number && d.estimatedCaloriesBurned >= 0 && d.estimatedCaloriesBurned <= 100000
+    && d.xpEarned is int && d.xpEarned >= 0 && d.xpEarned <= 77
+    && d.starsEarned is int && d.starsEarned >= 1 && d.starsEarned <= 3
+    && d.difficultyFeedback in ['too_easy','suitable','too_difficult']
+    && d.feelingFeedback in ['energized','normal','tired','discomfort']
+    && d.discomfortReported == (d.feelingFeedback == 'discomfort')
+    && d.firstCompletion is bool && d.unlocked is list
+    && d.totalXpAfter == user.totalXp && user.lastRecordId == id
+    && d.weeklyTarget is int && d.weeklyTarget >= 1 && d.weeklyTarget <= 7
+    && d.weeklyCompleted is int && d.weeklyCompleted >= 0;
+  }
+ }
+}
