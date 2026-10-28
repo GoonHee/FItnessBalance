@@ -51,5 +51,6 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.flexbox)
     implementation(libs.play.services.code.scanner)
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
 
 }

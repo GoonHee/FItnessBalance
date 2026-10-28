@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/exRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/exToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationContentDescription="@string/back"
+        app:title="@string/ex_home" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/exercise_spacing">
+            <ProgressBar
+                android:id="@+id/exLoading"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/ex_loading"
+                android:visibility="gone" />
+            <TextView
+                android:id="@+id/exStatus"
+                style="@style/ExerciseBody"
+                android:accessibilityLiveRegion="polite"
+                android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/exRetry"
+                style="@style/ExerciseButton"
+                android:text="@string/ex_retry" />
+            <LinearLayout
+                android:id="@+id/exContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/exHello"
+                    style="@style/ExerciseHeading" />
+                <LinearLayout style="@style/ExercisePanel">
+                    <TextView
+                        android:id="@+id/exLevel"
+                        style="@style/ExerciseHeading" />
+                    <TextView
+                        android:id="@+id/exXp"
+                        style="@style/ExerciseBody" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/exXpBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="12dp"
+                        android:max="100" />
+                    <TextView
+                        android:id="@+id/exApplicationProgress"
+                        style="@style/ExerciseBody"
+                        android:text="@string/ex_app_progress" />
+                </LinearLayout>
+                <LinearLayout style="@style/ExercisePanel">
+                    <TextView
+                        android:id="@+id/exWeekly"
+                        style="@style/ExerciseHeading"
+                        android:text="@string/ex_weekly" />
+                    <TextView
+                        android:id="@+id/exMomentum"
+                        style="@style/ExerciseBody" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/exMomentumBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="12dp"
+                        android:max="100" />
+                    <TextView
+                        android:id="@+id/exBand"
+                        style="@style/ExerciseBody" />
+                    <TextView
+                        android:id="@+id/exRecoveryNote"
+                        style="@style/ExerciseBody"
+                        android:text="@string/ex_recovery_note" />
+                </LinearLayout>
+                <LinearLayout style="@style/ExercisePanel">
+                    <TextView
+                        android:id="@+id/exRecommended"
+                        style="@style/ExerciseHeading"
+                        android:text="@string/ex_recommended" />
+                    <TextView
+                        android:id="@+id/exRecommendationTitle"
+                        style="@style/ExerciseBody" />
+                    <TextView
+                        android:id="@+id/exRecommendationMeta"
+                        style="@style/ExerciseBody" />
+                    <TextView
+                        android:id="@+id/exRecommendationReason"
+                        style="@style/ExerciseBody" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/exStart"
+                        style="@style/ExerciseButton"
+                        android:text="@string/ex_start"
+                        android:enabled="false" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/exDiscard"
+                        style="@style/ExerciseButton"
+                        android:text="@string/ex_discard" />
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/exQuestsTitle"
+                    style="@style/ExerciseHeading"
+                    android:text="@string/ex_quests" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/exQuests"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exPath"
+                    style="@style/ExerciseButton"
+                    android:text="@string/ex_path" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exQuick"
+                    style="@style/ExerciseButton"
+                    android:text="@string/ex_quick" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exProgress"
+                    style="@style/ExerciseButton"
+                    android:text="@string/ex_progress" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exAchievements"
+                    style="@style/ExerciseButton"
+                    android:text="@string/ex_achievements" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

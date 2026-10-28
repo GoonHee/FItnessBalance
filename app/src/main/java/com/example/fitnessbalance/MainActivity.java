@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         exerciseCard.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, ExerciseActivity.class));
+            startActivity(new Intent(MainActivity.this, com.example.fitnessbalance.ui.exercise.ExerciseHomeActivity.class));
         });
 
         profileCard.setOnClickListener(v -> {
