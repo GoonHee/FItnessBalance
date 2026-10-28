@@ -570,7 +570,7 @@ public class ProfileActivity extends AppCompatActivity {
         userData.put("preferredExercises", preferredExercises);
 
         firestore.collection("users").document(userId)
-                .set(userData)
+                .set(userData, com.google.firebase.firestore.SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

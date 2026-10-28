@@ -31,7 +31,7 @@
     <string name="calculation_result_title">Calorie Calculation</string>
     <string name="default_calorie_result">0 calories</string>
     <string name="add_to_food_log_button">Add to Food Log</string>
-    <string name="exercise_tracking_title">Exercise Tracking</string>
+    <string name="exercise_tracking_title">Quick Exercise Log</string>
     <string name="todays_date_placeholder">Today\'s Date</string>
     <string name="suggested_exercises_title">Suggested Exercises</string>
     <string name="suggested_exercises_loading">Based on your preferences: Loading…</string>
@@ -132,4 +132,126 @@
     <string name="food_search_fat">Fat: %1$s g</string>
     <string name="food_search_fiber">Fiber: %1$s g</string>
     <string name="food_search_sodium">Sodium: %1$s mg</string>
-</resources>
+
+    <string name="ex_home">Exercise</string>
+    <string name="ex_path">Exercise Path</string>
+    <string name="ex_details">Workout Details</string>
+    <string name="ex_active">Active Workout</string>
+    <string name="ex_feedback">Workout Feedback</string>
+    <string name="ex_result">Workout Result</string>
+    <string name="ex_progress">Exercise Progress</string>
+    <string name="ex_achievements">Achievements</string>
+    <string name="ex_quick">Quick Exercise Log</string>
+    <string name="ex_start">Start Workout</string>
+    <string name="ex_continue">Continue</string>
+    <string name="ex_retry">Retry</string>
+    <string name="ex_loading">Loading…</string>
+    <string name="ex_error">Could not load or save your workout. Check your connection and access, then retry.</string>
+    <string name="ex_empty">No workout content yet. Ask your project administrator to run the development seed import.</string>
+    <string name="ex_profile_missing">Your profile is incomplete. Defaults are 3 workouts per week and a 10-minute preference. You can still start a beginner workout.</string>
+    <string name="ex_sign_in">Please sign in to use exercise progress.</string>
+    <string name="ex_progress_note">Levels and mastery reflect application progress, not medical or physical ability. Recovery days preserve your earned XP and achievements.</string>
+    <string name="ex_safety">Stop if you feel pain. If pain persists, seek appropriate professional guidance. Choose recovery or gentle mobility when comfortable.</string>
+    <string name="ex_safety_short">Move comfortably. Pause or stop if you feel pain.</string>
+    <string name="ex_recommended">Recommended for You</string>
+    <string name="ex_quests">Today’s Quests</string>
+    <string name="ex_weekly">Weekly Momentum</string>
+    <string name="ex_path_name">Beginner Foundation Path</string>
+    <string name="ex_level_xp">Level %1$d · %2$d XP · %3$d XP to next level</string>
+    <string name="ex_hello">Hello, %1$s</string>
+    <string name="ex_momentum">%1$d of %2$d qualifying workouts · %3$d%%</string>
+    <string name="ex_strong">Strong Momentum</string>
+    <string name="ex_building">Building Momentum</string>
+    <string name="ex_restart">Restart Opportunity</string>
+    <string name="ex_begin">Begin Again</string>
+    <string name="ex_locked">Locked</string>
+    <string name="ex_unlocked">Unlocked</string>
+    <string name="ex_completed">Completed</string>
+    <string name="ex_lesson_row">%1$s
+%2$s
+%3$d min · %4$d XP · %5$s
+Best: %6$d stars · %7$.0f%% complete</string>
+    <string name="ex_lesson_summary">%1$s
+%2$s
+%3$s · about %4$d min · %5$d base XP
+Equipment: %6$s</string>
+    <string name="ex_target_duration">%1$s
+%2$d seconds · Rest %3$d seconds</string>
+    <string name="ex_target_reps">%1$s
+%2$d repetitions · Rest %3$d seconds</string>
+    <string name="ex_complete">Complete Exercise</string>
+    <string name="ex_skip">Skip Exercise</string>
+    <string name="ex_pause">Pause</string>
+    <string name="ex_resume">Resume</string>
+    <string name="ex_end">End Workout</string>
+    <string name="ex_end_confirm">End this workout and submit feedback for the exercises you completed?</string>
+    <string name="ex_position">Exercise %1$d of %2$d · %3$d completed · %4$d skipped</string>
+    <string name="ex_seconds">%1$d seconds remaining</string>
+    <string name="ex_repetitions">Target: %1$d repetitions</string>
+    <string name="ex_rest">Rest · %1$d seconds remaining</string>
+    <string name="ex_paused">Paused — resume when ready</string>
+    <string name="ex_finished_timer">Target time reached. Complete when ready.</string>
+    <string name="ex_difficulty">How was the difficulty?</string>
+    <string name="ex_feeling">How do you feel?</string>
+    <string name="ex_too_easy">Too Easy</string>
+    <string name="ex_suitable">Suitable</string>
+    <string name="ex_too_difficult">Too Difficult</string>
+    <string name="ex_energized">Energized</string>
+    <string name="ex_normal">Normal</string>
+    <string name="ex_tired">Tired</string>
+    <string name="ex_discomfort">Discomfort</string>
+    <string name="ex_submit">Save Workout</string>
+    <string name="ex_attempted">Workout attempted</string>
+    <string name="ex_finished">Lesson completed</string>
+    <string name="ex_result_summary">%1$s
+%2$s
+%3$.0f%% complete · %4$d seconds
+Estimated calories: %5$.0f kcal
+%6$d XP earned · %7$d stars
+Level %8$d · %9$d XP to next level
+Weekly target: %10$d of %11$d</string>
+    <string name="ex_no_unlocks">Keep moving at your own pace. Your earned progress stays with you.</string>
+    <string name="ex_new_unlocks">New progress: %1$s</string>
+    <string name="ex_progress_summary">%1$s
+%2$s
+%3$s
+Recent workouts (up to 30):</string>
+    <string name="ex_record_row">%1$s · %2$.0f%% · %3$d XP</string>
+    <string name="ex_quest_planned">Complete a planned workout (+5 XP)</string>
+    <string name="ex_quest_minutes">Complete at least five minutes (+5 XP)</string>
+    <string name="ex_quest_feedback">Submit workout feedback (+2 XP per workout)</string>
+    <string name="ex_quest_row">%1$s %2$s</string>
+    <string name="ex_done_symbol">✓</string>
+    <string name="ex_pending_symbol">○</string>
+    <string name="ex_achievement_row">%1$s · %2$s
+%3$s</string>
+    <string name="ex_earned">Unlocked</string>
+    <string name="ex_not_earned">Not yet unlocked</string>
+    <string name="ex_no_records">Your completed or attempted workouts will appear here.</string>
+    <string name="ex_no_achievements">Achievements will appear after content is imported.</string>
+    <string name="ex_reason_discomfort">Recent discomfort: choose gentle recovery and avoid increasing difficulty.</string>
+    <string name="ex_reason_recovery">Today is a planned recovery day. Recovery supports consistency.</string>
+    <string name="ex_reason_comeback">Welcome back. Start with a comfortable comeback workout.</string>
+    <string name="ex_reason_equipment">Choose a gentle session that fits your available equipment.</string>
+    <string name="ex_reason_easier">Your last workout felt too difficult. Try a shorter beginner session.</string>
+    <string name="ex_reason_balance">Balance recent strength activity with mobility or recovery.</string>
+    <string name="ex_reason_next">Your previous two workouts felt easy. Try the next unlocked beginner lesson at a comfortable pace.</string>
+    <string name="ex_reason_micro">A short workout fits your five-minute preference.</string>
+    <string name="ex_reason_preference">Chosen from unlocked beginner lessons using your duration, categories, equipment and fitness preferences.</string>
+    <string name="ex_recommendation">%1$s
+About %2$d min · %3$d base XP
+%4$s</string>
+    <string name="ex_finish_existing">A workout is in progress. Resume it or finish and submit feedback before starting another.</string>
+    <string name="ex_feedback_pending">Your workout is ready for feedback.</string>
+    <string name="ex_resume_workout">Resume Workout</string>
+    <string name="ex_no_recommendation">Take a planned recovery day. There is no suitable available workout for this recommendation.</string>
+    <string name="ex_save_pending">Saving your workout… Keep this screen open. If saving fails, retry with the same session.</string>
+    <string name="ex_feedback_missing">Choose both difficulty and feeling before saving.</string>
+    <string name="ex_expired">This workout draft belongs to a different account. Sign in with the original account to continue.</string>
+    <string name="ex_quick_note">Record independent activities such as running, cycling, walking or swimming. Quick logs do not unlock path lessons.</string>
+
+ <string name="ex_manual_hint">Optional custom activity name</string>
+ <string name="ex_manual_estimate">Custom activities use a general estimate of 3 MET. Adjust your activity choice if a closer match exists.</string>
+ <string name="ex_lesson_02_name">Lower Body Basics</string><string name="ex_lesson_03_name">Upper Body Basics</string><string name="ex_lesson_04_name">Five-Minute Workout</string><string name="ex_lesson_05_name">Strength and Mobility</string><string name="ex_lesson_06_name">Ten-Minute Full Body</string><string name="ex_lesson_07_name">Foundation Challenge</string>
+ <string name="ex_first_step">First Step</string><string name="ex_routine_builder">Routine Builder</string><string name="ex_path_explorer">Path Explorer</string><string name="ex_welcome_back">Welcome Back</string><string name="ex_honest_reflection">Honest Reflection</string><string name="ex_balanced_week">Balanced Week</string>
+<string name="ex_discard">Discard Unfinished Workout</string><string name="ex_discard_confirm">Discard this unfinished local session? Saved workout records and earned progress will remain.</string></resources>
