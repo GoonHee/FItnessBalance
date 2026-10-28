@@ -1,1 +1,0 @@
-{"private":true,"scripts":{"test":"node --test rules.test.cjs"},"devDependencies":{"firebase-tools":"14.22.0","@firebase/rules-unit-testing":"4.0.1","firebase":"11.10.0"}}

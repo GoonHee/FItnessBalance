@@ -1,6 +1,0 @@
-<resources>
- <dimen name="ex_space">16dp</dimen><dimen name="ex_card_space">12dp</dimen>
- <color name="ex_green">#226D35</color><color name="ex_surface">#F3F7F2</color><color name="ex_ink">#18321D</color>
- <style name="ExText"><item name="android:layout_width">match_parent</item><item name="android:layout_height">wrap_content</item><item name="android:textSize">16sp</item><item name="android:textColor">@color/ex_ink</item><item name="android:padding">12dp</item></style>
- <style name="ExButton" parent="Widget.Material3.Button"><item name="android:layout_width">match_parent</item><item name="android:layout_height">wrap_content</item><item name="android:minHeight">48dp</item><item name="backgroundTint">@color/ex_green</item><item name="android:textColor">@color/white</item></style>
-</resources>

@@ -13,10 +13,3 @@
 .externalNativeBuild
 .cxx
 local.properties
-
-# Local module development tools and emulator output
-/work/
-/tools/security-tests/node_modules/
-/firebase-debug.log
-/firestore-debug.log
-/ui-debug.log

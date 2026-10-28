@@ -147,7 +147,7 @@ public class ExerciseActivity extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             // Load user weight
                             if (documentSnapshot.contains("weight")) {
-                                userWeight = com.example.fitnessbalance.util.Values.decimal(documentSnapshot.get("weight"),70);
+                                userWeight = documentSnapshot.getDouble("weight");
                             }
 
                             // Load preferred exercises
@@ -214,10 +214,8 @@ public class ExerciseActivity extends AppCompatActivity {
                 return;
             }
 
-            String customName = ((android.widget.EditText)findViewById(R.id.customQuickActivity)).getText().toString().trim();
-            String selectedExercise = customName.isEmpty() ? exerciseSpinner.getSelectedItem().toString() : customName;
-            ExerciseData exercise = customName.isEmpty() ? exerciseDatabase.get(selectedExercise) : new ExerciseData(customName,3.0,"general estimate");
-            if(!customName.isEmpty())Toast.makeText(this,R.string.ex_manual_estimate,Toast.LENGTH_LONG).show();
+            String selectedExercise = exerciseSpinner.getSelectedItem().toString();
+            ExerciseData exercise = exerciseDatabase.get(selectedExercise);
 
             if (exercise != null) {
                 double hours = duration / 60.0;
@@ -314,7 +312,7 @@ public class ExerciseActivity extends AppCompatActivity {
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.exists()) {
                             if (documentSnapshot.contains("totalCaloriesBurned")) {
-                                totalCaloriesBurned = com.example.fitnessbalance.util.Values.integer(documentSnapshot.get("totalCaloriesBurned"),0);
+                                totalCaloriesBurned = documentSnapshot.getLong("totalCaloriesBurned").intValue();
                             }
                             if (documentSnapshot.contains("exercises")) {
                                 List<Map<String, Object>> exercisesData =
@@ -323,8 +321,8 @@ public class ExerciseActivity extends AppCompatActivity {
                                     todayExercises.clear();
                                     for (Map<String, Object> exerciseData : exercisesData) {
                                         String name = (String) exerciseData.get("name");
-                                        long duration = com.example.fitnessbalance.util.Values.integer(exerciseData.get("duration"),0);
-                                        long calories = com.example.fitnessbalance.util.Values.integer(exerciseData.get("calories"),0);
+                                        long duration = (Long) exerciseData.get("duration");
+                                        long calories = (Long) exerciseData.get("calories");
                                         boolean completed = exerciseData.get("completed") != null ?
                                                 (Boolean) exerciseData.get("completed") : false;
                                         todayExercises.add(new ExerciseItem(name, (int) duration, (int) calories, completed));

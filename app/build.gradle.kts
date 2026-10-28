@@ -50,6 +50,5 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.flexbox)
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
 
 }

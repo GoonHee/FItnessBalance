@@ -154,9 +154,6 @@
                             android:background="@drawable/spinner_background"
                             android:paddingStart="12dp"
                             android:paddingEnd="12dp" />
- <EditText android:id="@+id/customQuickActivity" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:inputType="textCapWords" android:hint="@string/ex_manual_hint"/>
- <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ex_quick_note" android:textSize="14sp" android:textColor="#333333" android:padding="8dp"/>
-
 
                     </LinearLayout>
 
