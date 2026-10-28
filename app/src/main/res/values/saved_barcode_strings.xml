@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sb_add">Add or edit product from label</string>
+    <string name="sb_title">Save packaged food</string>
+    <string name="sb_code">Barcode: %1$s</string>
+    <string name="sb_name">Product name</string>
+    <string name="sb_reference">Label reference amount (for example, 100 or 30)</string>
+    <string name="sb_unit">Label reference unit</string>
+    <string name="sb_note">Enter nutrients for the reference amount above. Calories are required. Leave unlisted nutrients blank; enter 0 only if the label states zero.</string>
+    <string name="sb_confirm">I copied the reference amount, unit and nutrients from this product label</string>
+    <string name="sb_save">Save product and continue</string>
+    <string name="sb_missing_confirmation">Confirm the label information before saving.</string>
+    <string name="sb_invalid">Enter a product name, a positive reference amount up to 10,000 g or ml, and valid non-negative calorie/nutrient values. Leave unavailable nutrients blank.</string>
+    <string name="sb_saved">Product saved. Choose the amount you ate, then tap Log food.</string>
+    <string name="sb_loading">Checking your saved products…</string>
+    <string name="sb_access">Your saved products could not be loaded. Check the barcodeFoods access rule and your connection, then retry.</string>
+</resources>

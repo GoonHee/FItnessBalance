@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/foodRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="?android:attr/colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <Button
+            android:id="@+id/foodBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back" />
+
+        <TextView
+            style="@style/FoodHeading"
+            android:text="@string/fl_title" />
+
+        <Button
+            android:id="@+id/foodDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/fl_date"
+            android:visibility="visible" />
+
+        <LinearLayout style="@style/FoodPanel">
+
+            <TextView
+                style="@style/FoodHeading"
+                android:text="@string/fl_summary" />
+
+            <TextView
+                android:id="@+id/foodDailyTotals"
+                style="@style/FoodBody" />
+
+            <TextView
+                style="@style/FoodBody"
+                android:text="@string/fl_partial_note" />
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/FoodPanel">
+
+            <EditText
+                android:id="@+id/foodSearchInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:hint="@string/fl_search_hint"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:maxLines="1" />
+
+            <Button
+                android:id="@+id/foodSearchButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/fl_search" />
+
+            <Button
+                android:id="@+id/foodBarcodeScan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/bc_scan" />
+
+            <Button
+                android:id="@+id/foodBarcodeEnter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/bc_enter" />
+
+            <TextView
+                style="@style/FoodBody"
+                android:text="@string/fl_prefix_note" />
+
+            <TextView
+                android:id="@+id/foodSearchStatus"
+                style="@style/FoodBody"
+                android:accessibilityLiveRegion="polite" />
+
+            <LinearLayout
+                android:id="@+id/foodSearchResults"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <Button
+                android:id="@+id/foodMore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/fl_more"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <TextView
+            style="@style/FoodHeading"
+            android:text="@string/fl_history" />
+
+        <TextView
+            android:id="@+id/foodHistoryStatus"
+            style="@style/FoodBody"
+            android:accessibilityLiveRegion="polite" />
+
+        <Button
+            android:id="@+id/foodRetry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/fl_retry"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/foodHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </LinearLayout>
+
+</ScrollView>

@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/foodRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <Button
+            android:id="@+id/foodBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back" />
+
+        <TextView
+            style="@style/FoodHeading"
+            android:text="@string/fl_details" />
+
+        <TextView
+            android:id="@+id/foodDetailsName"
+            style="@style/FoodHeading" />
+
+        <TextView
+            android:id="@+id/foodDetailsDate"
+            style="@style/FoodBody" />
+
+        <TextView
+            android:id="@+id/foodDetailsSource"
+            style="@style/FoodBody" />
+
+        <TextView
+            android:id="@+id/foodDetailsStatus"
+            style="@style/FoodBody"
+            android:accessibilityLiveRegion="polite" />
+
+        <LinearLayout
+            android:id="@+id/barcodeConfirmPanel"
+            style="@style/FoodPanel"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/FoodHeading"
+                android:text="@string/bc_confirm_title" />
+
+            <TextView
+                style="@style/FoodBody"
+                android:text="@string/bc_confirm_note" />
+
+            <CheckBox
+                android:id="@+id/barcodeConfirmed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/bc_confirm"
+                android:saveEnabled="false" />
+
+            <Spinner
+                android:id="@+id/barcodeReferenceUnit"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:saveEnabled="false" />
+
+            <TextView
+                android:id="@+id/barcodeAttribution"
+                style="@style/FoodBody"
+                android:text="@string/bc_attribution"
+                android:minHeight="48dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/FoodPanel">
+
+            <TextView
+                style="@style/FoodBody"
+                android:text="@string/fs_meal"
+                android:labelFor="@+id/foodMeal" />
+
+            <Spinner
+                android:id="@+id/foodMeal"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:entries="@array/fs_meals"
+                android:saveEnabled="false" />
+
+            <TextView
+                style="@style/FoodBody"
+                android:text="@string/fs_serving_size"
+                android:labelFor="@+id/foodPortion" />
+
+            <EditText
+                android:id="@+id/foodPortion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:hint="@string/fs_size_hint"
+                android:inputType="numberDecimal"
+                android:maxLength="10"
+                android:saveEnabled="false" />
+
+            <Spinner
+                android:id="@+id/foodUnit"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:saveEnabled="false" />
+
+            <TextView
+                style="@style/FoodBody"
+                android:text="@string/fs_count"
+                android:labelFor="@+id/foodServings" />
+
+            <EditText
+                android:id="@+id/foodServings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:hint="@string/fs_count_hint"
+                android:inputType="numberDecimal"
+                android:maxLength="10"
+                android:saveEnabled="false" />
+
+            <CheckBox
+                android:id="@+id/foodManual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/fs_manual"
+                android:saveEnabled="false" />
+
+            <LinearLayout
+                android:id="@+id/foodManualPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/FoodBody"
+                    android:text="@string/fs_manual_calories"
+                    android:labelFor="@+id/foodManualCalories" />
+
+                <EditText
+                    android:id="@+id/foodManualCalories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:hint="@string/enter_calories"
+                    android:inputType="numberDecimal"
+                    android:maxLength="10"
+                    android:saveEnabled="false" />
+
+                <TextView
+                    style="@style/FoodBody"
+                    android:text="@string/fs_manual_note" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/foodBasis"
+                style="@style/FoodBody" />
+
+            <TextView
+                android:id="@+id/foodTotalAmount"
+                style="@style/FoodBody" />
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/FoodPanel">
+
+            <TextView
+                style="@style/FoodHeading"
+                android:text="@string/fs_calculated" />
+
+            <TextView
+                android:id="@+id/foodNutrients"
+                style="@style/FoodBody" />
+
+            <TextView
+                style="@style/FoodHeading"
+                android:text="@string/fs_reference" />
+
+            <TextView
+                android:id="@+id/foodReferenceNutrients"
+                style="@style/FoodBody" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/foodExtraPanel"
+            style="@style/FoodPanel"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/FoodHeading"
+                android:text="@string/fl_additional" />
+
+            <TextView
+                style="@style/FoodBody"
+                android:text="@string/fl_additional_note" />
+
+            <TextView
+                android:id="@+id/foodExtra"
+                style="@style/FoodBody" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/foodLogButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="@string/fl_log" />
+
+        <Button
+            android:id="@+id/foodRetry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/fl_retry"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/barcodeSaveProduct"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sb_add"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/barcodeManualFallback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bc_manual"
+            android:visibility="gone" />
+
+
+    </LinearLayout>
+
+</ScrollView>

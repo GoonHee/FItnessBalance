@@ -10,6 +10,7 @@ kotlin = "2.2.21"
 coreKtx = "1.17.0"
 material = "1.13.0"
 constraintlayout = "2.2.1"
+playServicesCodeScanner = "16.1.0"
 
 [libraries]
 # AndroidX & Core
@@ -29,6 +30,7 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+play-services-code-scanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "playServicesCodeScanner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

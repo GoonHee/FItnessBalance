@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="fl_title">Food log</string>
+    <string name="fl_details">Food details</string>
+    <string name="fl_search_hint">Search the start of a food name</string>
+    <string name="fl_search">Search foods</string>
+    <string name="fl_prefix_note">Search by the beginning of a name, for example “barley”.</string>
+    <string name="fl_results">Search results</string>
+    <string name="fl_history">Logged foods</string>
+    <string name="fl_summary">Daily nutrition</string>
+    <string name="fl_more">Load more</string>
+    <string name="fl_empty">No foods logged for this date.</string>
+    <string name="fl_no_results">No matching foods found.</string>
+    <string name="fl_loading">Loading…</string>
+    <string name="fl_sign_in">Please sign in to access foods and your log.</string>
+    <string name="fl_retry">Retry loading log</string>
+    <string name="fl_date">Date: %1$s</string>
+
+    <string name="fl_recorded">Recorded nutrition</string>
+    <string name="fl_portion">Serving size (grams)</string>
+    <string name="fl_portion_hint">Enter grams, e.g. 100</string>
+    <string name="fl_log">Log food</string>
+    <string name="fl_unknown_basis">The nutrition basis has not been verified. Recorded values are shown below. Portion calculation and logging are unavailable for this food.</string>
+    <string name="fl_per100">Reference values are per 100 g. Values below update for your portion.</string>
+    <string name="fl_invalid_portion">Enter an amount greater than 0 and no more than 10,000 g.</string>
+    <string name="fl_missing_energy">Calories are unavailable for this food, so it cannot be logged yet.</string>
+    <string name="fl_missing">Not available</string>
+    <string name="fl_name_missing">Unnamed food</string>
+    <string name="fl_food_missing">This food is no longer available.</string>
+
+    <string name="fl_nutrient_energy_kcal">Energy (kcal)</string>
+    <string name="fl_nutrient_protein_g">Protein (g)</string>
+    <string name="fl_nutrient_carbohydrate_g">Carbohydrate (g)</string>
+    <string name="fl_nutrient_fat_g">Fat (g)</string>
+    <string name="fl_nutrient_fiber_g">Fiber (g)</string>
+    <string name="fl_nutrient_sodium_mg">Sodium (mg)</string>
+    <string name="fl_nutrient_row">%1$s: %2$s</string>
+    <string name="fl_calories">%1$s kcal</string>
+    <string name="fl_partial">%1$s (partial)</string>
+    <string name="fl_partial_note">Partial totals include only entries with that nutrient recorded.</string>
+
+    <string name="fl_entry_portion">%1$s g · %2$s kcal</string>
+    <string name="fl_legacy_portion">%1$s kcal · portion not recorded</string>
+    <string name="fl_remove_title">Remove this logged food?</string>
+    <string name="fl_remove">Remove</string>
+
+    <string name="fl_error">%1$s failed (%2$s). Check your connection and Firebase access, then retry.</string>
+    <string name="fl_search_operation">Search</string>
+    <string name="fl_load_operation">Loading</string>
+    <string name="fl_save_operation">Saving</string>
+
+    <string name="fl_source">Source: %1$s</string>
+    <string name="fl_additional">Additional nutrients</string>
+    <string name="fl_additional_note">Reference data below is shown as stored and is not adjusted for your portion.</string>
+    <string name="fl_saved">Food logged successfully.</string>
+    <string name="fl_saving">Saving…</string>
+
+</resources>

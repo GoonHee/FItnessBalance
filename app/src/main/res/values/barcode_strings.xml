@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bc_scan">Scan barcode</string>
+    <string name="bc_enter">Enter barcode</string>
+    <string name="bc_hint">8, 12, 13 or 14 digits</string>
+    <string name="bc_invalid">Enter a product barcode containing 8, 12, 13 or 14 digits.</string>
+    <string name="bc_looking">Looking up product…</string>
+    <string name="bc_scan_failed">Barcode scanning failed. Check Google Play services, or use Enter barcode.</string>
+    <string name="bc_not_found">No product was found. Try another barcode, search MyFCD, or enter calories manually.</string>
+    <string name="bc_lookup_failed">Product lookup failed. Check your connection and retry, or enter calories manually.</string>
+    <string name="bc_rate_limit">Please wait before retrying. The product service limits requests.</string>
+    <string name="bc_manual">Use manual calorie entry</string>
+    <string name="bc_product">Product %1$s</string>
+    <string name="bc_confirm_title">Check the package label</string>
+    <string name="bc_confirm_note">Confirm the product name and nutrition values against the package. Choose the reference unit shown on your label before using calculated logging. If values do not match, use manual calorie entry.</string>
+    <string name="bc_confirm">These values match the package and are per 100 of the unit selected below</string>
+    <string name="bc_needs_confirmation">Confirm the nutrition and reference unit above, or select manual calorie entry.</string>
+    <string name="bc_attribution">Product data: Open Food Facts contributors · ODbL. Community-supplied data may be incomplete. View source</string>
+    <string name="bc_confirmed_basis">Reference: per 100 %1$s, confirmed by you from the package.</string>
+    <string name="bc_http_agent" translatable="false">FitnessBalance/1.0 (https://github.com/GoonHee/FItnessBalance)</string>
+</resources>

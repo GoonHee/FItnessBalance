@@ -50,5 +50,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.flexbox)
+    implementation(libs.play.services.code.scanner)
 
 }
