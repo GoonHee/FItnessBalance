@@ -1,0 +1,29 @@
+<resources>
+    <string name="prefs_title">Goals and preferences</string>
+    <string name="prefs_intro">Choose your workout preferences and your own nutrition targets. These settings do not change past logs or award points.</string>
+    <string name="prefs_workout">Workout preferences</string>
+    <string name="prefs_minutes">Preferred workout duration (1–180 minutes)</string>
+    <string name="prefs_target">Weekly workout target (1–7 sessions)</string>
+    <string name="prefs_days">Preferred workout days. Leave all unchecked for no fixed schedule. Other days can receive recovery suggestions; the weekly target is a session count.</string>
+    <string name="prefs_equipment">Available equipment. Choose “No equipment” or the items you have. Recommendations still depend on the available workout catalogue.</string>
+    <string-array name="prefs_days"><item>Monday</item><item>Tuesday</item><item>Wednesday</item><item>Thursday</item><item>Friday</item><item>Saturday</item><item>Sunday</item></string-array>
+    <string-array name="prefs_equipment"><item>No equipment</item><item>Stable chair</item><item>Exercise mat</item><item>Dumbbells</item><item>Resistance band</item></string-array>
+    <string name="prefs_nutrition">Daily nutrition goals</string>
+    <string name="prefs_goal_note">Enter targets you have chosen or agreed with a qualified professional. The app does not calculate a personalised diet prescription here. Leave a goal blank to keep it unset or clear it. Calories and macro targets are independent and are not automatically balanced.</string>
+    <string name="prefs_calories">Daily calorie goal (kcal)</string>
+    <string name="prefs_protein">Daily protein goal (g)</string>
+    <string name="prefs_carbs">Daily carbohydrate goal (g)</string>
+    <string name="prefs_fat">Daily fat goal (g)</string>
+    <string name="prefs_diet">Dietary preferences</string>
+    <string name="prefs_diet_note">Optional preferences saved for future food recommendations. They do not filter search yet or certify foods as halal, vegetarian or allergen-safe.</string>
+    <string-array name="prefs_diets"><item>Halal preference</item><item>Vegetarian</item><item>Vegan</item><item>Avoid pork</item><item>Avoid alcohol</item></string-array>
+    <string name="prefs_retry">Retry loading preferences</string>
+    <string name="prefs_save">Save preferences</string>
+    <string name="prefs_loaded">Review your choices, then save.</string>
+    <string name="prefs_saved">Preferences saved. Reopen the Exercise page to refresh recommendations. Nutrition preferences are saved for future recommendations.</string>
+    <string name="prefs_load_error">Preferences could not be loaded. Check your connection and retry. Saving is disabled until your existing settings are loaded.</string>
+    <string name="prefs_save_error">Preferences were not confirmed saved. Check your connection and sign-in, then retry.</string>
+    <string name="prefs_missing_profile">Your profile could not be found. Return to Profile and complete setup first.</string>
+    <string name="prefs_legacy_goal">Your existing calorie goal may be an earlier default. Review or clear it before saving your choices.</string>
+    <string name="prefs_invalid">Check your entries: duration 1–180 whole minutes, weekly target 1–7, and select equipment or “No equipment”. Optional calories must be greater than 0 and at most 20,000; macro goals must be 0–5,000 g. These are input limits, not recommended intake ranges.</string>
+</resources>

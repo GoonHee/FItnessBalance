@@ -204,7 +204,8 @@ public class RegistrationActivity extends AppCompatActivity {
         userData.put("email", email);
         userData.put("createdAt", new java.util.Date());
         userData.put("isVerified", false);
-        userData.put("dailyCalorieGoal", 2000);
+        // Nutrition goals stay unset until the user explicitly chooses them.
+        userData.put("nutritionGoalSource", "not_set");
 
         firestore.collection("users")
                 .document(userId)

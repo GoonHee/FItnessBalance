@@ -436,6 +436,13 @@
 
             <!-- Logout Button -->
             <Button
+                android:id="@+id/preferencesButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/prefs_title" />
+
+            <Button
                 android:id="@+id/logoutButton"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
