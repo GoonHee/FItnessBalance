@@ -63,7 +63,9 @@ public final class HealthConnectActivity extends AppCompatActivity {
         button(form, R.string.hc_retry).setOnClickListener(v -> refresh());
         button(form, R.string.hc_privacy).setOnClickListener(v -> startActivity(new Intent(this, HealthPermissionRationaleActivity.class)));
         button(form, R.string.hc_clear).setOnClickListener(v -> {
-            version++; bridge.cancelPending(); store.clear(); snapshot.clear(); busy = false;
+            version++; bridge.cancelPending(); store.clear();
+            new HealthRecommendationStore(this, uid).clear();
+            snapshot.clear(); busy = false;
             render(); refresh(); status.setText(R.string.hc_cleared);
         });
     }
@@ -100,6 +102,10 @@ public final class HealthConnectActivity extends AppCompatActivity {
             @Override public void onResult(Map<String, ? extends Object> ignored, Set<String> permissions) {
                 if (!current(request)) return;
                 granted = new HashSet<>(permissions); snapshot = HealthSummaryPolicy.mask(store.read(), allowed());
+                if (!granted.contains(HealthConnectBridge.SLEEP)) {
+                    try { new HealthRecommendationStore(HealthConnectActivity.this, uid).removeSleepInputs(); }
+                    catch (java.io.IOException e) { status.setText(R.string.hc_cache_error); }
+                }
                 try { store.write(snapshot); } catch (java.io.IOException e) { status.setText(R.string.hc_cache_error); }
                 busy = false; render();
             }
@@ -126,7 +132,12 @@ public final class HealthConnectActivity extends AppCompatActivity {
                 if (!latest.containsKey("syncedAt") && snapshot.containsKey("syncedAt")) latest.put("syncedAt", snapshot.get("syncedAt"));
                 granted = new HashSet<>(permissions); snapshot = HealthSummaryPolicy.mask(latest, allowed());
                 boolean saved = true;
-                try { store.write(snapshot); } catch (java.io.IOException e) { saved = false; }
+                try {
+                    store.write(snapshot);
+                    HealthRecommendationStore recommendations = new HealthRecommendationStore(HealthConnectActivity.this, uid);
+                    if (!granted.contains(HealthConnectBridge.SLEEP)) recommendations.removeSleepInputs();
+                    else recommendations.observe(snapshot, System.currentTimeMillis(), java.time.ZoneId.systemDefault());
+                } catch (java.io.IOException e) { saved = false; }
                 busy = false; render();
                 boolean partial = false;
                 for (String key : Arrays.asList("steps", "sleep", "heart")) partial |= !"available".equals(metric(key).get("state"));

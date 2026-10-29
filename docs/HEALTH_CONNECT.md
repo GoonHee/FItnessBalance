@@ -25,7 +25,7 @@ Only aggregate summaries, status and window/source timestamps are saved. Cache f
 
 Permission checks mask and remove revoked metric values from the local cache. Clear saved summaries removes this account's cache; it does not delete records from Health Connect or their source apps. Manage Health Connect access/data opens provider controls. Uninstall removes the local cache. Switching accounts uses separate cache files and stale callbacks cannot display the previous account's results. Backgrounding cancels pending work; there is no background sync job.
 
-Nothing writes exerciseLogs, workoutRecords, dailyData, caloriesBurned, goals, XP or achievements. These imported summaries do not yet influence recommendations. This separation prevents exercise calorie double counting and provides a foundation for later adaptive logic without implying it already exists.
+Nothing writes exerciseLogs, workoutRecords, dailyData, caloriesBurned, goals, XP or achievements. Fresh sleep summaries can influence recommendations only after separate opt-in on Exercise; see ADAPTIVE_RECOMMENDATIONS.md. This separation prevents exercise calorie double counting and provides a foundation for later adaptive logic without implying it already exists.
 
 No Firebase schema, rule deployment, service account or seed is needed. First-time library downloads require Gradle network access. This change does not establish production Health Connect/Play distribution approval.
 

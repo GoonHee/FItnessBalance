@@ -59,7 +59,7 @@ public final class RecommendationService {
     return new Recommendation(normal.get(0), p.minutes <= 5 ? "micro" : "preference");
   }
 
-  private boolean equipmentFits(Preferences p, WorkoutLesson l) {
+  boolean equipmentFits(Preferences p, WorkoutLesson l) {
     if (p.equipment.isEmpty()) return true;
     for (String e : l.getEquipment())
       if (!"none".equals(e) && !p.equipment.contains(e)) return false;

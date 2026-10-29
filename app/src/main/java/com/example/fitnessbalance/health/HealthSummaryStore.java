@@ -3,6 +3,7 @@ package com.example.fitnessbalance.health;
 import android.content.Context;
 import android.util.AtomicFile;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -11,10 +12,12 @@ import java.util.*;
 /** Account-specific summary cache in Android's no-backup directory; never stored in Firestore. */
 public final class HealthSummaryStore {
     private final AtomicFile file;
-    public HealthSummaryStore(Context context, String uid) {
+    public HealthSummaryStore(Context context, String uid) { this(context, uid, ""); }
+    public HealthSummaryStore(Context context, String uid, String namespace) {
+        if (!namespace.matches("[a-z_]*")) throw new IllegalArgumentException("Invalid cache name");
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(uid.getBytes(StandardCharsets.UTF_8));
-            StringBuilder name = new StringBuilder("health-");
+            StringBuilder name = new StringBuilder("health-" + (namespace.isEmpty() ? "" : namespace + "-"));
             for (byte b : digest) name.append(String.format(Locale.ROOT, "%02x", b & 255));
             file = new AtomicFile(new File(context.getNoBackupFilesDir(), name + ".json"));
         } catch (Exception e) { throw new IllegalStateException("Unable to open health cache"); }
@@ -28,8 +31,10 @@ public final class HealthSummaryStore {
     public void write(Map<String, Object> data) throws IOException {
         FileOutputStream stream = null;
         try {
+            byte[] bytes = new JSONObject(data).toString().getBytes(StandardCharsets.UTF_8);
+            if (bytes.length > 65536) throw new IOException("Summary cache too large");
             stream = file.startWrite();
-            stream.write(new JSONObject(data).toString().getBytes(StandardCharsets.UTF_8));
+            stream.write(bytes);
             file.finishWrite(stream);
         } catch (Exception e) {
             if (stream != null) file.failWrite(stream);
@@ -37,12 +42,21 @@ public final class HealthSummaryStore {
         }
     }
     public void clear() { file.delete(); }
+    private List<Object> decodeArray(JSONArray data) throws Exception {
+        List<Object> result = new ArrayList<>();
+        for (int i = 0; i < data.length(); i++) {
+            Object value = data.get(i);
+            result.add(value == JSONObject.NULL ? null : value instanceof JSONObject ? decode((JSONObject)value)
+                    : value instanceof JSONArray ? decodeArray((JSONArray)value) : value);
+        }
+        return result;
+    }
     private Map<String, Object> decode(JSONObject data) throws Exception {
         Map<String, Object> result = new HashMap<>();
         Iterator<String> keys = data.keys();
         while (keys.hasNext()) {
             String key = keys.next(); Object value = data.get(key);
-            result.put(key, value == JSONObject.NULL ? null : value instanceof JSONObject ? decode((JSONObject)value) : value);
+            result.put(key, value == JSONObject.NULL ? null : value instanceof JSONObject ? decode((JSONObject)value) : value instanceof JSONArray ? decodeArray((JSONArray)value) : value);
         }
         return result;
     }

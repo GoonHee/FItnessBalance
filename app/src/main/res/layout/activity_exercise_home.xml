@@ -103,6 +103,22 @@
                     <TextView
                         android:id="@+id/exRecommendationReason"
                         style="@style/ExerciseBody" />
+                    <CheckBox
+                        android:id="@+id/exUseHealth"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:saveEnabled="false"
+                        android:text="@string/ar_use_health" />
+                    <TextView android:id="@+id/exHealthReason" style="@style/ExerciseBody" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/exUsual"
+                        style="@style/ExerciseButton"
+                        android:text="@string/ar_usual" android:visibility="gone" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/exExplain"
+                        style="@style/ExerciseButton"
+                        android:text="@string/ar_explain" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/exStart"
                         style="@style/ExerciseButton"
