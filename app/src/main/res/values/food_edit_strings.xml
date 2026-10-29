@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="fe_edit">Edit logged food</string>
+
+    <string name="fe_save">Save changes</string>
+
+    <string name="fe_legacy">This older entry has no serving snapshot. Remove it and log the food again to change its portion.</string>
+
+    <string name="fe_failed">Changes were not saved. Check your connection and sign-in. If this entry changed or was removed, close this editor and reopen the log before trying again.</string>
+
+</resources>

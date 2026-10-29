@@ -47,6 +47,259 @@ public class FoodLogActivity extends AppCompatActivity {
     private DocumentSnapshot cursor;
     private ListenerRegistration registration;
 
+    private EditText editNumber(
+            LinearLayout form,
+            String label,
+            Object value
+    ) {
+        TextView caption = new TextView(this);
+        caption.setText(label);
+        form.addView(caption);
+
+        EditText input = new EditText(this);
+
+        input.setInputType(
+                android.text.InputType.TYPE_CLASS_NUMBER
+                        | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+        );
+
+        if (value instanceof Number) {
+            input.setText(value.toString());
+        }
+
+        form.addView(input);
+
+        return input;
+    }
+
+    private void editEntry(
+            String uid,
+            String date,
+            Map<String, Object> entry
+    ) {
+        if (!(entry.get("entryId") instanceof String)
+                || !(entry.get("totalAmount") instanceof Number)) {
+
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.fe_legacy)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+
+            return;
+        }
+
+        LinearLayout form = new LinearLayout(this);
+        form.setOrientation(LinearLayout.VERTICAL);
+
+        int padding = (int) (
+                20 * getResources().getDisplayMetrics().density
+        );
+
+        form.setPadding(
+                padding,
+                padding,
+                padding,
+                padding
+        );
+
+        EditText amount = editNumber(
+                form,
+                getString(R.string.fs_serving_size)
+                        + " (" + entry.get("portionUnit") + ")",
+                entry.get("servingAmount")
+        );
+
+        EditText count = editNumber(
+                form,
+                getString(R.string.fs_count),
+                entry.get("servings")
+        );
+
+        boolean manual =
+                "manual".equals(entry.get("calculationMode"));
+
+        EditText calories = manual
+                ? editNumber(
+                form,
+                getString(R.string.fs_manual_calories),
+                entry.get("manualCaloriesPerServing")
+        )
+                : null;
+
+        TextView mealLabel = new TextView(this);
+        mealLabel.setText(R.string.fs_meal);
+        form.addView(mealLabel);
+
+        android.widget.Spinner meal =
+                new android.widget.Spinner(this);
+
+        String[] meals =
+                getResources().getStringArray(R.array.fs_meals);
+
+        meal.setAdapter(
+                new android.widget.ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_spinner_dropdown_item,
+                        meals
+                )
+        );
+
+        for (int i = 0; i < meals.length; i++) {
+            if (meals[i].equals(entry.get("meal"))) {
+                meal.setSelection(i);
+                break;
+            }
+        }
+
+        form.addView(meal);
+
+        TextView preview = new TextView(this);
+        form.addView(preview);
+
+        java.util.concurrent.Callable<Map<String, Object>>
+                calculation = () -> FoodEntryEditor.resize(
+                entry,
+                Double.parseDouble(
+                        amount.getText().toString()
+                ),
+                Double.parseDouble(
+                        count.getText().toString()
+                ),
+                meal.getSelectedItem().toString(),
+                manual
+                        ? Double.parseDouble(
+                        calories.getText().toString()
+                )
+                        : 0
+        );
+
+        Runnable refresh = () -> {
+            try {
+                Map<String, Object> resized =
+                        calculation.call();
+
+                preview.setText(
+                        FoodUi.nutrients(
+                                this,
+                                (Map<?, ?>) resized.get("nutrients"),
+                                null,
+                                1
+                        )
+                );
+
+            } catch (Exception invalid) {
+                preview.setText(R.string.fs_invalid);
+            }
+        };
+
+        android.text.TextWatcher watcher =
+                new android.text.TextWatcher() {
+
+                    @Override
+                    public void beforeTextChanged(
+                            CharSequence s,
+                            int start,
+                            int count,
+                            int after
+                    ) {}
+
+                    @Override
+                    public void onTextChanged(
+                            CharSequence s,
+                            int start,
+                            int before,
+                            int count
+                    ) {
+                        refresh.run();
+                    }
+
+                    @Override
+                    public void afterTextChanged(
+                            android.text.Editable s
+                    ) {}
+                };
+
+        amount.addTextChangedListener(watcher);
+        count.addTextChangedListener(watcher);
+
+        if (calories != null) {
+            calories.addTextChangedListener(watcher);
+        }
+
+        refresh.run();
+
+        android.widget.ScrollView scroll =
+                new android.widget.ScrollView(this);
+
+        scroll.addView(form);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.fe_edit)
+                .setView(scroll)
+                .setNegativeButton(
+                        android.R.string.cancel,
+                        null
+                )
+                .setPositiveButton(
+                        R.string.fe_save,
+                        null
+                )
+                .create();
+
+        dialog.setOnShowListener(ignored ->
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setOnClickListener(v -> {
+
+                            final Map<String, Object> replacement;
+
+                            try {
+                                replacement = calculation.call();
+
+                            } catch (Exception invalid) {
+                                preview.setText(R.string.fs_invalid);
+                                return;
+                            }
+
+                            dialog.getButton(
+                                    AlertDialog.BUTTON_POSITIVE
+                            ).setEnabled(false);
+
+                            dialog.getButton(
+                                    AlertDialog.BUTTON_NEGATIVE
+                            ).setEnabled(false);
+
+                            dialog.setCancelable(false);
+
+                            FoodLogRepository.update(
+                                    uid,
+                                    date,
+                                    entry,
+                                    replacement
+                            ).addOnSuccessListener(unused ->
+                                    dialog.dismiss()
+                            ).addOnFailureListener(error -> {
+                                if (isDestroyed() || isFinishing()) {
+                                    return;
+                                }
+
+                                dialog.setCancelable(true);
+
+                                dialog.getButton(
+                                        AlertDialog.BUTTON_POSITIVE
+                                ).setEnabled(true);
+
+                                dialog.getButton(
+                                        AlertDialog.BUTTON_NEGATIVE
+                                ).setEnabled(true);
+
+                                preview.setText(R.string.fe_failed);
+                            });
+                        })
+        );
+
+        dialog.show();
+    }
+
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -434,6 +687,15 @@ public class FoodLogActivity extends AppCompatActivity {
             }
 
             panel.addView(subtitle);
+
+            Button edit = new Button(this);
+            edit.setText(R.string.fe_edit);
+
+            edit.setOnClickListener(v ->
+                    editEntry(uid, date, entry)
+            );
+
+            panel.addView(edit);
 
             Button remove = new Button(this);
             remove.setText(R.string.fl_remove);

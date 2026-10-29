@@ -35,6 +35,7 @@ final class FoodLogRepository {
                         (Map<String, Object>) item
                 ));
             }
+
         } else if (raw != null) {
             throw new IllegalStateException(
                     "Invalid food log format"
@@ -44,13 +45,47 @@ final class FoodLogRepository {
         return result;
     }
 
+    // Existing add/remove functionality.
     static Task<Void> save(
             String userId,
             String date,
             Map<String, Object> entry,
             boolean remove
     ) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        return mutate(
+                userId,
+                date,
+                entry,
+                remove,
+                null
+        );
+    }
+
+    // New functionality: update an existing logged food.
+    static Task<Void> update(
+            String userId,
+            String date,
+            Map<String, Object> original,
+            Map<String, Object> replacement
+    ) {
+        return mutate(
+                userId,
+                date,
+                replacement,
+                false,
+                original
+        );
+    }
+
+    private static Task<Void> mutate(
+            String userId,
+            String date,
+            Map<String, Object> entry,
+            boolean remove,
+            Map<String, Object> original
+    ) {
+        FirebaseFirestore db =
+                FirebaseFirestore.getInstance();
 
         DocumentReference log = db.collection("users")
                 .document(userId)
@@ -68,10 +103,19 @@ final class FoodLogRepository {
 
             Object id = entry.get("entryId");
 
-            if (remove) {
+            if (original != null) {
+                FoodEntryEditor.replace(
+                        items,
+                        original,
+                        entry
+                );
+
+            } else if (remove) {
                 for (int i = 0; i < items.size(); i++) {
                     boolean matches = id != null
-                            ? id.equals(items.get(i).get("entryId"))
+                            ? id.equals(
+                            items.get(i).get("entryId")
+                    )
                             : entry.equals(items.get(i));
 
                     if (matches) {
@@ -79,16 +123,24 @@ final class FoodLogRepository {
                         break;
                     }
                 }
+
             } else {
-                // Reusing an entry ID prevents duplicate retry saves.
+                if (!(id instanceof String)) {
+                    throw new IllegalArgumentException(
+                            "Invalid entry ID"
+                    );
+                }
+
                 boolean exists = false;
 
                 for (Map<String, Object> item : items) {
                     if (id.equals(item.get("entryId"))) {
                         exists = true;
+                        break;
                     }
                 }
 
+                // Prevent duplicate entries when retrying a save.
                 if (!exists) {
                     items.add(entry);
                 }
@@ -98,19 +150,27 @@ final class FoodLogRepository {
                     FoodNutrition.totals(items);
 
             Map<String, Object> dashboard = new HashMap<>();
+
             dashboard.put(
                     "caloriesConsumed",
                     values.get("totalCalories")
             );
+
             dashboard.put(
                     "nutrientTotals",
                     values.get("nutrientTotals")
             );
+
             dashboard.put(
                     "nutrientCoverage",
                     values.get("nutrientCoverage")
             );
-            dashboard.put("foodEntryCount", items.size());
+
+            dashboard.put(
+                    "foodEntryCount",
+                    items.size()
+            );
+
             dashboard.put(
                     "lastUpdated",
                     FieldValue.serverTimestamp()
@@ -118,9 +178,12 @@ final class FoodLogRepository {
 
             values.put("foodItems", items);
             values.put("date", date);
-            values.put("timestamp", FieldValue.serverTimestamp());
 
-            // Replace complete nutrient maps to clear obsolete totals.
+            values.put(
+                    "timestamp",
+                    FieldValue.serverTimestamp()
+            );
+
             transaction.set(
                     log,
                     values,
@@ -134,7 +197,6 @@ final class FoodLogRepository {
                     )
             );
 
-            // Preserve unrelated fields, including exercise totals.
             transaction.set(
                     daily,
                     dashboard,
