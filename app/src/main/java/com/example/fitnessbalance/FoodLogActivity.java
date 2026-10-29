@@ -39,6 +39,8 @@ public class FoodLogActivity extends AppCompatActivity {
     private Button dateButton, more, retry;
 
     private String selectedDate;
+    private com.example.fitnessbalance.util.LocalDayObserver days;
+    private int logVersion;
     private String activeSearch = "";
 
     private int searchVersion;
@@ -53,13 +55,11 @@ public class FoodLogActivity extends AppCompatActivity {
         setContentView(R.layout.activity_food_log_redesign);
         FoodUi.insets(this);
 
-        selectedDate = state == null
-                ? FoodUi.date(new Date())
-                : state.getString("date");
-
-        if (!FoodUi.validDate(selectedDate)) {
-            selectedDate = FoodUi.date(new Date());
-        }
+        String today = com.example.fitnessbalance.util.LocalDayObserver.today();
+        selectedDate = com.example.fitnessbalance.util.LocalDayState.selection(
+                state == null ? null : state.getString("date"),
+                state == null ? null : state.getString("observedDay"), today);
+        if (!FoodUi.validDate(selectedDate)) selectedDate = today;
 
         searchInput = findViewById(R.id.foodSearchInput);
         searchStatus = findViewById(R.id.foodSearchStatus);
@@ -109,6 +109,12 @@ public class FoodLogActivity extends AppCompatActivity {
                 getString(R.string.fl_date, selectedDate)
         );
 
+        days = new com.example.fitnessbalance.util.LocalDayObserver(this, this, today, () -> {
+            selectedDate = com.example.fitnessbalance.util.LocalDayObserver.today();
+            dateButton.setText(getString(R.string.fl_date, selectedDate));
+            observeLog();
+        });
+
         if (state != null) {
             searchInput.setText(state.getString("query", ""));
 
@@ -126,6 +132,7 @@ public class FoodLogActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        logVersion++;
         if (registration != null) {
             registration.remove();
             registration = null;
@@ -142,6 +149,7 @@ public class FoodLogActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle state) {
         state.putString("date", selectedDate);
+        state.putString("observedDay", days.day());
         state.putString(
                 "query",
                 searchInput.getText().toString()
@@ -294,6 +302,7 @@ public class FoodLogActivity extends AppCompatActivity {
     }
 
     private void observeLog() {
+        final int version = ++logVersion;
         if (registration != null) {
             registration.remove();
             registration = null;
@@ -319,7 +328,7 @@ public class FoodLogActivity extends AppCompatActivity {
                 .collection("foodLogs")
                 .document(date)
                 .addSnapshotListener((document, error) -> {
-                    if (!date.equals(selectedDate)
+                    if (version != logVersion || !date.equals(selectedDate)
                             || isDestroyed()
                             || isFinishing()) {
                         return;

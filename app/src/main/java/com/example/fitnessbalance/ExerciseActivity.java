@@ -19,6 +19,7 @@ import java.util.*;
 public final class ExerciseActivity extends ExerciseBaseActivity
     implements ActivityLogAdapter.Actions {
   private String selectedDay;
+  private LocalDayObserver days;
   private double weight = 70;
   private ArrayList<String> preferences = new ArrayList<>();
   private ExerciseLogRepository logs;
@@ -29,10 +30,21 @@ public final class ExerciseActivity extends ExerciseBaseActivity
   protected void onCreate(Bundle state) {
     super.onCreate(state);
     screen(R.layout.activity_activity_log);
+    String today = LocalDayObserver.today();
     selectedDay =
-        state == null
-            ? DateUtils.day(new Date(), TimeZone.getDefault())
-            : state.getString("selectedDay", DateUtils.day(new Date(), TimeZone.getDefault()));
+        LocalDayState.selection(
+            state == null ? null : state.getString("selectedDay"),
+            state == null ? null : state.getString("observedDay"),
+            today);
+    days =
+        new LocalDayObserver(
+            this,
+            this,
+            today,
+            () -> {
+              selectedDay = LocalDayObserver.today();
+              reload();
+            });
     findViewById(R.id.alDate).setOnClickListener(v -> chooseDate());
     findViewById(R.id.alAdd).setOnClickListener(v -> editor(null));
     getSupportFragmentManager()
@@ -47,6 +59,7 @@ public final class ExerciseActivity extends ExerciseBaseActivity
   @Override
   protected void onSaveInstanceState(Bundle out) {
     out.putString("selectedDay", selectedDay);
+    out.putString("observedDay", days.day());
     super.onSaveInstanceState(out);
   }
 
@@ -164,6 +177,7 @@ public final class ExerciseActivity extends ExerciseBaseActivity
         .setPositiveButton(
             R.string.al_delete,
             (d, w) -> {
+              if (!day.equals(selectedDay)) return;
               deleting = true;
               enabled(R.id.alAdd, false);
               enabled(R.id.alDate, false);
@@ -175,6 +189,7 @@ public final class ExerciseActivity extends ExerciseBaseActivity
                   .addOnSuccessListener(
                       this,
                       result -> {
+                        if (!selectedDay.equals(day)) return;
                         deleting = false;
                         Toast.makeText(this, R.string.al_removed, Toast.LENGTH_SHORT).show();
                         if (selectedDay.equals(day)) render(result);
@@ -182,6 +197,7 @@ public final class ExerciseActivity extends ExerciseBaseActivity
                   .addOnFailureListener(
                       this,
                       e -> {
+                        if (!selectedDay.equals(day)) return;
                         deleting = false;
                         enabled(R.id.alDate, true);
                         error(e);

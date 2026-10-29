@@ -12,6 +12,18 @@ public final class DateUtils {
     return f.format(time);
   }
 
+  /** Calendar midnight, rather than a fixed 24 hours (DST days may be shorter/longer). */
+  public static long untilNextDay(Date now, TimeZone zone) {
+    Calendar c = Calendar.getInstance(zone);
+    c.setTime(now);
+    c.add(Calendar.DATE, 1);
+    c.set(Calendar.HOUR_OF_DAY, 0);
+    c.set(Calendar.MINUTE, 0);
+    c.set(Calendar.SECOND, 0);
+    c.set(Calendar.MILLISECOND, 0);
+    return Math.max(1, c.getTimeInMillis() - now.getTime());
+  }
+
   public static String week(Date time, TimeZone zone) {
     Calendar c = Calendar.getInstance(zone);
     c.setTime(time);

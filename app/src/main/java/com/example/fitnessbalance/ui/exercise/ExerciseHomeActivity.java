@@ -15,11 +15,13 @@ import java.util.*;
 
 public final class ExerciseHomeActivity extends ExerciseBaseActivity {
   private WorkoutLesson recommended;
+  private int loadVersion;
 
   @Override
   protected void onCreate(Bundle b) {
     super.onCreate(b);
     screen(R.layout.activity_exercise_home);
+    new LocalDayObserver(this, this, null, this::reload);
     findViewById(R.id.exPath).setOnClickListener(v -> open(WorkoutPathActivity.class, null));
     findViewById(R.id.exQuick).setOnClickListener(v -> open(ExerciseActivity.class, null));
     findViewById(R.id.exProgress)
@@ -56,7 +58,10 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
 
   @Override
   protected void load() {
+    final int version = ++loadVersion;
     loading();
+    text(R.id.alHomeSummary, getString(R.string.fl_loading));
+    list(R.id.exQuests, new QuestAdapter(Collections.emptyList()));
     recommended = null;
     WorkoutDraft draft = drafts.read(uid);
     enabled(R.id.exStart, draft != null);
@@ -70,7 +75,8 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
         .addOnSuccessListener(
             this,
             day -> {
-              if (!activityDay.equals(DateUtils.day(new Date(), TimeZone.getDefault()))) return;
+              if (version != loadVersion
+                  || !activityDay.equals(DateUtils.day(new Date(), TimeZone.getDefault()))) return;
               text(
                   R.id.alHomeSummary,
                   getString(
@@ -88,7 +94,11 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
                           Values.integer(day.totals.get("exerciseEntryCount"), 0)));
             })
         .addOnFailureListener(
-            this, error -> text(R.id.alHomeSummary, getString(R.string.al_summary_error)));
+            this,
+            error -> {
+              if (version == loadVersion)
+                text(R.id.alHomeSummary, getString(R.string.al_summary_error));
+            });
 
     Task<DocumentSnapshot> profile = repository.profile(),
         progress = repository.progress(path()),
@@ -100,6 +110,7 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
         .addOnSuccessListener(
             this,
             v -> {
+              if (version != loadVersion || !activityDay.equals(LocalDayObserver.today())) return;
               DocumentSnapshot user = profile.getResult();
               text(
                   R.id.exHello,
@@ -176,7 +187,11 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
               if (lessons.getResult().isEmpty()) status(R.string.ex_empty);
               else if (!user.exists()) status(R.string.ex_profile_default);
             })
-        .addOnFailureListener(this, this::error);
+        .addOnFailureListener(
+            this,
+            e -> {
+              if (version == loadVersion && activityDay.equals(LocalDayObserver.today())) error(e);
+            });
   }
 
   private int reasonResource(String reason) {

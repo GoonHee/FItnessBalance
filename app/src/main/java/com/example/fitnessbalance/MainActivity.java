@@ -21,6 +21,26 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
     private FirebaseUser currentUser;
     private String userName;
+    private com.example.fitnessbalance.util.LocalDayObserver days;
+    private int metricsRequest;
+    private String displayDay;
+
+    private void refreshToday() {
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String today = com.example.fitnessbalance.util.LocalDayObserver.today();
+        if (!today.equals(displayDay)) {
+            displayDay = today;
+            updateCalorieDisplay(0, 0);
+        }
+        updateDate();
+        loadTodayMetrics();
+    }
+
+    private boolean currentMetrics(int token, String day, String userId) {
+        FirebaseUser active = FirebaseAuth.getInstance().getCurrentUser();
+        return token == metricsRequest && active != null && userId.equals(active.getUid())
+            && day.equals(com.example.fitnessbalance.util.LocalDayObserver.today());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +54,7 @@ public class MainActivity extends AppCompatActivity {
         initializeViews();
         setupClickListeners();
 
-        loadUserData();
-        updateDate();
+        days = new com.example.fitnessbalance.util.LocalDayObserver(this, this, null, this::refreshToday);
     }
 
     private void initializeViews() {
@@ -74,11 +93,10 @@ public class MainActivity extends AppCompatActivity {
                         if (documentSnapshot.exists()) {
                             userName = documentSnapshot.getString("fullName");
                             updateWelcomeMessage();
-                            loadTodayMetrics();
                         } else {
                             Log.w("MainActivity", "User document doesn't exist");
-                            updateCalorieDisplay(0, 0);
-                            loadTodayMetrics();
+                            userName = null;
+                            updateWelcomeMessage();
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -100,15 +118,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadTodayMetrics() {
-        if (currentUser == null) return;
+        final int token = ++metricsRequest;
+        if (currentUser == null) { updateCalorieDisplay(0, 0); return; }
 
         String userId = currentUser.getUid();
-        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        String todayDate = com.example.fitnessbalance.util.LocalDayObserver.today();
 
         firestore.collection("users").document(userId)
                 .collection("dailyData").document(todayDate)
                 .get()
-                .addOnSuccessListener(documentSnapshot -> {
+                .addOnSuccessListener(this, documentSnapshot -> {
+                    if (!currentMetrics(token, todayDate, userId)) return;
                     int consumed = 0;
                     int burned = 0;
                     if (documentSnapshot.exists()) {
@@ -122,21 +142,21 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     updateCalorieDisplay(consumed, burned);
-                    refreshExerciseTotals(todayDate, userId);
+                    refreshExerciseTotals(todayDate, userId, token);
                 })
                 .addOnFailureListener(e -> {
+                    if (!currentMetrics(token, todayDate, userId)) return;
                     Log.e("MainActivity", "Error loading today's metrics", e);
                     updateCalorieDisplay(0, 0);
                 });
     }
 
 
-    private void refreshExerciseTotals(String day, String userId) {
+    private void refreshExerciseTotals(String day, String userId, int token) {
         new com.example.fitnessbalance.repository.ExerciseLogRepository(userId)
                 .loadDay(day)
                 .addOnSuccessListener(this, result -> {
-                    com.google.firebase.auth.FirebaseUser active = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
-                    if (active == null || !userId.equals(active.getUid()) || !day.equals(com.example.fitnessbalance.util.DateUtils.day(new Date(), java.util.TimeZone.getDefault()))) return;
+                    if (!currentMetrics(token, day, userId)) return;
                     updateCalorieDisplay(result.caloriesConsumed,
                             com.example.fitnessbalance.util.Values.integer(result.totals.get("caloriesBurned"), 0));
                 })
@@ -177,5 +197,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadUserData();
+        refreshToday();
     }
 }
