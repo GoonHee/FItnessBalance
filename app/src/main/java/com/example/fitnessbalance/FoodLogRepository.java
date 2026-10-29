@@ -50,6 +50,17 @@ final class FoodLogRepository {
             Map<String, Object> entry,
             boolean remove
     ) {
+        return mutate(userId, date, entry, remove, null);
+    }
+
+    static Task<Void> update(String userId, String date,
+            Map<String, Object> original, Map<String, Object> replacement) {
+        return mutate(userId, date, replacement, false, original);
+    }
+
+    private static Task<Void> mutate(String userId, String date,
+            Map<String, Object> entry, boolean remove,
+            Map<String, Object> original) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         DocumentReference log = db.collection("users")
@@ -68,7 +79,9 @@ final class FoodLogRepository {
 
             Object id = entry.get("entryId");
 
-            if (remove) {
+            if (original != null) {
+                FoodEntryEditor.replace(items, original, entry);
+            } else if (remove) {
                 for (int i = 0; i < items.size(); i++) {
                     boolean matches = id != null
                             ? id.equals(items.get(i).get("entryId"))
@@ -80,6 +93,9 @@ final class FoodLogRepository {
                     }
                 }
             } else {
+                if (!(id instanceof String)) {
+                    throw new IllegalArgumentException("Invalid entry ID");
+                }
                 // Reusing an entry ID prevents duplicate retry saves.
                 boolean exists = false;
 
