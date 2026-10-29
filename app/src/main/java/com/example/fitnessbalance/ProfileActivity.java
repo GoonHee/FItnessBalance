@@ -90,6 +90,8 @@ public class ProfileActivity extends AppCompatActivity {
         setupSpinner();
         loadUserData();
         setupClickListeners();
+        findViewById(R.id.connectHealthButton).setOnClickListener(v ->
+                startActivity(new Intent(this, HealthConnectActivity.class)));
         findViewById(R.id.preferencesButton).setOnClickListener(v ->
                 startActivity(new Intent(this, PreferencesActivity.class)));
         setEditMode(false);

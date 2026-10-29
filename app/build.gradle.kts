@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.fitnessbalance"
-        minSdk = 23
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -52,5 +52,6 @@ dependencies {
     implementation(libs.flexbox)
     implementation(libs.play.services.code.scanner)
     implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.health.connect:connect-client:1.1.0")
 
 }
