@@ -160,7 +160,26 @@ public final class FoodNutrition {
 
         // Existing scale() applies the per-100 multiplier.
         // The unit check above prevents treating ml as grams.
-        return scale(nutrition, totalAmount(amount, servings));
+        return scale(withEstimatedEnergy(nutrition), totalAmount(amount, servings));
+    }
+
+    /** Reference-value estimate only; servingNutrition still requires a known basis. */
+    public static Map<String, Object> withEstimatedEnergy(Map<String, Object> nutrition) {
+        Map<String, Object> result = new HashMap<>(nutrition);
+        if (number(nutrition.get("energy_kcal")) != null) return result;
+        Double protein = number(nutrition.get("protein_g"));
+        Double carbs = number(nutrition.get("carbohydrate_g"));
+        Double fat = number(nutrition.get("fat_g"));
+        if (protein != null && carbs != null && fat != null) {
+            double estimate = 4 * protein + 4 * carbs + 9 * fat;
+            if (Double.isFinite(estimate)) result.put("energy_kcal", estimate);
+        }
+        return result;
+    }
+
+    public static boolean usesEstimatedEnergy(Map<String, Object> nutrition) {
+        return number(nutrition.get("energy_kcal")) == null
+                && number(withEstimatedEnergy(nutrition).get("energy_kcal")) != null;
     }
 
     public static Map<String, Object> manualNutrition(

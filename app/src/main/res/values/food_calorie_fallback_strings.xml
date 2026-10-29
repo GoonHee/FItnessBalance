@@ -1,0 +1,6 @@
+<resources>
+    <string name="fc_estimate">Estimated calories from protein, carbohydrate and fat (4/4/9). These may differ from source energy values.</string>
+    <string name="fc_estimated">Estimated calories</string>
+    <string name="fc_manual_needed">Enter calories for ONE selected serving from a package label or another verified source. If the source reference quantity is unknown, do not copy its displayed calories into this field. Other nutrients remain unavailable in manual mode.</string>
+    <string name="fc_manual_ready">User-entered calories: calories per serving × servings. Other nutrients remain unavailable.</string>
+</resources>

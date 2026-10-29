@@ -599,6 +599,15 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
         showExtraFields(food);
 
+        // Open the existing manual form rather than leaving an unexplained disabled button.
+        // Barcode records may still have an explicit package-basis confirmation flow.
+        if ((!requiresBasisConfirmation() && FoodNutrition.portionUnit(basis) == null)
+                || FoodNutrition.number(
+                        FoodNutrition.withEstimatedEnergy(nutrition).get("energy_kcal")
+                ) == null) {
+            manual.setChecked(true);
+        }
+
         findViewById(R.id.barcodeConfirmPanel).setVisibility(
                 requiresBasisConfirmation()
                         ? View.VISIBLE : View.GONE
@@ -776,8 +785,16 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
             logButton.setEnabled(true);
 
+            if (manual.isChecked()) {
+                status.setText(R.string.fc_manual_ready);
+            } else if (FoodNutrition.usesEstimatedEnergy(nutrition)) {
+                status.setText(R.string.fc_estimate);
+            }
+
         } catch (IllegalArgumentException invalid) {
-            status.setText(R.string.fs_invalid);
+            status.setText(manual.isChecked()
+                    && !Double.isFinite(value(manualCalories))
+                    ? R.string.fc_manual_needed : R.string.fs_invalid);
         }
     }
 
@@ -925,8 +942,13 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
         entry.put(
                 "calculationMode",
-                manual.isChecked() ? "manual" : "database"
+                manual.isChecked() ? "manual"
+                        : FoodNutrition.usesEstimatedEnergy(nutrition)
+                        ? "macro_estimate" : "database"
         );
+        entry.put("energyMethod", manual.isChecked() ? "user_entered"
+                : FoodNutrition.usesEstimatedEnergy(nutrition)
+                ? "atwater_4_4_9" : "source_reported");
 
         entry.put(
                 "nutritionVerification",

@@ -100,8 +100,10 @@ public class FoodLogActivity extends AppCompatActivity {
         Runnable refresh = () -> {
             try {
                 Map<String, Object> resized = calculation.call();
-                preview.setText(FoodUi.nutrients(this,
-                        (Map<?, ?>) resized.get("nutrients"), null, 1));
+                String details = FoodUi.nutrients(this,
+                        (Map<?, ?>) resized.get("nutrients"), null, 1);
+                preview.setText("macro_estimate".equals(entry.get("calculationMode"))
+                        ? getString(R.string.fc_estimate) + "\n\n" + details : details);
             } catch (Exception invalid) { preview.setText(R.string.fs_invalid); }
         };
         android.text.TextWatcher watcher = new android.text.TextWatcher() {
@@ -513,6 +515,9 @@ public class FoodLogActivity extends AppCompatActivity {
 
                 if ("manual".equals(entry.get("calculationMode"))) {
                     line += " · " + getString(R.string.fs_user_entered);
+                }
+                if ("macro_estimate".equals(entry.get("calculationMode"))) {
+                    line += " · " + getString(R.string.fc_estimated);
                 }
 
                 subtitle.setText(line);
