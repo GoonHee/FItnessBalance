@@ -1,0 +1,47 @@
+<resources>
+    <string name="pr_title">Progress</string>
+    <string name="pr_home_button">Progress · charts and weight history</string>
+    <string name="pr_today_summary">Today’s recorded calories</string>
+    <string name="pr_home_net">Food minus logged exercise: %1$d kcal. This is not your full energy balance.</string>
+    <string-array name="pr_tabs"><item>Overview</item><item>Calories</item><item>Nutrients</item><item>Macros</item></string-array>
+    <string name="pr_previous">Previous week</string><string name="pr_next">Next week</string>
+    <string name="pr_refresh">Refresh progress</string>
+    <string name="pr_calories">Calories</string><string name="pr_weight">Weight</string>
+    <string name="pr_exercise">Estimated exercise calories</string><string name="pr_nutrients">Recorded nutrients</string>
+    <string name="pr_view_calories">View calorie details</string>
+    <string name="pr_total">Food total</string><string name="pr_net">Food minus logged exercise</string>
+    <string name="pr_data_note">Monday–Sunday weeks. Blank days mean no recorded data, not zero intake. Averages use only days with that value; today may be incomplete. All figures are based on saved logs, not measured total intake or energy expenditure.</string>
+    <string name="pr_average">Recorded daily average: %1$s · %2$d days with data</string>
+    <string name="pr_partial">Some entries lack this nutrient. These totals and averages include only available values and may understate intake.</string>
+    <string name="pr_recorded_total">Recorded total: %1$s</string>
+    <string name="pr_goal_reference">Current daily goal reference: %1$s. Dashed line uses this current goal, not historical targets.</string>
+    <string name="pr_goal_difference">Recorded food minus current-goal reference: %1$s kcal across %2$d days with complete calorie-entry coverage.</string>
+    <string name="pr_goal_note">Goal references use your current explicit goals. Missing goals are not replaced with defaults. Complete entry coverage does not prove a complete day’s intake.</string>
+    <string name="pr_nutrient_row">Recorded total: %1$s\nAverage per day with data: %2$s (%3$d days)\nCurrent daily goal reference: %4$s</string>
+    <string name="pr_net_note">Food calories minus recorded manual/guided exercise estimates. No logged exercise contributes zero recorded exercise to this arithmetic; it does not mean zero physical activity. Resting metabolism and other activity are excluded. This is not a calorie surplus or deficit, and exercise does not automatically change your food goal.</string>
+    <string name="pr_daily_values">Daily recorded values</string><string name="pr_highest">Highest recorded food calories · week totals</string>
+    <string name="pr_no_foods">No named food entries with calories in this week.</string>
+    <string name="pr_macro_share">Share of recorded macro energy</string>
+    <string name="pr_macro_incomplete">A complete macro-energy breakdown is unavailable. At least one recorded food entry lacks a macro, or there are no positive macro-energy values. Missing nutrients are not shown as zero percentages.</string>
+    <string name="pr_macro_share_note">Calculated from recorded carbohydrate × 4, fat × 9 and protein × 4. This can differ from source calories and excludes unlogged foods, fibre/alcohol adjustments and other energy sources.</string>
+    <string name="pr_chart_description">Progress chart. Exact dates, totals and available-value coverage are described in the surrounding text and entries.</string>
+    <string name="pr_load_error">Weekly progress could not be loaded. Check your connection and account access, then refresh.</string>
+    <string name="pr_export_week">Export displayed week as CSV</string><string name="pr_exported">CSV exported.</string><string name="pr_export_error">CSV could not be exported.</string>
+    <string name="wh_title">Measurements</string><string name="wh_open">Weight history · log my weight</string>
+    <string name="wh_add">Log or update weight</string><string name="wh_edit">Edit</string><string name="wh_date">Measurement date</string>
+    <string name="wh_kg">Weight in kg (greater than 0, up to 300)</string>
+    <string-array name="wh_ranges"><item>Since first recorded weight</item><item>Last 30 days</item><item>Last 90 days</item><item>Last 365 days</item></string-array>
+    <string name="wh_summary">First recorded (%1$s): %2$s kg\nLatest recorded (%3$s): %4$s kg\nChange since first entry: %5$s kg</string>
+    <string name="wh_profile">Current profile weight: %1$s kg (used for future exercise estimates; may be undated).</string>
+    <string name="wh_empty">No dated weight measurements yet. Your existing profile weight is not automatically backdated. Tap Log weight to record an actual measurement.</string>
+    <string name="wh_no_range">No measurements in this date range.</string>
+    <string name="wh_note">One measurement per date. The graph connects recorded points; it does not invent measurements between them. First/latest statistics use the full recorded history. Profile edits alone do not create dated measurements.</string>
+    <string name="wh_more">Show 100 more entries</string>
+    <string name="wh_entries">Entries</string><string name="wh_export">Export displayed weight range as CSV</string>
+    <string name="wh_update_profile">Also use this measurement as my current profile weight</string>
+    <string name="wh_save_note">Saving an existing date updates that day’s measurement. Updating profile weight is optional and affects future estimates only. Previously logged exercise calories are preserved. To correct an existing entry’s date, delete it and log the correct date.</string>
+    <string name="wh_invalid">Enter a finite weight greater than 0 and no more than 300 kg, on today or an earlier date. This is an input limit, not a recommended weight.</string>
+    <string name="wh_load_error">Weight history could not be loaded. Check your connection and account access, then retry. Weekly nutrition charts can still be used separately.</string>
+    <string name="wh_save_error">The change was not confirmed. Check your connection and access. If this measurement changed elsewhere, close the editor, refresh and reopen it before saving.</string>
+    <string name="wh_delete_note">Remove the measurement for %1$s (%2$s kg)? Your current profile weight and previously logged calories will remain unchanged.</string>
+</resources>

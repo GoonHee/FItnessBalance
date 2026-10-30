@@ -74,3 +74,24 @@ test('another account cannot edit manual entries or activity totals',async()=>{a
 
 function manualRows(manual={},daily={}){if(Array.isArray(manual.exercises))return manual.exercises;let fallback=Number(manual.totalCaloriesBurned||0);if(!Object.keys(manual).length){fallback=Number(daily.manualCaloriesBurned||0);if(!fallback&&!daily.exerciseTotalsVersion&&!daily.structuredExerciseContributions)fallback=Number(daily.caloriesBurned||0);}return fallback>0?[{entryId:'legacy_total_'+DAY,name:'',duration:0,calories:fallback,completed:true,legacySummary:true}]:[];}
 test('dashboard-only historical calories survive refreshes and later new activities',async()=>{const d=db();await setDoc(ref(d,`dailyData/${DAY}`),{caloriesBurned:90,caloriesConsumed:500});await backfill(d);await backfill(d);assert.equal((await getDoc(ref(d,`dailyData/${DAY}`))).data().caloriesBurned,90);await start(d);await complete(d);await backfill(d);assert.equal((await getDoc(ref(d,`dailyData/${DAY}`))).data().caloriesBurned,115);await saveManual(d,'new');const totals=(await getDoc(ref(d,`dailyData/${DAY}`))).data();assert.equal(totals.caloriesBurned,235);assert.equal(totals.caloriesConsumed,500)});
+
+// Progress weight history: owner-only dated records and matching atomic index.
+async function saveWeight(d,day=DAY,kg=70,revision=1,syncProfile=false){
+ const b=writeBatch(d),entry={day,weightKg:kg,revision,source:'manual',mutationId:'weight-'+revision,updateProfile:syncProfile,updatedAt:serverTimestamp()};
+ b.set(ref(d,'weightHistory/state'),{entries:{[day]:{weightKg:kg,revision}},updatedAt:serverTimestamp()});
+ b.set(ref(d,`weightLogs/${day}`),entry);
+ if(syncProfile)b.set(doc(d,'users/alice'),{weight:kg},{merge:true});
+ return b.commit();
+}
+test('weight log and index can be saved atomically by owner',async()=>{const d=db();await assertSucceeds(saveWeight(d,DAY,70,1,true));assert.equal((await getDoc(ref(d,`weightLogs/${DAY}`))).data().weightKg,70);assert.equal((await getDoc(doc(d,'users/alice'))).data().weight,70);assert.equal((await getDoc(doc(d,'users/alice'))).data().totalXp,0)});
+test('weight history is isolated from other users and anonymous clients',async()=>{await saveWeight(db());for(const client of [db('bob'),env.unauthenticatedContext().firestore()]){await assertFails(getDoc(ref(client,`weightLogs/${DAY}`)));await assertFails(getDoc(ref(client,'weightHistory/state')));await assertFails(saveWeight(client));}});
+test('weight writes require matching fresh index and server timestamp',async()=>{const d=db();await assertFails(setDoc(ref(d,`weightLogs/${DAY}`),{day:DAY,weightKg:70,revision:1,source:'manual',mutationId:'one',updateProfile:false,updatedAt:serverTimestamp()}));const b=writeBatch(d);b.set(ref(d,'weightHistory/state'),{entries:{[DAY]:{weightKg:69,revision:1}},updatedAt:serverTimestamp()});b.set(ref(d,`weightLogs/${DAY}`),{day:DAY,weightKg:70,revision:1,source:'manual',mutationId:'one',updateProfile:false,updatedAt:serverTimestamp()});await assertFails(b.commit());});
+test('invalid weight and revision updates are denied',async()=>{const d=db();await assertFails(saveWeight(d,DAY,0));await assertFails(saveWeight(d,DAY,301));await saveWeight(d);await assertFails(saveWeight(d,DAY,69,1));await assertSucceeds(saveWeight(d,DAY,69,2));});
+test('weight deletion requires atomic index removal and preserves profile',async()=>{const d=db();await saveWeight(d,DAY,70,1,true);await assertFails(deleteDoc(ref(d,`weightLogs/${DAY}`)));const b=writeBatch(d);b.set(ref(d,'weightHistory/state'),{entries:{},updatedAt:serverTimestamp()});b.delete(ref(d,`weightLogs/${DAY}`));await assertSucceeds(b.commit());assert.equal((await getDoc(doc(d,'users/alice'))).data().weight,70)});
+test('weight state rejects unknown fields and non-map index',async()=>{const d=db();await assertFails(setDoc(ref(d,'weightHistory/state'),{entries:[],updatedAt:serverTimestamp()}));await assertFails(setDoc(ref(d,'weightHistory/state'),{entries:{},updatedAt:serverTimestamp(),totalXp:100}));});
+test('concurrent weight transactions preserve different measurement dates',async()=>{
+ const d=db();
+ async function add(day,kg){return runTransaction(d,async tx=>{const index=ref(d,'weightHistory/state'),record=ref(d,`weightLogs/${day}`);const old=await tx.get(index);await tx.get(record);const entries={...(old.data()?.entries||{}),[day]:{weightKg:kg,revision:1}};tx.set(index,{entries,updatedAt:serverTimestamp()});tx.set(record,{day,weightKg:kg,revision:1,source:'manual',mutationId:day,updateProfile:false,updatedAt:serverTimestamp()});});}
+ await assertSucceeds(Promise.all([add('2026-10-27',71),add('2026-10-28',70)]));
+ assert.equal(Object.keys((await getDoc(ref(d,'weightHistory/state'))).data().entries).length,2);
+});

@@ -43,6 +43,37 @@ service cloud.firestore {
     && (!request.resource.data.keys().hasAny(protectedFields()) || atomicAward(uid));
    allow update: if owner(uid) && noPassword(request.resource.data)
     && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(protectedFields()) || atomicAward(uid));
+   // Dated manual weights and their transaction-maintained private index.
+   match /weightLogs/{day} {
+    function validWeight() {
+     let d = request.resource.data;
+     return day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+      && d.keys().hasOnly(['day','weightKg','revision','source','mutationId','updateProfile','updatedAt'])
+      && d.day == day && d.weightKg is number && d.weightKg > 0 && d.weightKg <= 300
+      && d.revision is int && d.revision > 0 && d.source == 'manual'
+      && d.mutationId is string && d.mutationId.size() > 0 && d.mutationId.size() <= 64
+      && d.updateProfile is bool && d.updatedAt == request.time;
+    }
+    function matchingIndex() {
+     let index = getAfter(/databases/$(database)/documents/users/$(uid)/weightHistory/state).data;
+     return index.updatedAt == request.time && index.entries[day].weightKg == request.resource.data.weightKg
+      && index.entries[day].revision == request.resource.data.revision;
+    }
+    allow read: if owner(uid);
+    allow create: if owner(uid) && validWeight() && request.resource.data.revision == 1 && matchingIndex();
+    allow update: if owner(uid) && validWeight() && request.resource.data.revision == resource.data.get('revision',1) + 1 && matchingIndex();
+    allow delete: if owner(uid)
+     && getAfter(/databases/$(database)/documents/users/$(uid)/weightHistory/state).data.updatedAt == request.time
+     && !getAfter(/databases/$(database)/documents/users/$(uid)/weightHistory/state).data.entries.keys().hasAny([day]);
+   }
+   match /weightHistory/{id} {
+    allow read: if owner(uid);
+    allow create, update: if owner(uid) && id == 'state'
+     && request.resource.data.keys().hasOnly(['entries','updatedAt'])
+     && request.resource.data.entries is map && request.resource.data.entries.keys().size() <= 5000
+     && request.resource.data.updatedAt == request.time;
+    allow delete: if owner(uid) && resource.data.entries.keys().size() == 0;
+   }
    match /foodLogs/{day} { allow read, write: if owner(uid); }
    match /exerciseLogs/{day} { allow read, write: if owner(uid); }
    match /dailyData/{day} { allow read, write: if owner(uid); }

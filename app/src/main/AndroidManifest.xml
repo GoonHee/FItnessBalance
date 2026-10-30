@@ -90,6 +90,8 @@
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="barcode_ui" />
 
+    <activity android:name=".ProgressActivity" android:exported="false" />
+    <activity android:name=".WeightHistoryActivity" android:exported="false" />
     <activity android:name=".FoodRecommendationsActivity" android:exported="false" />
     <activity android:name=".HealthConnectActivity" android:exported="false" />
     <activity android:name=".HealthPermissionRationaleActivity" android:exported="true">

@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
+        findViewById(R.id.progressCard).setOnClickListener(v -> startActivity(new Intent(this, ProgressActivity.class)));
         foodLogCard.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, FoodLogActivity.class));
         });
@@ -170,22 +171,8 @@ public class MainActivity extends AppCompatActivity {
         burnedCaloriesText.setText(String.valueOf(caloriesBurned));
         netCaloriesText.setText(String.valueOf(netCalories));
 
-        String balanceMessage;
-        int balanceColor;
-
-        if (netCalories > 0) {
-            balanceMessage = "You have a surplus of " + netCalories + " calories";
-            balanceColor = getColor(R.color.calorie_surplus);
-        } else if (netCalories < 0) {
-            balanceMessage = "You have a deficit of " + Math.abs(netCalories) + " calories";
-            balanceColor = getColor(R.color.calorie_deficit);
-        } else {
-            balanceMessage = "Perfect balance!";
-            balanceColor = getColor(R.color.calorie_balanced);
-        }
-
-        calorieBalanceText.setText(balanceMessage);
-        calorieBalanceText.setTextColor(balanceColor);
+        calorieBalanceText.setText(getString(R.string.pr_home_net, netCalories));
+        calorieBalanceText.setTextColor(getColor(R.color.black));
     }
 
     private void updateDate() {
