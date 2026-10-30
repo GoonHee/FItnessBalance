@@ -90,6 +90,7 @@
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="barcode_ui" />
 
+    <activity android:name=".FoodRecommendationsActivity" android:exported="false" />
     <activity android:name=".HealthConnectActivity" android:exported="false" />
     <activity android:name=".HealthPermissionRationaleActivity" android:exported="true">
         <intent-filter><action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" /></intent-filter>

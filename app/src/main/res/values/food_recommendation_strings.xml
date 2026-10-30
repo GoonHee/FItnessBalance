@@ -1,0 +1,35 @@
+<resources>
+    <string name="fr_title">Suggested foods</string>
+    <string name="fr_intro">Get up to three individual food portions for a selected meal and allowance. These are alternatives, not a complete balanced meal or medical diet plan. Each portion has its own calorie limit. Suggestions use a snapshot of current goals and logs; regenerate after changes. Current profile goals are used even when viewing an earlier diary date. Preferences and nutrient coverage affect ranking; exercise calories are not added to your allowance.</string>
+    <string name="fr_allowance">Maximum calories for ONE suggested food portion (kcal)</string>
+    <string name="fr_respect_goal">Also limit suggestions to my remaining daily calorie goal when it is confirmed and complete</string>
+    <string name="fr_generate">Find suggested foods</string>
+    <string name="fr_invalid">Enter an allowance greater than 0 and no more than 20,000 kcal. This is an input limit, not a recommended intake.</string>
+    <string name="fr_context">Per-suggestion limit used: %1$s kcal. Remaining recorded daily calories: %2$s. If your recorded goal has been reached, you can review the limit option or continue normal food search and logging.</string>
+    <string name="fr_remaining_unknown">Unavailable — no confirmed calorie goal or incomplete calorie records</string>
+    <string name="fr_partial">Some logged nutrients are missing. Incomplete nutrient totals are not used as exact remaining goals.</string>
+    <string name="fr_applied_diets">Applied dietary preferences: %1$s</string>
+    <string name="fr_no_diet_preferences">None selected</string>
+    <string name="fr_macro_needs">Remaining tracked macro targets used for ranking: %1$s</string>
+    <string name="fr_clear_audit">Remove saved recommendation explanation</string>
+    <string name="fr_audit_cleared">Saved explanation removed from this device. Your food logs and preferences were not changed.</string>
+    <string name="fr_results">Suggested alternatives. Review current food details and confirm your portion before logging.</string>
+    <string name="fr_not_ready">Reviewed food suggestions are not available yet. Normal food search and logging remain available.</string>
+    <string name="fr_no_matches">No eligible reviewed portions match this meal, allowance and your preferences. Your dietary preferences were kept. Try a different allowance or meal, or continue normal food search.</string>
+    <string name="fr_load_error">Suggestions could not be loaded. Check your connection, sign-in and catalogue setup, then retry. No food has been logged.</string>
+    <string name="fr_metadata_error">Your preferences or the reviewed food metadata could not be interpreted safely. Review your settings or ask for a catalogue review. No dietary preference was relaxed.</string>
+    <string name="fr_audit_error">The local recommendation explanation could not be saved.</string>
+    <string name="fr_portion">%1$s — %2$s %3$s, %4$s kcal</string>
+    <string name="fr_reason_allowance">• This reviewed portion fits the displayed calorie allowance.</string>
+    <string name="fr_reason_preferred">• You explicitly marked this food as preferred.</string>
+    <string name="fr_reason_variety">• This food ID was not found in your preceding seven diary days.</string>
+    <string name="fr_reason_macro">• It contributes to available remaining macro targets. It is not necessarily a balanced meal.</string>
+    <string name="fr_reason_diet">• Its reviewed metadata matches your selected dietary preferences. This app does not independently certify ingredients or halal status.</string>
+    <string name="fr_details">Review food and portion</string>
+    <string name="fr_food_preference">Food recommendation preference</string>
+    <string-array name="fr_preference_options"><item>No preference</item><item>Prefer in suggestions</item><item>Avoid in suggestions</item></string-array>
+    <string name="fr_preference_saved">Food preference saved. Regenerate suggestions to use it.</string>
+    <string name="fr_preference_error">Food preference could not be saved or loaded. Check your connection and sign-in, then retry.</string>
+    <string name="fr_review_current">Suggested portion loaded for review. Current food values are shown below; goals and dietary suitability may have changed since the suggestion. Logging requires your confirmation.</string>
+    <string name="fr_changed_basis">The food’s reference unit changed or is unavailable. The suggested portion was not applied. Review the current food data before logging.</string>
+</resources>

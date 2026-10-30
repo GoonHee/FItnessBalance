@@ -164,6 +164,12 @@ public class FoodLogActivity extends AppCompatActivity {
         more = findViewById(R.id.foodMore);
         retry = findViewById(R.id.foodRetry);
 
+        findViewById(R.id.foodSuggestions).setOnClickListener(v -> {
+            Intent intent = new Intent(this, FoodRecommendationsActivity.class);
+            intent.putExtra("date", selectedDate);
+            startActivity(intent);
+        });
+
         findViewById(R.id.foodBack)
                 .setOnClickListener(v -> finish());
 

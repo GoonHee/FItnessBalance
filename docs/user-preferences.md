@@ -22,7 +22,7 @@ New registrations no longer silently receive dailyCalorieGoal=2000. Existing goa
 
 Existing recommendation code reads workout minutes, days and equipment the next time Exercise is opened. Nonselected days can trigger gentle recovery. Preference matching operates within unlocked available content; a 20-minute preference does not generate new 20-minute sessions. The current seeded catalogue uses only none/chair, although future content may use the other equipment options. Weekly target changes adjust displayed Momentum without granting XP just for changing settings; existing completion transactions handle subsequent rewards.
 
-Dietary and nutrition choices are stored for the next food-recommendation phase. They do not filter search, prove halal status, certify ingredients or prevent allergen exposure. Existing diet/BMI profile features remain separate. This change does not integrate Health Connect or implement physiological goal adaptation, dashboard goal visualisations or food recommendations.
+Dietary and nutrition choices are used by the reviewed-food suggestion module; see FOOD_RECOMMENDATIONS.md. They do not filter ordinary search, prove halal status, certify ingredients or prevent allergen exposure. Existing diet/BMI profile features remain separate. This change does not integrate Health Connect or implement physiological goal adaptation, dashboard goal visualisations.
 
 No new collections, catalogue seed or Firestore rules deployment is required with the repository's owner-scoped profile rules.
 

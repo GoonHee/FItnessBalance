@@ -29,6 +29,12 @@
             android:text="@string/fl_date"
             android:visibility="visible" />
 
+        <Button
+            android:id="@+id/foodSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/fr_title" />
+
         <LinearLayout style="@style/FoodPanel">
 
             <TextView

@@ -15,12 +15,12 @@
     <string name="prefs_carbs">Daily carbohydrate goal (g)</string>
     <string name="prefs_fat">Daily fat goal (g)</string>
     <string name="prefs_diet">Dietary preferences</string>
-    <string name="prefs_diet_note">Optional preferences saved for future food recommendations. They do not filter search yet or certify foods as halal, vegetarian or allergen-safe.</string>
+    <string name="prefs_diet_note">Used to filter reviewed food suggestions. Ordinary food search is not filtered. The app does not independently certify foods as halal, vegetarian or allergen-safe.</string>
     <string-array name="prefs_diets"><item>Halal preference</item><item>Vegetarian</item><item>Vegan</item><item>Avoid pork</item><item>Avoid alcohol</item></string-array>
     <string name="prefs_retry">Retry loading preferences</string>
     <string name="prefs_save">Save preferences</string>
     <string name="prefs_loaded">Review your choices, then save.</string>
-    <string name="prefs_saved">Preferences saved. Reopen the Exercise page to refresh recommendations. Nutrition preferences are saved for future recommendations.</string>
+    <string name="prefs_saved">Preferences saved. Reopen Exercise or regenerate Suggested foods to refresh recommendations.</string>
     <string name="prefs_load_error">Preferences could not be loaded. Check your connection and retry. Saving is disabled until your existing settings are loaded.</string>
     <string name="prefs_save_error">Preferences were not confirmed saved. Check your connection and sign-in, then retry.</string>
     <string name="prefs_missing_profile">Your profile could not be found. Return to Profile and complete setup first.</string>

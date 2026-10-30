@@ -33,6 +33,12 @@
             android:id="@+id/foodDetailsSource"
             style="@style/FoodBody" />
 
+        <TextView android:id="@+id/foodRecommendationContext"
+            style="@style/FoodBody" android:visibility="gone" />
+        <Button android:id="@+id/foodRecommendationPreference"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/fr_food_preference" android:visibility="gone" />
+
         <TextView
             android:id="@+id/foodDetailsStatus"
             style="@style/FoodBody"

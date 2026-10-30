@@ -46,6 +46,7 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
     private String foodId, barcode;
     private String date, entryId, basis, restoredUnit;
+    private boolean recommendationPrefillPending;
 
     private boolean saving;
     private boolean barcodeManualFallbackActive;
@@ -223,9 +224,19 @@ public class FoodDetailsActivity extends AppCompatActivity {
                 state != null && state.getBoolean("manual")
         );
 
+        recommendationPrefillPending = state == null && getIntent().hasExtra("recommendedAmount");
         meal.setSelection(state == null
                 ? 0
                 : Math.max(0, Math.min(3, state.getInt("meal"))));
+
+        if (state == null) {
+            String recommendedMeal = getIntent().getStringExtra("recommendedMeal");
+            String[] meals = getResources().getStringArray(R.array.fs_meals);
+            for (int i = 0; i < meals.length; i++) if (meals[i].equals(recommendedMeal)) meal.setSelection(i);
+        }
+        findViewById(R.id.foodRecommendationPreference).setOnClickListener(v -> {
+            if (food != null && barcode == null) FoodPreferenceDialog.show(this, foodId);
+        });
 
         restoredUnit = state == null
                 ? null : state.getString("unit");
@@ -571,6 +582,24 @@ public class FoodDetailsActivity extends AppCompatActivity {
                 : Collections.emptyMap();
 
         basis = text("nutrition_basis");
+        findViewById(R.id.foodRecommendationPreference).setVisibility(barcode == null ? View.VISIBLE : View.GONE);
+        if (getIntent().hasExtra("recommendedAmount")) {
+            TextView recommendationNote = findViewById(R.id.foodRecommendationContext);
+            recommendationNote.setVisibility(View.VISIBLE);
+            recommendationNote.setText(R.string.fr_review_current);
+            if (recommendationPrefillPending) {
+                recommendationPrefillPending = false;
+                double proposed = getIntent().getDoubleExtra("recommendedAmount", Double.NaN);
+                String proposedUnit = getIntent().getStringExtra("recommendedUnit");
+                String currentUnit = FoodNutrition.portionUnit(basis);
+                if (currentUnit != null && currentUnit.equals(proposedUnit)
+                        && Double.isFinite(proposed) && proposed > 0 && proposed <= 10000) {
+                    portion.setText(String.valueOf(proposed));
+                    servings.setText("1"); restoredUnit = proposedUnit;
+                } else recommendationNote.setText(R.string.fr_changed_basis);
+            }
+        }
+
 
         TextView nameText = findViewById(R.id.foodDetailsName);
         nameText.setText(text("food_name") == null
