@@ -106,6 +106,9 @@ public final class WorkoutDetailsActivity extends ExerciseBaseActivity {
       error(new IllegalStateException());
       return;
     }
+    try { new com.example.fitnessbalance.repository.BanditStore(this,uid).bind(
+        getIntent().getStringExtra(com.example.fitnessbalance.repository.BanditStore.EXTRA),draft.sessionId,plan.lesson.getId()); }
+    catch(java.io.IOException error){Toast.makeText(this,R.string.cmab_error,Toast.LENGTH_LONG).show();}
     repository
         .begin(draft.pathId, plan.lesson.getId(), draft.sessionId, plan.items.size())
         .addOnSuccessListener(

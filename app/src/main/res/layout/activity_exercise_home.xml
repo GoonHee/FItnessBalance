@@ -110,6 +110,10 @@
                         android:minHeight="48dp"
                         android:saveEnabled="false"
                         android:text="@string/ar_use_health" />
+                    <CheckBox android:id="@+id/exUseBandit"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:minHeight="48dp" android:text="@string/cmab_enable" />
+                    <TextView style="@style/ExerciseBody" android:text="@string/cmab_note" />
                     <TextView android:id="@+id/exHealthReason" style="@style/ExerciseBody" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/exUsual"
