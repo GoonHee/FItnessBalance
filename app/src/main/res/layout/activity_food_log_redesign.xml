@@ -105,6 +105,10 @@
 
         </LinearLayout>
 
+        <Button android:id="@+id/foodSavedMeals"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/sm_title" />
+
         <TextView
             style="@style/FoodHeading"
             android:text="@string/fl_history" />

@@ -1,0 +1,23 @@
+package com.example.fitnessbalance;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import java.util.*;
+
+public class SavedMealServiceTest {
+    private Map<String,Object> entry(){Map<String,Object> e=new HashMap<>();e.put("name","Rice");e.put("entryId","old");e.put("meal","Lunch");e.put("servingAmount",100.0);e.put("servings",1.0);e.put("totalAmount",100.0);e.put("portionUnit","g");e.put("loggedAt",new Date());Map<String,Object> n=new HashMap<>();n.put("energy_kcal",130.0);n.put("protein_g",2.0);e.put("nutrients",n);return e;}
+    private List<Map<String,Object>> rows(){return Arrays.asList(entry());}
+    @Test public void stripsDiaryIdentityButPreservesPortionAndNutrition(){Map<String,Object> r=SavedMealService.snapshots(rows()).get(0);assertFalse(r.containsKey("entryId"));assertFalse(r.containsKey("meal"));assertFalse(r.containsKey("loggedAt"));assertEquals(100.0,r.get("totalAmount"));assertEquals(130.0,r.get("calories"));}
+    @Test public void snapshotDoesNotAliasSource(){Map<String,Object> original=entry();Map<String,Object> snapshot=SavedMealService.snapshots(Arrays.asList(original)).get(0);((Map<String,Object>)original.get("nutrients")).put("energy_kcal",900.0);assertEquals(130.0,((Map<?,?>)snapshot.get("nutrients")).get("energy_kcal"));}
+    @Test public void missingNutrientsRemainMissingAndCoveragePartial(){Map<String,Object> incomplete=entry();incomplete.remove("nutrients");List<Map<String,Object>> r=SavedMealService.snapshots(Arrays.asList(entry(),incomplete));Map<String,Object> totals=FoodNutrition.totals(r);assertEquals(1,((Map<?,?>)totals.get("nutrientCoverage")).get("energy_kcal"));assertFalse(r.get(1).containsKey("calories"));}
+    @Test public void legacyCaloriesAndRecordedZeroPreserved(){Map<String,Object> old=entry();old.remove("nutrients");old.put("calories",0);Map<String,Object> r=SavedMealService.snapshots(Arrays.asList(old)).get(0);assertEquals(0.0,r.get("calories"));assertEquals(0.0,((Map<?,?>)r.get("nutrients")).get("energy_kcal"));}
+    @Test public void loggingUsesNewStableIdsAndSelectedMeal(){String op=UUID.randomUUID().toString();List<Map<String,Object>> a=SavedMealService.loggingEntries(rows(),"saved","Breakfast set",op,"Dinner"),b=SavedMealService.loggingEntries(rows(),"saved","Breakfast set",op,"Dinner");assertEquals(a,b);assertNotEquals("old",a.get(0).get("entryId"));assertEquals("Dinner",a.get(0).get("meal"));assertEquals("saved",a.get(0).get("savedMealId"));}
+    @Test public void newIntentionalLogGetsDifferentIds(){assertNotEquals(SavedMealService.loggingEntries(rows(),"s","Meal",UUID.randomUUID().toString(),"Lunch").get(0).get("entryId"),SavedMealService.loggingEntries(rows(),"s","Meal",UUID.randomUUID().toString(),"Lunch").get(0).get("entryId"));}
+    @Test public void duplicateFoodsRemainDistinctEntries(){List<Map<String,Object>> r=SavedMealService.loggingEntries(Arrays.asList(entry(),entry()),"s","Meal",UUID.randomUUID().toString(),"Lunch");assertNotEquals(r.get(0).get("entryId"),r.get(1).get("entryId"));assertEquals(260L,FoodNutrition.totals(r).get("totalCalories"));}
+    @Test public void appendDeduplicatesAndPreservesOtherFoods(){List<Map<String,Object>> diary=new ArrayList<>(rows());List<Map<String,Object>> added=SavedMealService.loggingEntries(rows(),"s","Meal",UUID.randomUUID().toString(),"Lunch");SavedMealService.append(diary,added);SavedMealService.append(diary,added);assertEquals(2,diary.size());assertEquals(260L,FoodNutrition.totals(diary).get("totalCalories"));}
+    @Test public void nameTrimmed(){assertEquals("Breakfast",SavedMealService.name(" Breakfast "));}
+    @Test(expected=IllegalArgumentException.class)public void blankNameRejected(){SavedMealService.name(" ");}
+    @Test(expected=IllegalArgumentException.class)public void emptySelectionRejected(){SavedMealService.snapshots(Collections.emptyList());}
+    @Test(expected=IllegalArgumentException.class)public void oversizedSelectionRejected(){List<Map<String,Object>> rows=new ArrayList<>();for(int i=0;i<26;i++)rows.add(entry());SavedMealService.snapshots(rows);}
+    @Test(expected=IllegalArgumentException.class)public void invalidNutrientsRejected(){Map<String,Object> row=entry();((Map<String,Object>)row.get("nutrients")).put("energy_kcal",Double.NaN);SavedMealService.snapshots(Arrays.asList(row));}
+    @Test public void manualAndEstimateProvenancePreserved(){Map<String,Object> row=entry();row.put("calculationMode","manual");row.put("manualCaloriesPerServing",130.0);row.put("energyMethod","user_entered");Map<String,Object> saved=SavedMealService.snapshots(Arrays.asList(row)).get(0);assertEquals("manual",saved.get("calculationMode"));assertEquals(130.0,saved.get("manualCaloriesPerServing"));assertEquals("user_entered",saved.get("energyMethod"));}
+}

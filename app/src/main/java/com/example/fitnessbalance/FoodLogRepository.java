@@ -110,6 +110,37 @@ final class FoodLogRepository {
                 }
             }
 
+            writeTotals(transaction, log, daily, items, date);
+
+            return null;
+        });
+    }
+
+    static Task<Void> saveMeal(String userId, String date, String mealId,
+            String operation, List<Map<String,Object>> additions) {
+        if(!FoodUi.validDate(date))throw new IllegalArgumentException("Invalid date.");
+        java.util.UUID.fromString(operation);
+        FirebaseFirestore db=FirebaseFirestore.getInstance();
+        DocumentReference user=db.collection("users").document(userId);
+        DocumentReference log=user.collection("foodLogs").document(date), daily=user.collection("dailyData").document(date),
+            receipt=user.collection("savedMealLogs").document(operation);
+        for(Map<String,Object> addition:additions)addition.put("loggedAt",new java.util.Date());
+        return db.runTransaction(tx->{
+            DocumentSnapshot done=tx.get(receipt);
+            if(done.exists()){
+                if(!date.equals(done.getString("date"))||!mealId.equals(done.getString("mealId")))throw new IllegalStateException("Operation changed.");
+                return null;
+            }
+            List<Map<String,Object>> items=entries(tx.get(log));
+            SavedMealService.append(items,additions);
+            writeTotals(tx,log,daily,items,date);
+            Map<String,Object> ack=new HashMap<>();ack.put("date",date);ack.put("mealId",mealId);
+            ack.put("entryCount",additions.size());ack.put("createdAt",FieldValue.serverTimestamp());tx.set(receipt,ack);
+            return null;
+        });
+    }
+    private static void writeTotals(com.google.firebase.firestore.Transaction transaction,
+            DocumentReference log,DocumentReference daily,List<Map<String,Object>> items,String date) {
             Map<String, Object> values =
                     FoodNutrition.totals(items);
 
@@ -163,7 +194,5 @@ final class FoodLogRepository {
                     )
             );
 
-            return null;
-        });
     }
 }

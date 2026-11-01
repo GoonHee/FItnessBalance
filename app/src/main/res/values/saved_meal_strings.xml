@@ -1,0 +1,25 @@
+<resources>
+<string name="sm_title">Saved meals</string>
+<string name="sm_create">Save foods from a diary date</string>
+<string name="sm_pick">Select foods to save</string>
+<string name="sm_name">Meal name (1–80 characters)</string>
+<string name="sm_save">Save meal</string>
+<string name="sm_log">Log this saved meal</string>
+<string name="sm_rename">Rename</string>
+<string name="sm_delete">Delete saved meal</string>
+<string name="sm_delete_note">Delete this reusable meal? Previously logged foods will remain unchanged.</string>
+<string name="sm_empty">No saved meals yet. Save selected foods from a diary date to reuse their portions.</string>
+<string name="sm_note">Saved meals reuse the listed portions and nutrition snapshots. Missing nutrients remain unavailable or partial. This does not verify source nutrition. After logging, you can adjust individual foods in the diary.</string>
+<string name="sm_target">Destination date: %1$s</string>
+<string name="sm_source">Choose source diary date</string>
+<string name="sm_saved">Meal saved.</string>
+<string name="sm_logged">Saved meal logged. Return to Food Log to view it.</string>
+<string name="sm_retry">Retry last log</string>
+<string name="sm_pending">A log is awaiting confirmation. Retry it before starting another. The same request will not be logged twice.</string>
+<string name="sm_error">Saved meal operation failed. Check your connection and Firestore rules, then retry. %1$s</string>
+<string name="sm_refresh">Refresh saved meals</string>
+<string name="sm_more">Load more saved meals</string>
+<string name="sm_count">%1$d foods · saved portions</string>
+<string name="sm_discard">Discard pending request</string>
+<string name="sm_discard_note">This stops retrying; it does not remove foods already saved. If the result was uncertain, check the destination diary before logging this meal again.</string>
+</resources>
