@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -35,6 +36,11 @@ import java.util.concurrent.Future;
 
 public class FoodDetailsActivity extends AppCompatActivity {
 
+    private CheckBox unknownCalories;
+    private EditText unknownPortion;
+    private boolean resetPersonalForm;
+    private final ActivityResultLauncher<Intent> nutritionEditor=registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),result->{if(result.getResultCode()==RESULT_OK){resetPersonalForm=true;loadFood();}});
     private EditText portion, servings, manualCalories;
     private Spinner meal, unit, barcodeReferenceUnit;
     private CheckBox manual, barcodeConfirmed;
@@ -92,12 +98,18 @@ public class FoodDetailsActivity extends AppCompatActivity {
         totalAmount = findViewById(R.id.foodTotalAmount);
         logButton = findViewById(R.id.foodLogButton);
         retry = findViewById(R.id.foodRetry);
+        unknownCalories=findViewById(R.id.foodUnknownCalories);unknownPortion=findViewById(R.id.foodUnknownPortion);
+        unknownCalories.setChecked(state!=null&&state.getBoolean("unknownCalories"));
+        unknownPortion.setText(state==null?"":state.getString("unknownPortion",""));
+        unknownPortion.setVisibility(unknownCalories.isChecked()?View.VISIBLE:View.GONE);
+        findViewById(R.id.foodNutritionSource).setOnClickListener(v->{if(!saving&&food!=null&&barcode==null)
+            nutritionEditor.launch(new Intent(this,PersonalNutritionActivity.class).putExtra("foodId",foodId).putExtra("foodName",text("food_name")));});
         if(ingredientMode())logButton.setText(R.string.rp_choose);
         PersonalServingController personal=new PersonalServingController(this,
             ()->{if(food==null)throw new IllegalStateException("Load a food first.");return PersonalServingService.key(foodId,barcode);},
             ()->value(portion),this::selectedUnit,(amountValue,unitValue)->{
                 if(saving)return;
-                if(!PersonalServingService.compatible(basis,unitValue,manual.isChecked()))throw new IllegalArgumentException("This serving unit does not match the food reference unit.");
+                if(!PersonalServingService.compatible(basis,unitValue,manual.isChecked()||unknownCalories.isChecked()))throw new IllegalArgumentException("This serving unit does not match the food reference unit.");
                 restoredUnit=unitValue;configureUnits();portion.setText(String.valueOf(amountValue));servings.setText("1");
                 if(manual.isChecked())manualCalories.setText("");updatePortion();
             });
@@ -305,6 +317,11 @@ public class FoodDetailsActivity extends AppCompatActivity {
                 }
         );
 
+        unknownCalories.setOnCheckedChangeListener((button,checked)->{
+            unknownPortion.setVisibility(checked?View.VISIBLE:View.GONE);
+            if(checked){portion.setText("");manual.setChecked(false);}manual.setEnabled(!checked);configureUnits();updatePortion();
+        });
+        unknownPortion.addTextChangedListener(watcher);manual.setEnabled(!unknownCalories.isChecked());
         loadFood();
     }
 
@@ -323,6 +340,7 @@ public class FoodDetailsActivity extends AppCompatActivity {
                 barcodeReferenceUnit.getSelectedItem().toString()
         );
         state.putString("entryId", entryId);
+        state.putBoolean("unknownCalories",unknownCalories.isChecked());state.putString("unknownPortion",unknownPortion.getText().toString());
         state.putString("portion", portion.getText().toString());
         state.putString("servings", servings.getText().toString());
         state.putString(
@@ -386,10 +404,7 @@ public class FoodDetailsActivity extends AppCompatActivity {
                         return;
                     }
 
-                    showFood(
-                            document.getData(),
-                            document.getId()
-                    );
+                    loadPersonalNutrition(document.getData(),document.getId());
                 })
                 .addOnFailureListener(error -> {
                     if (isDestroyed() || isFinishing()) return;
@@ -402,6 +417,18 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
                     retry.setVisibility(View.VISIBLE);
                 });
+    }
+
+    private void loadPersonalNutrition(Map<String,Object> original,String id){
+        FirebaseUser owner=FirebaseAuth.getInstance().getCurrentUser();if(owner==null)return;String uid=owner.getUid();
+        new PersonalNutritionRepository(uid,id).get().addOnCompleteListener(task->{
+            FirebaseUser now=FirebaseAuth.getInstance().getCurrentUser();if(isDestroyed()||isFinishing()||now==null||!uid.equals(now.getUid()))return;
+            if(task.isSuccessful()&&task.getResult().exists()){
+                Map<String,Object> custom=new HashMap<>(task.getResult().getData());
+                if(resetPersonalForm){manual.setChecked(false);unknownCalories.setChecked(false);resetPersonalForm=false;}
+                showFood(custom,id);
+            }else{showFood(original,id);if(!task.isSuccessful())((TextView)findViewById(R.id.foodNutritionNote)).setText(R.string.na_personal_failed);}
+        });
     }
 
     private void lookupBarcode() {
@@ -587,6 +614,11 @@ public class FoodDetailsActivity extends AppCompatActivity {
     ) {
         food = new HashMap<>(data);
         foodId = id;
+        if(unknownCalories.isChecked())manual.setChecked(false);
+        findViewById(R.id.foodNutritionSource).setVisibility(barcode==null?View.VISIBLE:View.GONE);
+        TextView sourceNote=findViewById(R.id.foodNutritionNote);String kind=Objects.toString(food.get("source_kind"),"");
+        sourceNote.setText(kind.equals("alternative")?getString(R.string.na_alternative_used,Objects.toString(food.get("alternativeName"),"")):
+            kind.equals("label")?getString(R.string.na_personal_used,Objects.toString(food.get("source_note"),"")):"");
 
         Object raw = food.get("nutrition");
 
@@ -643,10 +675,10 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
         // Open the existing manual form rather than leaving an unexplained disabled button.
         // Barcode records may still have an explicit package-basis confirmation flow.
-        if ((!requiresBasisConfirmation() && FoodNutrition.portionUnit(basis) == null)
+        if (!unknownCalories.isChecked() && ((!requiresBasisConfirmation() && FoodNutrition.portionUnit(basis) == null)
                 || (!ingredientMode() && FoodNutrition.number(
                         FoodNutrition.withEstimatedEnergy(nutrition).get("energy_kcal")
-                ) == null)) {
+                ) == null))) {
             manual.setChecked(true);
         }
 
@@ -702,7 +734,7 @@ public class FoodDetailsActivity extends AppCompatActivity {
         restoredUnit = null;
 
         String[] choices =
-                !manual.isChecked() && reference != null
+                !manual.isChecked() && !unknownCalories.isChecked() && reference != null
                         ? new String[]{reference}
                         : new String[]{"g", "ml"};
 
@@ -782,7 +814,10 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
     private void updatePortion() {
         if (food == null || saving) return;
-
+        if(unknownCalories.isChecked()){
+            try{Map<String,Object> entry=unknownEntry();nutrients.setText(FoodUi.nutrients(this,(Map<?,?>)entry.get("nutrients"),null,1));status.setText(R.string.na_unknown_note);totalAmount.setText(Objects.toString(entry.get("portionDescription"),""));logButton.setEnabled(true);}
+            catch(RuntimeException invalid){logButton.setEnabled(false);status.setText(R.string.fs_invalid);}return;
+        }
         logButton.setEnabled(false);
         status.setText("");
         totalAmount.setText("");
@@ -896,9 +931,33 @@ public class FoodDetailsActivity extends AppCompatActivity {
         manualCalories.setEnabled(enabled);
         unit.setEnabled(enabled);
         meal.setEnabled(enabled);
-        manual.setEnabled(enabled);
+        manual.setEnabled(enabled&&!unknownCalories.isChecked());
+        unknownCalories.setEnabled(enabled);unknownPortion.setEnabled(enabled);findViewById(R.id.foodNutritionSource).setEnabled(enabled);
         barcodeConfirmed.setEnabled(enabled);
         barcodeReferenceUnit.setEnabled(enabled);
+    }
+
+    private void personalProvenance(Map<String,Object> entry){
+        if(food.get("source_kind")==null)return;
+        entry.put("personalNutritionKind",food.get("source_kind"));if(food.get("revision")!=null)entry.put("personalNutritionRevision",food.get("revision"));
+        for(String key:new String[]{"alternativeFoodId","alternativeName"})if(food.get(key)!=null)entry.put(key,food.get(key));
+        if("alternative".equals(food.get("source_kind"))){entry.put("nutritionVerification","approximate_substitution");
+            if(!unknownCalories.isChecked()&&!manual.isChecked())entry.put("energyMethod",FoodNutrition.usesEstimatedEnergy(nutrition)?"atwater_4_4_9":"alternative_food");}
+    }
+    private Map<String,Object> unknownEntry(){
+        Double amount=portion.getText().toString().trim().isEmpty()?null:value(portion);
+        Map<String,Object> entry=NutritionAvailabilityService.unknown(Objects.toString(food.get("food_name"),"Food"),foodId,entryId,meal.getSelectedItem().toString(),nutrition,basis,selectedUnit(),amount,amount==null?1:value(servings),unknownPortion.getText().toString());
+        entry.put("sourceDatabase",food.get("source_database"));if(barcode!=null)entry.put("barcode",barcode);personalProvenance(entry);return entry;
+    }
+    private void saveUnknown(FirebaseUser user){
+        final Map<String,Object> entry;try{entry=unknownEntry();}catch(RuntimeException invalid){status.setText(R.string.fs_invalid);return;}
+        if(ingredientMode()){
+            if(!user.getUid().equals(getIntent().getStringExtra("ingredientUid"))){finish();return;}
+            setResult(RESULT_OK,new Intent().putExtra("ingredient",new org.json.JSONObject(SavedMealService.snapshots(java.util.Arrays.asList(entry)).get(0)).toString()));finish();return;
+        }
+        entry.put("loggedAt",new Date());saving=true;controls(false);logButton.setEnabled(false);status.setText(R.string.fl_saving);
+        FoodLogRepository.save(user.getUid(),date,entry,false).addOnSuccessListener(ignored->{if(!isDestroyed()&&!isFinishing()){Toast.makeText(this,R.string.fl_saved,Toast.LENGTH_SHORT).show();finish();}})
+            .addOnFailureListener(error->{saving=false;if(isDestroyed()||isFinishing())return;controls(true);updatePortion();status.setText(FoodUi.error(this,R.string.fl_save_operation,error));});
     }
 
     private void save() {
@@ -912,6 +971,7 @@ public class FoodDetailsActivity extends AppCompatActivity {
             return;
         }
 
+        if(unknownCalories.isChecked()){saveUnknown(user);return;}
         final Map<String, Object> scaled;
 
         try {
@@ -1016,6 +1076,7 @@ public class FoodDetailsActivity extends AppCompatActivity {
         entry.put("nutrients", scaled);
         entry.put("calories", scaled.get("energy_kcal"));
         entry.put("loggedAt", new Date());
+        personalProvenance(entry);
         if(ingredientMode()){
             if(!user.getUid().equals(getIntent().getStringExtra("ingredientUid"))){finish();return;}
             Map<String,Object> snapshot=SavedMealService.snapshots(java.util.Arrays.asList(entry)).get(0);

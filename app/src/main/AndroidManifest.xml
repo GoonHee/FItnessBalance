@@ -92,6 +92,7 @@
 
     <activity android:name=".ProgressActivity" android:exported="false" />
     <activity android:name=".WeightHistoryActivity" android:exported="false" />
+    <activity android:name=".PersonalNutritionActivity" android:exported="false" />
     <activity android:name=".RecipeEditorActivity" android:exported="false" />
     <activity android:name=".SavedMealsActivity" android:exported="false" />
     <activity android:name=".FoodRecommendationsActivity" android:exported="false" />

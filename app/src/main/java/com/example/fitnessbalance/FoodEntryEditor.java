@@ -32,7 +32,7 @@ final class FoodEntryEditor {
                 }
             }
         }
-        if (FoodNutrition.number(nutrients.get("energy_kcal")) == null) {
+        if (FoodNutrition.number(nutrients.get("energy_kcal")) == null && !"unknown".equals(original.get("calculationMode"))) {
             throw new IllegalArgumentException("Saved calories are unavailable.");
         }
         result.put("servingAmount", amount);
@@ -45,7 +45,7 @@ final class FoodEntryEditor {
         }
         result.put("g".equals(unit) ? "portionGrams" : "portionMillilitres", total);
         result.put("nutrients", nutrients);
-        result.put("calories", nutrients.get("energy_kcal"));
+        result.remove("calories");if(nutrients.containsKey("energy_kcal"))result.put("calories", nutrients.get("energy_kcal"));
         return result;
     }
 

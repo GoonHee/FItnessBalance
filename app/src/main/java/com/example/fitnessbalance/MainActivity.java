@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         String today = com.example.fitnessbalance.util.LocalDayObserver.today();
         if (!today.equals(displayDay)) {
             displayDay = today;
-            updateCalorieDisplay(0, 0);
+            todayNutrition=null;renderNutrition(null);
         }
         updateDate();
         loadTodayMetrics();
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                     });
         } else {
             welcomeText.setText("Welcome!");
-            updateCalorieDisplay(0, 0);
+            todayNutrition=null;renderNutrition(null);
         }
     }
 
@@ -118,60 +118,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private NutritionAvailabilityService.Stats todayNutrition;
     private void loadTodayMetrics() {
-        final int token = ++metricsRequest;
-        if (currentUser == null) { updateCalorieDisplay(0, 0); return; }
-
-        String userId = currentUser.getUid();
-        String todayDate = com.example.fitnessbalance.util.LocalDayObserver.today();
-
-        firestore.collection("users").document(userId)
-                .collection("dailyData").document(todayDate)
-                .get()
-                .addOnSuccessListener(this, documentSnapshot -> {
-                    if (!currentMetrics(token, todayDate, userId)) return;
-                    int consumed = 0;
-                    int burned = 0;
-                    if (documentSnapshot.exists()) {
-                        Object consumedObj = documentSnapshot.get("caloriesConsumed");
-                        if (consumedObj instanceof Number) {
-                            consumed = ((Number) consumedObj).intValue();
-                        }
-                        Object burnedObj = documentSnapshot.get("caloriesBurned");
-                        if (burnedObj instanceof Number) {
-                            burned = ((Number) burnedObj).intValue();
-                        }
-                    }
-                    updateCalorieDisplay(consumed, burned);
-                    refreshExerciseTotals(todayDate, userId, token);
-                })
-                .addOnFailureListener(e -> {
-                    if (!currentMetrics(token, todayDate, userId)) return;
-                    Log.e("MainActivity", "Error loading today's metrics", e);
-                    updateCalorieDisplay(0, 0);
-                });
+        final int token=++metricsRequest;
+        if(currentUser==null){todayNutrition=null;renderNutrition(null);return;}
+        String userId=currentUser.getUid(),day=com.example.fitnessbalance.util.LocalDayObserver.today();
+        com.google.firebase.firestore.DocumentReference user=firestore.collection("users").document(userId);
+        com.google.android.gms.tasks.Task<com.google.firebase.firestore.DocumentSnapshot> daily=user.collection("dailyData").document(day).get();
+        com.google.android.gms.tasks.Task<com.google.firebase.firestore.DocumentSnapshot> foods=user.collection("foodLogs").document(day).get();
+        com.google.android.gms.tasks.Tasks.whenAll(daily,foods).addOnSuccessListener(this,ignored->{
+            if(!currentMetrics(token,day,userId))return;
+            try{
+                com.google.firebase.firestore.DocumentSnapshot log=foods.getResult(),dashboard=daily.getResult();
+                todayNutrition=log.contains("foodItems")?NutritionAvailabilityService.stats(FoodLogRepository.entries(log)):
+                    NutritionAvailabilityService.dashboard(dashboard.getData()==null?java.util.Collections.emptyMap():dashboard.getData());
+                if(!log.contains("foodItems")&&FoodNutrition.number(log.get("totalCalories"))!=null&&FoodNutrition.number(log.get("totalCalories"))>0)todayNutrition=NutritionAvailabilityService.legacy(log.get("totalCalories"));
+                Object burned=dashboard.get("caloriesBurned");renderNutrition(burned instanceof Number?((Number)burned).intValue():0);
+                refreshExerciseTotals(day,userId,token);
+            }catch(RuntimeException invalid){todayNutrition=null;renderNutrition(null);}
+        }).addOnFailureListener(this,error->{if(currentMetrics(token,day,userId)){todayNutrition=null;renderNutrition(null);}});
     }
-
-
-    private void refreshExerciseTotals(String day, String userId, int token) {
-        new com.example.fitnessbalance.repository.ExerciseLogRepository(userId)
-                .loadDay(day)
-                .addOnSuccessListener(this, result -> {
-                    if (!currentMetrics(token, day, userId)) return;
-                    updateCalorieDisplay(result.caloriesConsumed,
-                            com.example.fitnessbalance.util.Values.integer(result.totals.get("caloriesBurned"), 0));
-                })
-                .addOnFailureListener(this, error -> Log.w("MainActivity", "Exercise totals refresh: " + error.getClass().getSimpleName()));
+    private void refreshExerciseTotals(String day,String userId,int token){
+        new com.example.fitnessbalance.repository.ExerciseLogRepository(userId).loadDay(day).addOnSuccessListener(this,result->{
+            if(currentMetrics(token,day,userId))renderNutrition(com.example.fitnessbalance.util.Values.integer(result.totals.get("caloriesBurned"),0));
+        }).addOnFailureListener(this,error->Log.w("MainActivity","Exercise totals could not be refreshed"));
     }
-
-    private void updateCalorieDisplay(int caloriesConsumed, int caloriesBurned) {
-        int netCalories = caloriesConsumed - caloriesBurned;
-
-        consumedCaloriesText.setText(String.valueOf(caloriesConsumed));
-        burnedCaloriesText.setText(String.valueOf(caloriesBurned));
-        netCaloriesText.setText(String.valueOf(netCalories));
-
-        calorieBalanceText.setText(getString(R.string.pr_home_net, netCalories));
+    private void renderNutrition(Integer burned){
+        burnedCaloriesText.setText(burned==null?"—":String.valueOf(burned));
+        if(todayNutrition==null){consumedCaloriesText.setText("—");netCaloriesText.setText("—");calorieBalanceText.setText(R.string.na_load_failed);return;}
+        NutritionAvailabilityService.Stats s=todayNutrition;
+        consumedCaloriesText.setText(s.subtotal==null?"—":s.complete()?FoodUi.number(s.subtotal):getString(R.string.na_partial_value,FoodUi.number(s.subtotal)));
+        Double net=burned==null?null:s.net(burned);netCaloriesText.setText(net==null?"—":FoodUi.number(net));
+        if(!s.coverageKnown)calorieBalanceText.setText(R.string.na_home_legacy);
+        else if(s.missing>0)calorieBalanceText.setText(s.known==0?getString(R.string.na_all_unknown,s.missing):getString(R.string.na_known,FoodUi.number(s.subtotal),s.missing));
+        else calorieBalanceText.setText(net==null?getString(R.string.na_load_failed):getString(R.string.pr_home_net,Math.round(net)));
         calorieBalanceText.setTextColor(getColor(R.color.black));
     }
 

@@ -60,7 +60,7 @@ public final class ProgressActivity extends AppCompatActivity {
         if(net)ProgressUi.text(this,c,getString(R.string.pr_net_note),14,false);else{
             for(int i=0;i<5;i++){double sum=0;for(ProgressService.Day d:week.days)sum+=d.meals[i];TextView legend=ProgressUi.text(this,c,ProgressService.MEALS[i]+": "+n(sum)+" kcal",15,false);legend.setTextColor(ProgressUi.INK);}
             Double goal=week.goal("energy_kcal");ProgressUi.text(this,c,getString(R.string.pr_goal_reference,n(goal)),16,false);
-            if(goal!=null){double sum=0;int days=0;for(ProgressService.Day d:week.days)if(d.food!=null&&!d.partialEnergy){sum+=d.food;days++;}if(days>0)ProgressUi.text(this,c,getString(R.string.pr_goal_difference,n(sum-goal*days),days),15,false);}
+            if(goal!=null&&!week.partial("energy_kcal")){double sum=0;int days=0;for(ProgressService.Day d:week.days)if(d.food!=null&&!d.partialEnergy){sum+=d.food;days++;}if(days>0)ProgressUi.text(this,c,getString(R.string.pr_goal_difference,n(sum-goal*days),days),15,false);}
         }
         c=ProgressUi.card(this,body,getString(R.string.pr_daily_values));for(ProgressService.Day d:week.days)ProgressUi.text(this,c,d.date+" · "+n(ProgressService.Week.value(d,key))+(ProgressService.Week.value(d,key)==null?"":" kcal")+(d.partialEnergy?" · "+getString(R.string.fl_partial_note):""),14,false);
         c=ProgressUi.card(this,body,getString(R.string.pr_highest));if(week.highest.isEmpty())ProgressUi.text(this,c,getString(R.string.pr_no_foods),16,false);for(int i=0;i<Math.min(5,week.highest.size());i++){Map<String,Object> row=week.highest.get(i);ProgressUi.text(this,c,row.get("name")+" — "+n(row.get("calories"))+" kcal",16,false);}}

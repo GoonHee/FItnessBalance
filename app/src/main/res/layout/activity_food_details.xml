@@ -44,6 +44,14 @@
         <Button android:id="@+id/foodSaveServing" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:text="@string/ps_save" />
         <TextView style="@style/FoodBody" android:text="@string/ps_note" />
+        <Button android:id="@+id/foodNutritionSource" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="@string/na_personal" />
+        <TextView android:id="@+id/foodNutritionNote" style="@style/FoodBody" />
+        <CheckBox android:id="@+id/foodUnknownCalories" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/na_unknown" />
+        <EditText android:id="@+id/foodUnknownPortion" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:hint="@string/na_portion"
+            android:inputType="textCapSentences" android:maxLength="200" android:visibility="gone" />
         <TextView
             android:id="@+id/foodDetailsStatus"
             style="@style/FoodBody"

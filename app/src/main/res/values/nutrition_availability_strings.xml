@@ -1,0 +1,29 @@
+<resources>
+<string name="na_unknown">Log without calories</string>
+<string name="na_portion">Optional portion note, e.g. one plate, weight unknown</string>
+<string name="na_unknown_note">Calories will remain unavailable, not zero. Source nutrients with an unknown reference amount cannot be calculated for this portion.</string>
+<string name="na_known">Known calories: %1$s kcal. %2$d foods have unavailable calories. Daily totals are incomplete.</string>
+<string name="na_all_unknown">Calories unavailable for %1$d foods. Daily totals are incomplete.</string>
+<string name="na_partial_value">%1$s (known subtotal)</string>
+<string name="na_home_legacy">Older calorie summary: nutrient coverage is unknown. Net calories are unavailable.</string>
+<string name="na_load_failed">Today’s nutrition could not be loaded. Calories are unavailable; retry by reopening the home page.</string>
+<string name="na_add_calories">Add known calories</string>
+<string name="na_add_note">Enter calories for this entire logged entry, not per 100 g or per serving. Only use an amount you know; do not enter zero for missing information.</string>
+<string name="na_personal">My nutrition source</string>
+<string name="na_label">Enter package-label nutrition</string>
+<string name="na_alternative">Find alternative nutrition</string>
+<string name="na_delete">Remove personal nutrition source</string>
+<string name="na_source_note">Describe the label or source</string>
+<string name="na_reference">Reference amount stated on the label</string>
+<string name="na_confirm">I confirm the food, preparation state, reference amount and unit match my intended use.</string>
+<string name="na_label_note">Enter values for the stated reference amount. Blank nutrients remain unavailable. A personal serving measurement alone does not establish a nutrition reference amount.</string>
+<string name="na_alt_note">Search the existing catalogue by the beginning of a food name. Only alternatives with usable calories and a known reference amount are shown. Matches are approximate: verify raw/cooked state, ingredients, sweetness and units. No external provider is connected by this feature.</string>
+<string name="na_no_alt">No usable alternatives on this page. Try another food name or load more. You can also enter a label or log without calories.</string>
+<string name="na_substitute">Use as approximate alternative</string>
+<string name="na_alternative_used">Approximate nutrition from: %1$s. This is a user-confirmed substitute, not verified nutrition for the original food.</string>
+<string name="na_personal_used">Using your saved package-label nutrition. Source: %1$s</string>
+<string name="na_personal_failed">Your saved personal nutrition could not be checked. Original source data is shown; retry before logging if you normally use a saved source.</string>
+<string name="na_saved">Personal nutrition saved. Reopen Food Details to use it.</string>
+<string name="na_source_original">Original source nutrition</string>
+<string name="na_remove_note">Remove this personal source? Future logs will use the original record; existing logs, recipes and saved meals stay unchanged.</string>
+</resources>

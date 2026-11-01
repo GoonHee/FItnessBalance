@@ -158,6 +158,7 @@ final class FoodLogRepository {
                     values.get("nutrientCoverage")
             );
             dashboard.put("foodEntryCount", items.size());
+            for(String key:java.util.Arrays.asList("knownCalorieCount","missingCalorieCount","caloriesComplete"))dashboard.put(key,values.get(key));
             dashboard.put(
                     "lastUpdated",
                     FieldValue.serverTimestamp()
@@ -175,6 +176,7 @@ final class FoodLogRepository {
                             "foodItems",
                             "date",
                             "totalCalories",
+                            "knownCalorieCount","missingCalorieCount","caloriesComplete",
                             "nutrientTotals",
                             "nutrientCoverage",
                             "timestamp"
@@ -190,6 +192,7 @@ final class FoodLogRepository {
                             "nutrientTotals",
                             "nutrientCoverage",
                             "foodEntryCount",
+                            "knownCalorieCount","missingCalorieCount","caloriesComplete",
                             "lastUpdated"
                     )
             );

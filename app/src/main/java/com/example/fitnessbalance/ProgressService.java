@@ -14,12 +14,15 @@ final class ProgressService {
         final String date; final Map<String,Object> totals,coverage; final double[] meals;
         final int entries; final Double food,exercise,net; final boolean partialEnergy;
         Day(String date,Map<String,Object> totals,Map<String,Object> coverage,double[] meals,int entries,Double food,Double exercise) {
+            this(date,totals,coverage,meals,entries,food,exercise,false);
+        }
+        Day(String date,Map<String,Object> totals,Map<String,Object> coverage,double[] meals,int entries,Double food,Double exercise,boolean legacyCoverage) {
             this.date=date; this.totals=totals;this.coverage=coverage;this.meals=meals;this.entries=entries;this.food=food;this.exercise=exercise;
-            this.net=food==null?null:food-(exercise==null?0:exercise);
-            partialEnergy=food!=null&&Values.integer(coverage.get("energy_kcal"),0)<entries;
+            partialEnergy=legacyCoverage||entries>0&&Values.integer(coverage.get("energy_kcal"),0)<entries;
+            this.net=food==null||partialEnergy?null:food-(exercise==null?0:exercise);
         }
         Double nutrient(String key) { return FoodNutrition.number(totals.get(key)); }
-        boolean partial(String key) { return nutrient(key)!=null&&Values.integer(coverage.get(key),0)<entries; }
+        boolean partial(String key) { if("net".equals(key)||"energy_kcal".equals(key))return partialEnergy;if("exercise".equals(key))return false;return entries>0&&Values.integer(coverage.get(key),0)<entries; }
     }
     static final class Week {
         final List<Day> days; final Map<String,Object> profile; final List<Map<String,Object>> highest;
@@ -50,10 +53,10 @@ final class ProgressService {
             String date=start.plusDays(i).toString();
             if(start.plusDays(i).isAfter(today)) { days.add(new Day(date,new HashMap<>(),new HashMap<>(),new double[5],0,null,null));continue; }
             Map<String,Object> f=foods.getOrDefault(date,Collections.emptyMap()),d=daily.getOrDefault(date,Collections.emptyMap());
-            List<Map<String,Object>> entries=foodEntries(f);
+            List<Map<String,Object>> entries=foodEntries(f);boolean legacyCoverage=false;
             if(!f.containsKey("foodItems")) {
                 Double legacy=FoodNutrition.number(f.get("totalCalories"));if(legacy==null)legacy=FoodNutrition.number(d.get("caloriesConsumed"));
-                if(legacy!=null&&legacy>0)entries.add(Values.of("calories",legacy,"legacySummary",true));
+                if(legacy!=null&&legacy>0){entries.add(Values.of("calories",legacy,"legacySummary",true));legacyCoverage=true;}
             }
             Map<String,Object> total=FoodNutrition.totals(entries),values=Values.map(total.get("nutrientTotals")),coverage=Values.map(total.get("nutrientCoverage"));
             double[] meals=new double[5];
@@ -71,7 +74,7 @@ final class ProgressService {
             for(Map<String,Object> record:guided)if(date.equals(record.get("localDay")))exercise.guided(contributions,Values.text(record.get("recordId"),""),record);
             Map<String,Object> ex=exercise.totals(exercise.manualEntries(date,manual.getOrDefault(date,Collections.emptyMap()),d),contributions);
             Double burned=Values.integer(ex.get("exerciseEntryCount"),0)>0?Values.decimal(ex.get("caloriesBurned"),0):null;
-            days.add(new Day(date,values,coverage,meals,entries.size(),FoodNutrition.number(values.get("energy_kcal")),burned));
+            days.add(new Day(date,values,coverage,meals,entries.size(),FoodNutrition.number(values.get("energy_kcal")),burned,legacyCoverage));
         }
         List<Map<String,Object>> top=new ArrayList<>(highest.values());top.sort(Comparator.comparingDouble((Map<String,Object> r)->Values.decimal(r.get("calories"),0)).reversed());
         return new Week(days,profile,top);

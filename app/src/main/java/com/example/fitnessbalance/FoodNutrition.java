@@ -101,6 +101,8 @@ public final class FoodNutrition {
 
         Map<String, Object> result = new HashMap<>();
         result.put("totalCalories", Math.round(calories));
+        NutritionAvailabilityService.Stats status=NutritionAvailabilityService.stats(entries);
+        result.put("knownCalorieCount",status.known);result.put("missingCalorieCount",status.missing);result.put("caloriesComplete",status.complete());
         result.put("nutrientTotals", totals);
         result.put("nutrientCoverage", coverage);
 

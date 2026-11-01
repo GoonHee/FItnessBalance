@@ -9,7 +9,7 @@ final class SavedMealService {
     private static final List<String> FIELDS=Arrays.asList("foodId","name","servingAmount","servings",
         "portionUnit","totalAmount","portionGrams","portionMillilitres","nutritionBasis","sourceDatabase",
         "barcode","sourceUrl","basisConfirmationSource","calculationMode","energyMethod",
-        "nutritionVerification","manualCaloriesPerServing","recipeId","recipeName","recipeRevision","recipeYield","recipeServings");
+        "nutritionVerification","manualCaloriesPerServing","recipeId","recipeName","recipeRevision","recipeYield","recipeServings","portionDescription","nutritionStatus","personalNutritionKind","personalNutritionRevision","alternativeFoodId","alternativeName");
     private SavedMealService(){}
     static String name(String value){String name=value==null?"":value.trim();
         if(name.isEmpty()||name.length()>80)throw new IllegalArgumentException("Use a meal name of 1–80 characters.");return name;}

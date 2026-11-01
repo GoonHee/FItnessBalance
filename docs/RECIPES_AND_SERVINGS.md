@@ -24,7 +24,7 @@ Food Log's button is now **Meals and recipes**. It opens the existing private sa
 4. **Multiply ingredient amount by** adjusts an ingredient and its known nutrients proportionally. Remove incorrect ingredients and add replacements through search/manual entry.
 5. **Update nutrition preview** shows whole-recipe and per-serving summaries with coverage. Save, then return to the Recipes tab.
 
-Food Details can return missing-energy ingredients if the reference basis is known. An unknown reference basis is not silently assigned per-100 units: the existing manual form still requires entered calories, or the recipe editor's explicit manual-ingredient form can record a measured ingredient with unavailable nutrition. No serving measurement repairs missing source metadata.
+Food Details can return missing-energy ingredients if the reference basis is known. An unknown reference basis is not silently assigned per-100 units: use the explicit Log without calories option, enter known manual calories, or use the recipe editor's manual-ingredient form to retain unavailable values. No serving measurement repairs missing source metadata.
 
 The editor retains draft inputs, IDs, revision and mutation UUID through Android state restoration. It confirms navigation away from the draft. This is not a cloud draft system. An interrupted source load can be retried using the editor's retry button. After an uncertain save, refresh the library before creating another recipe.
 

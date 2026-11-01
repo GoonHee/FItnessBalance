@@ -91,6 +91,27 @@ service cloud.firestore {
      && request.resource.data.createdAt == resource.data.createdAt
      && request.resource.data.items == resource.data.items;
    }
+   match /foodNutrition/{foodId} {
+    function validPersonalNutrition() {
+     let d = request.resource.data;
+     return d.keys().hasOnly(['originalFoodId','food_name','nutrition','nutrition_basis','source_kind','source_database','source_note','nutrition_verification','label_amount','label_unit','label_nutrition','alternativeFoodId','alternativeName','revision','mutationId','updatedAt','confirmedAt'])
+      && d.originalFoodId == foodId && d.food_name is string && d.food_name.size() > 0 && d.food_name.size() <= 1000
+      && d.nutrition is map && d.nutrition.keys().hasOnly(['energy_kcal','protein_g','carbohydrate_g','fat_g','fiber_g','sodium_mg'])
+      && d.nutrition_basis in ['per_100g','per_100ml'] && d.source_kind in ['label','alternative']
+      && d.source_note is string && d.source_note.size() > 0 && d.source_note.size() <= 300
+      && d.source_database is string && d.nutrition_verification is string
+      && d.revision is int && d.mutationId is string && d.mutationId.size() == 36
+      && d.updatedAt == request.time && d.confirmedAt == request.time
+      && (d.source_kind == 'label'
+       ? d.label_amount is number && d.label_amount > 0 && d.label_amount <= 10000 && d.label_unit in ['g','ml'] && d.label_nutrition is map
+        && d.nutrition_verification == 'user_entered'
+        && (d.label_unit == 'g' ? d.nutrition_basis == 'per_100g' : d.nutrition_basis == 'per_100ml')
+       : d.alternativeFoodId is string && d.alternativeFoodId.size() > 0 && d.alternativeName is string && d.nutrition_verification == 'approximate_substitution');
+    }
+    allow read, delete: if owner(uid);
+    allow create: if owner(uid) && validPersonalNutrition() && request.resource.data.revision == 1;
+    allow update: if owner(uid) && validPersonalNutrition() && request.resource.data.revision == resource.data.revision + 1;
+   }
    match /recipes/{recipeId} {
     function validRecipe() {
      let d = request.resource.data;

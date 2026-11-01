@@ -1,5 +1,7 @@
 # Progress charts and dated weight history
 
+See [Nutrition availability](NUTRITION_AVAILABILITY.md) for incomplete-calorie behavior. Net calories are withheld for incomplete or legacy-unknown energy coverage, and weekly goal-difference comparisons are suppressed for an incomplete week.
+
 ## Open the feature
 
 Home → **Progress · charts and weight history** opens Overview, Calories, Nutrients and Macros tabs. Weeks run Monday–Sunday. Previous/next controls and the date selector browse weeks; future weeks cannot be selected. Refresh is in the toolbar menu. Changing tabs reuses the loaded snapshot rather than querying again.
@@ -16,7 +18,7 @@ The UI follows the supplied examples' card/tab/chart organisation, using Fitness
 - Exercise estimates are read from manual logs, immutable guided records and existing daily guided contributions. Guided records are merged by record ID so they are not added twice. No query rewrites stored exercise totals and current profile weight never recalculates previous calories here.
 - No recorded exercise contributes zero *logged exercise* when calculating a day's food-minus-exercise value. It does not mean no physical activity occurred. This arithmetic excludes resting metabolism and other activity and is not labelled a full surplus/deficit. The old homepage wording is corrected accordingly.
 - Health Connect steps are not added as calorie expenditure.
-- Goal lines/comparisons use current confirmed user-entered goals, not historical targets or a default 2000. Food comparisons apply only to days with complete saved calorie-entry coverage; the UI labels these as current-goal references. Net calories do not automatically change the food allowance.
+- Goal lines/comparisons use current confirmed user-entered goals, not historical targets or a default 2000. Food comparisons are withheld if any recorded day in the selected week has incomplete or unknown saved calorie-entry coverage; the UI labels these as current-goal references. Net calories do not automatically change the food allowance.
 - Macro percentages are withheld if any saved food entry lacks a macro. Available gram totals may still be displayed as partial. The percentage denominator is energy from recorded carbohydrate ×4, fat ×9 and protein ×4, not necessarily source-reported calories.
 - Highest-food values are cumulative saved kcal over the selected week, grouped by food ID (or saved name for older entries), not newly fetched nutritional reference values.
 

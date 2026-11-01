@@ -142,6 +142,19 @@ public class FoodLogActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void addKnownCalories(String uid,String date,Map<String,Object> entry){
+        LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);TextView note=new TextView(this);note.setText(R.string.na_add_note);form.addView(note);EditText value=new EditText(this);value.setInputType(8194);value.setHint(R.string.na_add_calories);form.addView(value);
+        android.widget.CheckBox confirmed=new android.widget.CheckBox(this);confirmed.setText(R.string.na_confirm);form.addView(confirmed);
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(R.string.na_add_calories).setView(form).setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.fe_save,null).create();
+        dialog.setOnShowListener(v->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(w->{
+            com.google.firebase.auth.FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();if(user==null||!uid.equals(user.getUid()))return;
+            try{if(!confirmed.isChecked())throw new IllegalArgumentException(getString(R.string.na_add_note));double kcal=Double.parseDouble(value.getText().toString().trim().replace(',','.'));
+                Map<String,Object> replacement=NutritionAvailabilityService.addCalories(entry,kcal);dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                FoodLogRepository.update(uid,date,entry,replacement).addOnCompleteListener(task->{if(isDestroyed()||isFinishing())return;if(task.isSuccessful())dialog.dismiss();else{dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);value.setError(getString(R.string.fe_failed));}});
+            }catch(RuntimeException invalid){value.setError(invalid.getMessage());}
+        }));dialog.show();
+    }
+
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -488,6 +501,9 @@ public class FoodLogActivity extends AppCompatActivity {
                 entries.size()
         ));
 
+        NutritionAvailabilityService.Stats calorieStatus=NutritionAvailabilityService.stats(entries);
+        if(calorieStatus.missing>0)totals.append("\n\n"+(calorieStatus.known==0?getString(R.string.na_all_unknown,calorieStatus.missing):getString(R.string.na_known,FoodUi.number(calorieStatus.subtotal),calorieStatus.missing)));
+
         for (Map<String, Object> entry : entries) {
             LinearLayout panel = new LinearLayout(this);
             panel.setOrientation(LinearLayout.VERTICAL);
@@ -522,7 +538,7 @@ public class FoodLogActivity extends AppCompatActivity {
                         FoodUi.number(entry.get("calories"))
                 );
 
-                if ("manual".equals(entry.get("calculationMode")) || "user_ingredient".equals(entry.get("calculationMode"))) {
+                if ("manual".equals(entry.get("calculationMode")) || "user_ingredient".equals(entry.get("calculationMode")) || "label".equals(entry.get("personalNutritionKind"))) {
                     line += " · " + getString(R.string.fs_user_entered);
                 }
                 if ("macro_estimate".equals(entry.get("calculationMode"))) {
@@ -548,6 +564,12 @@ public class FoodLogActivity extends AppCompatActivity {
             }
 
             panel.addView(subtitle);
+            if(NutritionAvailabilityService.energy(entry)==null){
+                TextView unavailable=new TextView(this);unavailable.setText(getString(R.string.na_unknown_note)+"\n"+java.util.Objects.toString(entry.get("portionDescription"),""));panel.addView(unavailable);
+                if(entry.get("entryId") instanceof String){Button addCalories=new Button(this);addCalories.setText(R.string.na_add_calories);panel.addView(addCalories);addCalories.setOnClickListener(v->addKnownCalories(uid,date,entry));}
+            }
+            if("alternative".equals(entry.get("personalNutritionKind"))){TextView approximate=new TextView(this);approximate.setText(getString(R.string.na_alternative_used,java.util.Objects.toString(entry.get("alternativeName"),"")));panel.addView(approximate);}
+
             if(entry.get("recipeName") instanceof String){
                 TextView recipeSource=new TextView(this);
                 recipeSource.setText(getString(R.string.rp_log_source,(String)entry.get("recipeName"),FoodUi.number(entry.get("recipeServings"))));
