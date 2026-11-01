@@ -39,6 +39,11 @@
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="@string/fr_food_preference" android:visibility="gone" />
 
+        <Button android:id="@+id/foodPersonalServings" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="@string/ps_choose" />
+        <Button android:id="@+id/foodSaveServing" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="@string/ps_save" />
+        <TextView style="@style/FoodBody" android:text="@string/ps_note" />
         <TextView
             android:id="@+id/foodDetailsStatus"
             style="@style/FoodBody"

@@ -17,11 +17,11 @@ public final class SavedMealsActivity extends AppCompatActivity {
     private String uid,date;
     private LinearLayout body;
     private TextView status;
-    private Button dateButton,retry;
+    private Button dateButton,retry,saveFromDiary;
     private SavedMealRepository repository;
     private final List<DocumentSnapshot> meals=new ArrayList<>();
     private DocumentSnapshot cursor;
-    private boolean busy,more=true;
+    private boolean busy,more=true,recipeTab;
     private int version;
     private Map<String,Object> pending;
     private com.example.fitnessbalance.health.HealthSummaryStore pendingStore;
@@ -29,17 +29,22 @@ public final class SavedMealsActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle state){
         super.onCreate(state);
         FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();if(user==null){finish();return;}uid=user.getUid();
-        repository=new SavedMealRepository(uid);
+        recipeTab=state!=null&&state.getBoolean("recipes");
+        repository=new SavedMealRepository(uid,recipeTab);
         pendingStore=new com.example.fitnessbalance.health.HealthSummaryStore(this,uid,"saved_meal_pending");
         Map<String,Object> cached=pendingStore.read();if(!cached.isEmpty())pending=cached;
         date=state==null?getIntent().getStringExtra("date"):state.getString("date");
         if(!FoodUi.validDate(date))date=LocalDate.now().toString();
         if(pending==null && state!=null && uid.equals(state.getString("uid"))){try{String value=state.getString("pending");if(value!=null)pending=decode(new JSONObject(value));}catch(Exception ignored){pending=null;}}
         LinearLayout root=ProgressUi.column(this);root.setBackgroundColor(0xFFF5F5F5);setContentView(root);FoodUi.insets(this);
-        MaterialToolbar toolbar=new MaterialToolbar(this);toolbar.setTitle(R.string.sm_title);toolbar.setNavigationIcon(R.drawable.ic_arrow_back);toolbar.setNavigationOnClickListener(v->finish());root.addView(toolbar);
+        MaterialToolbar toolbar=new MaterialToolbar(this);toolbar.setTitle(R.string.library_title);toolbar.setNavigationIcon(R.drawable.ic_arrow_back);toolbar.setNavigationOnClickListener(v->finish());root.addView(toolbar);
+        LinearLayout tabs=new LinearLayout(this);root.addView(tabs);
+        ProgressUi.button(this,tabs,R.string.rp_tab_meals,()->switchTab(false));
+        ProgressUi.button(this,tabs,R.string.rp_tab_recipes,()->switchTab(true));
+        ProgressUi.button(this,root,R.string.rp_new,()->{if(ready())startActivity(new android.content.Intent(this,RecipeEditorActivity.class));});
         dateButton=ProgressUi.button(this,root,R.string.sm_title,()->{if(ready())pick(date,value->{date=value;dateButton.setText(getString(R.string.sm_target,date));});});
         dateButton.setText(getString(R.string.sm_target,date));
-        ProgressUi.button(this,root,R.string.sm_create,()->{if(ready())pick(date,this::chooseFoods);});
+        saveFromDiary=ProgressUi.button(this,root,R.string.sm_create,()->{if(ready())pick(date,this::chooseFoods);});
         ProgressUi.button(this,root,R.string.sm_refresh,()->{if(!busy)load(true);});
         retry=ProgressUi.button(this,root,R.string.sm_retry,this::submitPending);
         status=ProgressUi.text(this,root,"",14,false);status.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
@@ -47,11 +52,12 @@ public final class SavedMealsActivity extends AppCompatActivity {
         render();
     }
     @Override protected void onResume(){super.onResume();if(!same()){finish();return;}if(!busy)load(true);}
-    @Override protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);state.putString("date",date);state.putString("uid",uid);if(pending!=null)state.putString("pending",new JSONObject(pending).toString());}
+    @Override protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);state.putBoolean("recipes",recipeTab);state.putString("date",date);state.putString("uid",uid);if(pending!=null)state.putString("pending",new JSONObject(pending).toString());}
     private boolean same(){FirebaseUser u=FirebaseAuth.getInstance().getCurrentUser();return u!=null&&uid!=null&&uid.equals(u.getUid());}
     private boolean visible(){return same()&&!isDestroyed()&&!isFinishing();}
     private boolean ready(){return visible()&&!busy&&pending==null;}
     private void pick(String initial,java.util.function.Consumer<String> action){LocalDate d=LocalDate.parse(initial);new DatePickerDialog(this,(view,y,m,day)->{if(ready())action.accept(LocalDate.of(y,m+1,day).toString());},d.getYear(),d.getMonthValue()-1,d.getDayOfMonth()).show();}
+    private void switchTab(boolean recipes){if(!ready())return;recipeTab=recipes;repository=new SavedMealRepository(uid,recipes);load(true);}
     private void load(boolean reset){
         if(!same()||busy)return;busy=true;int request=++version;
         if(reset){meals.clear();cursor=null;more=true;}
@@ -61,7 +67,7 @@ public final class SavedMealsActivity extends AppCompatActivity {
             else error(task.getException());render();});
     }
     private void render(){
-        if(body==null)return;body.removeAllViews();retry.setVisibility(pending==null?android.view.View.GONE:android.view.View.VISIBLE);retry.setEnabled(!busy);
+        if(body==null)return;saveFromDiary.setVisibility(recipeTab?android.view.View.GONE:android.view.View.VISIBLE);body.removeAllViews();retry.setVisibility(pending==null?android.view.View.GONE:android.view.View.VISIBLE);retry.setEnabled(!busy);
         if(pending!=null){
             ProgressUi.text(this,body,getString(R.string.sm_pending),16,true);
             ProgressUi.button(this,body,R.string.sm_discard,()->{if(!visible()||busy)return;
@@ -70,16 +76,19 @@ public final class SavedMealsActivity extends AppCompatActivity {
                         if(busy||!visible())return;pendingStore.clear();pending=null;status.setText("");render();
                     }).show();});
         }
-        ProgressUi.text(this,body,getString(R.string.sm_note),14,false);
-        if(meals.isEmpty())ProgressUi.text(this,body,getString(R.string.sm_empty),16,false);
+        ProgressUi.text(this,body,getString(recipeTab?R.string.rp_note:R.string.sm_note),14,false);
+        ProgressUi.text(this,body,getString(recipeTab?R.string.rp_tab_recipes:R.string.rp_tab_meals),22,true);
+        if(meals.isEmpty())ProgressUi.text(this,body,getString(recipeTab?R.string.rp_empty:R.string.sm_empty),16,false);
         for(DocumentSnapshot meal:meals){try{
             List<Map<String,Object>> items=SavedMealService.items(meal.get("items"));
             LinearLayout card=ProgressUi.card(this,body,meal.getString("name"));
             ProgressUi.text(this,card,getString(R.string.sm_count,items.size()),14,false);
-            ProgressUi.text(this,card,summary(items),15,false);
-            ProgressUi.button(this,card,R.string.sm_log,()->{if(ready())review(meal,items);});
+            ProgressUi.text(this,card,recipeTab?getString(R.string.rp_per_serving):getString(R.string.sm_count,items.size()),15,false);
+            ProgressUi.text(this,card,summary(recipeTab?RecipeService.portions(items,meal.getDouble("yieldServings"),1):items),15,false);
+            ProgressUi.button(this,card,recipeTab?R.string.rp_log:R.string.sm_log,()->{if(ready()){if(recipeTab)reviewRecipe(meal,items);else review(meal,items);}});
+            ProgressUi.button(this,card,recipeTab?R.string.rp_edit:R.string.rp_from_meal,()->{if(ready())startActivity(new android.content.Intent(this,RecipeEditorActivity.class).putExtra(recipeTab?"recipeId":"savedMealId",meal.getId()));});
             ProgressUi.button(this,card,R.string.sm_rename,()->{if(ready())rename(meal);});
-            ProgressUi.button(this,card,R.string.sm_delete,()->{if(ready())delete(meal);});
+            ProgressUi.button(this,card,recipeTab?R.string.rp_delete:R.string.sm_delete,()->{if(ready())delete(meal);});
         }catch(RuntimeException invalid){ProgressUi.text(this,body,getString(R.string.sm_error,"Invalid saved meal. Refresh the library."),14,false);}}
         if(more)ProgressUi.button(this,body,R.string.sm_more,()->{if(!busy)load(false);});
     }
@@ -125,6 +134,22 @@ public final class SavedMealsActivity extends AppCompatActivity {
                 }catch(RuntimeException invalid){error(invalid);}
             }).show();
     }
+    private void reviewRecipe(DocumentSnapshot recipe,List<Map<String,Object>> ingredients){
+        LinearLayout form=ProgressUi.column(this);ProgressUi.text(this,form,getString(R.string.sm_target,date),16,true);
+        Spinner meal=new Spinner(this);meal.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,getResources().getStringArray(R.array.fs_meals)));form.addView(meal);
+        ProgressUi.text(this,form,getString(R.string.rp_count),16,true);EditText count=new EditText(this);count.setInputType(8194);count.setText("1");form.addView(count);
+        TextView nutrition=ProgressUi.text(this,form,"",15,false);
+        Runnable preview=()->{try{nutrition.setText(summary(RecipeService.portions(ingredients,recipe.getDouble("yieldServings"),Double.parseDouble(count.getText().toString()))));}catch(RuntimeException invalid){nutrition.setText(invalid.getMessage());}};
+        ProgressUi.button(this,form,R.string.rp_preview,preview);preview.run();
+        ProgressUi.text(this,form,getString(R.string.rp_note),14,false);ScrollView scroll=new ScrollView(this);scroll.addView(form);
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(recipe.getString("name")).setView(scroll).setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.rp_log,null).create();
+        dialog.setOnShowListener(v->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(w->{if(!ready())return;try{
+            double servings=Double.parseDouble(count.getText().toString());String operation=UUID.randomUUID().toString();
+            Map<String,Object> data=new HashMap<>();data.put("operation",operation);data.put("date",date);data.put("mealId","recipe:"+recipe.getId());
+            data.put("entries",RecipeService.log(ingredients,recipe.getDouble("yieldServings"),servings,recipe.getId(),recipe.getString("name"),recipe.getLong("revision"),operation,meal.getSelectedItem().toString()));
+            pending=data;dialog.dismiss();submitPending();
+        }catch(RuntimeException invalid){count.setError(invalid.getMessage());}}));dialog.show();
+    }
     private void submitPending(){
         if(!visible()||busy||pending==null)return;busy=true;render();status.setText(R.string.fl_loading);
         final Map<String,Object> request=pending;
@@ -147,7 +172,7 @@ public final class SavedMealsActivity extends AppCompatActivity {
             repository.rename(meal.getId(),meal.getLong("revision"),title).addOnCompleteListener(task->{busy=false;if(!visible())return;if(task.isSuccessful()){dialog.dismiss();load(true);}else error(task.getException());});
         }catch(RuntimeException invalid){name.setError(invalid.getMessage());}}));dialog.show();
     }
-    private void delete(DocumentSnapshot meal){new AlertDialog.Builder(this).setTitle(R.string.sm_delete).setMessage(R.string.sm_delete_note).setNegativeButton(android.R.string.cancel,null)
+    private void delete(DocumentSnapshot meal){new AlertDialog.Builder(this).setTitle(recipeTab?R.string.rp_delete:R.string.sm_delete).setMessage(R.string.sm_delete_note).setNegativeButton(android.R.string.cancel,null)
         .setPositiveButton(R.string.sm_delete,(d,w)->{if(!ready())return;busy=true;
             repository.delete(meal.getId(),meal.getLong("revision")).addOnCompleteListener(task->{busy=false;if(!visible())return;if(task.isSuccessful())load(true);else error(task.getException());});}).show();}
     private void error(Exception error){status.setText(getString(R.string.sm_error,error==null?"":Objects.toString(error.getMessage(),"")));}

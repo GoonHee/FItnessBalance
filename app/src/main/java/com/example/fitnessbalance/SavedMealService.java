@@ -9,7 +9,7 @@ final class SavedMealService {
     private static final List<String> FIELDS=Arrays.asList("foodId","name","servingAmount","servings",
         "portionUnit","totalAmount","portionGrams","portionMillilitres","nutritionBasis","sourceDatabase",
         "barcode","sourceUrl","basisConfirmationSource","calculationMode","energyMethod",
-        "nutritionVerification","manualCaloriesPerServing");
+        "nutritionVerification","manualCaloriesPerServing","recipeId","recipeName","recipeRevision","recipeYield","recipeServings");
     private SavedMealService(){}
     static String name(String value){String name=value==null?"":value.trim();
         if(name.isEmpty()||name.length()>80)throw new IllegalArgumentException("Use a meal name of 1–80 characters.");return name;}
@@ -20,7 +20,7 @@ final class SavedMealService {
             Map<String,Object> row=new HashMap<>();
             for(String key:FIELDS){Object value=entry.get(key);if(value==null)continue;
                 if(value instanceof String){if(((String)value).length()>2000)throw new IllegalArgumentException("Food description is too long.");row.put(key,value);}
-                else if(value instanceof Number){if(FoodNutrition.number(value)==null)throw new IllegalArgumentException("Invalid food amount.");row.put(key,value);}
+                else if(value instanceof Number){if(FoodNutrition.number(value)==null)throw new IllegalArgumentException("Invalid food amount.");if(key.equals("recipeRevision"))row.put(key,((Number)value).longValue());else row.put(key,((Number)value).doubleValue());}
                 else throw new IllegalArgumentException("Invalid saved food.");}
             if(!(row.get("name") instanceof String)||((String)row.get("name")).trim().isEmpty())throw new IllegalArgumentException("A selected food has no name.");
             Map<String,Object> nutrients=new HashMap<>();Object raw=entry.get("nutrients");

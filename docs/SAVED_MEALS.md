@@ -1,5 +1,7 @@
 # Saved meals
 
+The library now also includes recipes and personal servings; see [Recipes and servings](RECIPES_AND_SERVINGS.md).
+
 Saved meals are private reusable groups of existing diary portions. They are not recipes, serving-size conversions or certified nutrition records. This feature does not modify the shared `foods` collection.
 
 ## Android Studio and Firebase setup
@@ -16,13 +18,13 @@ The new rules have been tested against a local emulator, not deployed to product
 
 ## Use
 
-- Open **Food Log** and choose a date. Tap **Saved meals**, below the search panel.
+- Open **Food Log** and choose a date. Tap **Meals and recipes**, below the search panel, then the Saved meals tab.
 - **Save foods from a diary date** opens a source-date picker. Select 1–25 entries from that date, then choose **Save meal**, enter a name and save. The original diary is unchanged.
 - The saved library shows food count and nutrient totals with availability/coverage. Meals are paginated, 30 per page; **Load more saved meals** continues by document ID.
 - **Log this saved meal** previews every food at its original saved portion and the nutrient summary. Choose Breakfast/Lunch/Dinner/Snacks and confirm. The destination date can be changed at the top of the screen before reviewing.
 - Return to Food Log and select that destination date to see the new individual foods. Existing edit/remove actions still apply to them; changing those diary entries does not edit the saved template.
 - **Rename** changes the reusable name. **Delete saved meal** removes only the template; existing diary entries remain.
-- This first version reuses exact portions. To change a template's component foods or amounts, adjust diary entries and save a new meal, then delete the old template if desired. Recipes, ingredient yields and personal named servings are separate future work.
+- This first version reuses exact portions. To change a template's component foods or amounts, adjust diary entries and save a new meal, then delete the old template if desired. Recipes, ingredient yields and personal named servings are available through the combined library and Food Details; see the linked guide.
 
 ## Data model
 

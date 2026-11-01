@@ -1,0 +1,25 @@
+<resources>
+<string name="library_title">Meals and recipes</string>
+<string name="rp_tab_meals">Saved meals</string><string name="rp_tab_recipes">Recipes</string>
+<string name="rp_new">Create recipe</string><string name="rp_edit">Edit recipe</string><string name="rp_from_meal">Use as recipe ingredients</string>
+<string name="rp_save">Save recipe</string><string name="rp_add">Add ingredient from food search</string>
+<string name="rp_manual">Add ingredient manually</string><string name="rp_choose">Add to recipe</string>
+<string name="rp_yield">Recipe yield (number of servings)</string><string name="rp_count">Recipe servings to log</string>
+<string name="rp_per_serving">Nutrition per recipe serving</string><string name="rp_whole">Whole recipe nutrition</string>
+<string name="rp_note">Amounts describe the full recipe. Use matching raw or cooked food records. Yield divides the recipe into equal servings; it does not infer cooked weight. Missing nutrients remain unavailable or partial.</string>
+<string name="rp_log">Log recipe servings</string><string name="rp_empty">No recipes yet. Create one or use a saved meal as ingredients.</string>
+<string name="rp_scale">Multiply ingredient amount by</string><string name="rp_remove">Remove ingredient</string>
+<string name="rp_search">Search the beginning of a food name</string><string name="rp_search_go">Search foods</string>
+<string name="rp_manual_note">Enter nutrients for the entire ingredient amount below, not per 100 g. Blank means unavailable, not zero.</string>
+<string name="rp_amount">Ingredient amount</string><string name="rp_name">Ingredient name</string>
+<string name="rp_preview">Update nutrition preview</string><string name="rp_saved">Recipe saved.</string>
+<string name="rp_unsaved">Leave without saving recipe changes?</string>
+<string name="ps_choose">My serving options</string><string name="ps_save">Save this portion</string>
+<string name="ps_name">Serving name, e.g. My rice bowl</string><string name="ps_note">Personal servings store measured g or ml for this food only. They do not verify its nutrition or convert g to ml. For manual logging, enter calories for the selected serving again.</string>
+<string name="ps_use">Use this serving</string><string name="ps_edit">Edit serving</string><string name="ps_delete">Delete serving</string>
+<string name="ps_empty">No personal servings for this food yet.</string><string name="ps_saved">Personal serving saved.</string>
+<string name="ps_amount">Amount in one named serving</string><string name="ps_more">More serving options</string>
+<string name="rp_delete">Delete recipe</string>
+<string name="ps_delete_note">Delete this named serving? Existing diary entries and saved ingredients will remain unchanged.</string>
+<string name="rp_log_source">Recipe: %1$s · originally logged with %2$s recipe servings</string>
+</resources>

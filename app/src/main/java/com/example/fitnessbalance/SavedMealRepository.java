@@ -6,7 +6,8 @@ import java.util.*;
 
 final class SavedMealRepository {
     private final CollectionReference meals;
-    SavedMealRepository(String uid){meals=FirebaseFirestore.getInstance().collection("users").document(uid).collection("savedMeals");}
+    SavedMealRepository(String uid){this(uid,false);}
+    SavedMealRepository(String uid,boolean recipe){meals=FirebaseFirestore.getInstance().collection("users").document(uid).collection(recipe?"recipes":"savedMeals");}
     Task<QuerySnapshot> page(DocumentSnapshot after){Query q=meals.orderBy(FieldPath.documentId()).limit(30);if(after!=null)q=q.startAfter(after);return q.get(Source.SERVER);}
     Task<Void> create(String id,String name,List<Map<String,Object>> raw){
         String title=SavedMealService.name(name);List<Map<String,Object>> items=SavedMealService.snapshots(raw);

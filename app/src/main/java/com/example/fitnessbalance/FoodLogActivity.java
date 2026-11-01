@@ -522,7 +522,7 @@ public class FoodLogActivity extends AppCompatActivity {
                         FoodUi.number(entry.get("calories"))
                 );
 
-                if ("manual".equals(entry.get("calculationMode"))) {
+                if ("manual".equals(entry.get("calculationMode")) || "user_ingredient".equals(entry.get("calculationMode"))) {
                     line += " · " + getString(R.string.fs_user_entered);
                 }
                 if ("macro_estimate".equals(entry.get("calculationMode"))) {
@@ -548,6 +548,11 @@ public class FoodLogActivity extends AppCompatActivity {
             }
 
             panel.addView(subtitle);
+            if(entry.get("recipeName") instanceof String){
+                TextView recipeSource=new TextView(this);
+                recipeSource.setText(getString(R.string.rp_log_source,(String)entry.get("recipeName"),FoodUi.number(entry.get("recipeServings"))));
+                panel.addView(recipeSource);
+            }
 
             Button edit = new Button(this);
             edit.setText(R.string.fe_edit);

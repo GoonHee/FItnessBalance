@@ -91,6 +91,36 @@ service cloud.firestore {
      && request.resource.data.createdAt == resource.data.createdAt
      && request.resource.data.items == resource.data.items;
    }
+   match /recipes/{recipeId} {
+    function validRecipe() {
+     let d = request.resource.data;
+     return d.keys().hasOnly(['name','items','yieldServings','revision','mutationId','createdAt','updatedAt'])
+      && d.name is string && d.name.size() > 0 && d.name.size() <= 80
+      && d.items is list && d.items.size() > 0 && d.items.size() <= 25
+      && d.yieldServings is number && d.yieldServings > 0 && d.yieldServings <= 10000
+      && d.revision is int && d.mutationId is string && d.mutationId.size() == 36
+      && d.createdAt is timestamp && d.updatedAt == request.time;
+    }
+    allow read, delete: if owner(uid);
+    allow create: if owner(uid) && validRecipe() && request.resource.data.revision == 1 && request.resource.data.createdAt == request.time;
+    allow update: if owner(uid) && validRecipe() && request.resource.data.revision == resource.data.revision + 1
+     && request.resource.data.createdAt == resource.data.createdAt;
+   }
+   match /personalServings/{servingId} {
+    function validServing() {
+     let d = request.resource.data;
+     return d.keys().hasOnly(['name','foodKey','amount','unit','revision','createdAt','updatedAt'])
+      && d.name is string && d.name.size() > 0 && d.name.size() <= 80
+      && d.foodKey is string && d.foodKey.size() > 0 && d.foodKey.size() <= 300
+      && d.amount is number && d.amount > 0 && d.amount <= 10000 && d.unit in ['g','ml']
+      && d.revision is int && d.createdAt is timestamp && d.updatedAt == request.time;
+    }
+    allow read, delete: if owner(uid);
+    allow create: if owner(uid) && validServing() && request.resource.data.revision == 1 && request.resource.data.createdAt == request.time;
+    allow update: if owner(uid) && validServing() && request.resource.data.revision == resource.data.revision + 1
+     && request.resource.data.foodKey == resource.data.foodKey && request.resource.data.unit == resource.data.unit
+     && request.resource.data.createdAt == resource.data.createdAt;
+   }
    // Immutable receipts make a retried multi-food diary insertion a no-op.
    match /savedMealLogs/{operation} {
     allow read: if owner(uid);
