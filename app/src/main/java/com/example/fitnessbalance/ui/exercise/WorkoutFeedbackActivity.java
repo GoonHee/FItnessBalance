@@ -45,7 +45,7 @@ public final class WorkoutFeedbackActivity extends ExerciseBaseActivity {
             record -> {
               if (record.exists()) {
                 drafts.clear(uid, id);
-                openSession(WorkoutResultActivity.class, id);
+                openSavedResult(id);
                 finish();
                 return;
               }
@@ -78,6 +78,11 @@ public final class WorkoutFeedbackActivity extends ExerciseBaseActivity {
               loaded();
             })
         .addOnFailureListener(this, this::error);
+  }
+
+  private void openSavedResult(String id){
+    startActivity(new android.content.Intent(this,WorkoutResultActivity.class)
+        .putExtra(IntentKeys.SESSION,id).putExtra(IntentKeys.PATH,path()).putExtra(IntentKeys.CELEBRATE,true));
   }
 
   private void persistFeedback() {
@@ -120,7 +125,7 @@ public final class WorkoutFeedbackActivity extends ExerciseBaseActivity {
               this,
               id -> {
                 drafts.clear(uid, id);
-                openSession(WorkoutResultActivity.class, id);
+                openSavedResult(id);
                 finish();
               })
           .addOnFailureListener(

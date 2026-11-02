@@ -1,0 +1,13 @@
+<resources>
+<string name="gm_your_progress">Your progress</string><string name="gm_xp_badge">XP</string>
+<string name="gm_week">Your weekly momentum</string><string name="gm_week_note">Every qualifying session counts. Build your routine at your own pace.</string>
+<string name="gm_recommendation">Your next session</string><string name="gm_quests_note">Small steps, visible progress. Completed quests are marked with a check.</string>
+<string name="gm_earned">Workout rewards</string><string name="gm_saved">Workout saved</string>
+<string name="gm_level_up">Level up!</string><string name="gm_unlock">New unlocks!</string><string name="gm_target">Weekly target reached!</string>
+<string name="gm_attempt">Your effort is recorded</string><string name="gm_xp_earned">+%1$d XP earned</string>
+<string name="gm_stars">%1$d of 3 workout stars</string><string name="gm_level_detail">You reached Level %1$d.</string>
+<string name="gm_week_detail">%1$d of %2$d qualifying workouts in this workout’s week.</string>
+<string name="gm_reward_note">XP includes the workout and any feedback, quest or weekly bonuses awarded. Repeated workouts may earn less XP.</string>
+<string name="gm_continue">Continue</string><string name="gm_discomfort">Thank you for your feedback. Rest and follow the recovery guidance if you reported discomfort.</string>
+<string name="gm_star_visual">★</string>
+</resources>

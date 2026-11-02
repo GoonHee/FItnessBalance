@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/gm_canvas">
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/exToolbar"
         android:layout_width="match_parent"
@@ -14,7 +14,7 @@
         android:minHeight="?attr/actionBarSize"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:navigationContentDescription="@string/back"
-        app:title="@string/ex_result" />
+        app:title="@string/ex_result" app:titleTextColor="@color/gm_ink" android:background="@color/gm_canvas" />
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -34,7 +34,7 @@
                 android:visibility="gone" />
             <TextView
                 android:id="@+id/exStatus"
-                style="@style/ExerciseBody"
+                style="@style/RewardBody"
                 android:accessibilityLiveRegion="polite"
                 android:visibility="gone" />
             <com.google.android.material.button.MaterialButton
@@ -46,39 +46,47 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+                <LinearLayout style="@style/RewardPanel" android:background="@drawable/reward_panel_gold">
+                    <ImageView android:layout_width="48dp" android:layout_height="48dp" android:src="@drawable/ic_reward_star" android:importantForAccessibility="no" />
+                    <TextView style="@style/RewardHeading" android:text="@string/gm_earned" />
+                    <TextView android:id="@+id/exRewardXp" style="@style/RewardHeading" />
+                    <TextView android:id="@+id/exRewardStars" style="@style/RewardBody" />
+                    <TextView style="@style/RewardBody" android:text="@string/gm_reward_note" />
+                </LinearLayout>
                 <TextView
                     android:id="@+id/exResultTitle"
-                    style="@style/ExerciseHeading" />
+                    style="@style/RewardHeading" />
                 <TextView
                     android:id="@+id/exLessonName"
-                    style="@style/ExerciseHeading" />
-                <LinearLayout style="@style/ExercisePanel">
+                    style="@style/RewardHeading" />
+                <LinearLayout style="@style/RewardPanel">
                     <TextView
                         android:id="@+id/exResultStats"
-                        style="@style/ExerciseBody" />
+                        style="@style/RewardBody" />
                     <TextView
                         android:id="@+id/exCaloriesNote"
-                        style="@style/ExerciseBody"
+                        style="@style/RewardBody"
                         android:text="@string/ex_calories_note" />
                 </LinearLayout>
-                <LinearLayout style="@style/ExercisePanel">
+                <LinearLayout style="@style/RewardPanel" android:background="@drawable/reward_panel_xp">
+                    <TextView style="@style/RewardBody" android:textColor="#FFFFFFFF" android:text="@string/gm_your_progress" />
                     <TextView
                         android:id="@+id/exLevel"
-                        style="@style/ExerciseHeading" />
+                        style="@style/RewardHeading" android:textColor="#FFFFFFFF" />
                     <TextView
                         android:id="@+id/exXp"
-                        style="@style/ExerciseBody" />
+                        style="@style/RewardBody" android:textColor="#FFFFFFFF" />
                     <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:id="@+id/exXpBar"
+                        android:id="@+id/exXpBar" app:indicatorColor="@color/gm_gold" app:trackColor="@color/gm_track" app:trackThickness="8dp" app:trackCornerRadius="4dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginVertical="12dp"
                         android:max="100" />
                     <TextView
                         android:id="@+id/exMomentum"
-                        style="@style/ExerciseBody" />
+                        style="@style/RewardBody" android:textColor="#FFFFFFFF" />
                     <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:id="@+id/exMomentumBar"
+                        android:id="@+id/exMomentumBar" app:indicatorColor="@color/gm_gold" app:trackColor="@color/gm_track" app:trackThickness="8dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginVertical="12dp"
@@ -86,10 +94,10 @@
                 </LinearLayout>
                 <TextView
                     android:id="@+id/exUnlocks"
-                    style="@style/ExerciseBody" />
+                    style="@style/RewardBody" />
                 <TextView
                     android:id="@+id/exApplicationProgress"
-                    style="@style/ExerciseBody"
+                    style="@style/RewardBody"
                     android:text="@string/ex_app_progress" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/exContinue"

@@ -6,5 +6,6 @@ public final class IntentKeys {
   public static final String PATH = "exercise.path",
       LESSON = "exercise.lesson",
       SESSION = "exercise.session",
-      START_NEW = "exercise.start_new";
+      START_NEW = "exercise.start_new",
+      CELEBRATE = "exercise.celebrate_saved";
 }

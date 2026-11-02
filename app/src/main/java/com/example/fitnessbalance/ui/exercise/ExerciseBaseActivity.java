@@ -158,11 +158,14 @@ public abstract class ExerciseBaseActivity extends AppCompatActivity {
             Values.integer(Values.map(profile.get("weeklyCounts")).get(key), 0));
     text(R.id.exLevel, getString(R.string.ex_level, game.level(xp)));
     text(R.id.exXp, getString(R.string.ex_xp, xp, game.nextLevelXp(xp)));
+    boolean animate=android.animation.ValueAnimator.areAnimatorsEnabled();
     ((LinearProgressIndicator) findViewById(R.id.exXpBar))
-        .setProgressCompat(Math.max(0, xp) % 100, false);
+        .setProgressCompat(Math.max(0, xp) % 100, animate);
     text(R.id.exMomentum, getString(R.string.ex_week_count, count, target));
     ((LinearProgressIndicator) findViewById(R.id.exMomentumBar))
         .setProgressCompat(momentum.percentage(count, target), false);
+    com.google.android.material.progressindicator.CircularProgressIndicator ring=findViewById(R.id.exWeeklyRing);
+    if(ring!=null){ring.setProgressCompat(momentum.percentage(count,target),animate);ring.setContentDescription(getString(R.string.ex_week_count,count,target));}
     if (findViewById(R.id.exBand) != null) {
       int[] bands = {
         R.string.ex_band_begin,

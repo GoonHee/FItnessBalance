@@ -1,0 +1,9 @@
+<resources>
+<color name="gm_canvas">#F5F3FC</color><color name="gm_surface">#FFFFFF</color>
+<color name="gm_ink">#241D3B</color><color name="gm_muted">#5F5872</color>
+<color name="gm_purple">#6635B5</color><color name="gm_gold">#FFD56A</color>
+<color name="gm_teal">#087D75</color><color name="gm_teal_soft">#E0F5EF</color>
+<color name="gm_lavender">#EDE5FC</color><color name="gm_gold_soft">#FFF3D1</color>
+<color name="gm_success">#16613E</color><color name="gm_track">#C9B4E7</color>
+<color name="gm_border">#D8CDEB</color>
+</resources>

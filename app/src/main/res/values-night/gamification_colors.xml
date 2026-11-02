@@ -1,0 +1,7 @@
+<resources>
+<color name="gm_canvas">#191523</color><color name="gm_surface">#282133</color>
+<color name="gm_ink">#F5F0FF</color><color name="gm_muted">#CEC5DC</color>
+<color name="gm_teal">#83DED0</color><color name="gm_teal_soft">#163C36</color>
+<color name="gm_lavender">#39264E</color><color name="gm_gold_soft">#453719</color>
+<color name="gm_success">#8EE3B3</color><color name="gm_border">#655375</color>
+</resources>

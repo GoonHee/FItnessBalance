@@ -28,4 +28,7 @@
         <item name="android:layout_marginBottom">12dp</item>
         <item name="android:background">@drawable/exercise_panel</item>
     </style>
+    <style name="RewardBody" parent="ExerciseBody"><item name="android:textColor">@color/gm_ink</item></style>
+    <style name="RewardHeading" parent="ExerciseHeading"><item name="android:textColor">@color/gm_ink</item></style>
+    <style name="RewardPanel" parent="ExercisePanel"><item name="android:background">@drawable/reward_panel_surface</item><item name="android:padding">20dp</item><item name="android:layout_marginBottom">16dp</item></style>
 </resources>
