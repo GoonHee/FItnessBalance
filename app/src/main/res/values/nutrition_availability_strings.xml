@@ -26,4 +26,12 @@
 <string name="na_saved">Personal nutrition saved. Reopen Food Details to use it.</string>
 <string name="na_source_original">Original source nutrition</string>
 <string name="na_remove_note">Remove this personal source? Future logs will use the original record; existing logs, recipes and saved meals stay unchanged.</string>
+<string name="ref_action">Confirm source reference amount</string>
+<string name="ref_note">Calories are present, but the app does not know the amount they describe. Enter that reference quantity only if you know it from the source. Do not infer it from the calorie value or from your own serving size.</string>
+<string name="ref_amount">These source values describe how many g or ml?</string>
+<string name="ref_evidence">Where did you confirm this reference amount?</string>
+<string name="ref_confirm">I have checked that these source values apply to the reference amount and unit entered above.</string>
+<string name="ref_saved_note">Using your confirmed source reference. Confirmation: %1$s</string>
+<string name="ref_tag">User-confirmed reference</string>
+<string name="ref_values">Existing source values</string>
 </resources>

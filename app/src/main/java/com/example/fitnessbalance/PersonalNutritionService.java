@@ -1,7 +1,13 @@
 package com.example.fitnessbalance;
 import java.util.*;
 final class PersonalNutritionService {
+    static final String CONFIRMED_REFERENCE="User-confirmed source reference";
     private PersonalNutritionService(){}
+    static Map<String,Object> reference(String foodId,String name,Map<String,Object> source,double amount,String unit,String evidence,boolean confirmed){
+        if(!confirmed)throw new IllegalArgumentException("Confirm the reference amount and unit before using these values.");
+        Map<String,Object> result=label(foodId,name,amount,unit,source,evidence);
+        result.put("source_database",CONFIRMED_REFERENCE);return result;
+    }
     static Map<String,Object> label(String foodId,String name,double reference,String unit,Map<String,Object> label,String note){
         RecipeService.positive(reference);PersonalServingService.validate("reference",reference,unit);
         if(name==null||name.trim().isEmpty()||name.length()>1000)throw new IllegalArgumentException("Food name is unavailable or too long.");

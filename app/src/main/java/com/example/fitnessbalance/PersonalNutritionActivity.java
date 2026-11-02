@@ -10,15 +10,16 @@ import java.util.*;
 
 public final class PersonalNutritionActivity extends AppCompatActivity {
     private String uid,foodId,foodName,mutation;private long revision;
-    private boolean busy,loaded;
+    private boolean busy,loaded,launchReference;
     private PersonalNutritionRepository repository;
     private Map<String,Object> existing=Collections.emptyMap();
     private LinearLayout body;private TextView status;
-    @Override protected void onCreate(Bundle state){super.onCreate(state);FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();if(user==null){finish();return;}uid=user.getUid();foodId=getIntent().getStringExtra("foodId");foodName=getIntent().getStringExtra("foodName");
+    @Override protected void onCreate(Bundle state){super.onCreate(state);FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();if(user==null){finish();return;}uid=user.getUid();launchReference=state==null&&getIntent().getBooleanExtra("confirmSource",false);foodId=getIntent().getStringExtra("foodId");foodName=getIntent().getStringExtra("foodName");
         if(foodId==null||foodId.isEmpty()||foodId.contains("/")){finish();return;}repository=new PersonalNutritionRepository(uid,foodId);mutation=state==null?UUID.randomUUID().toString():state.getString("mutation",UUID.randomUUID().toString());
         LinearLayout root=ProgressUi.column(this);root.setId(R.id.foodRoot);setContentView(root);ProgressUi.theme(this,root);FoodUi.insets(this);MaterialToolbar toolbar=new MaterialToolbar(this);toolbar.setTitle(R.string.na_personal);toolbar.setNavigationIcon(R.drawable.ic_arrow_back);toolbar.setNavigationOnClickListener(v->finish());root.addView(toolbar);ProgressUi.toolbar(this,toolbar);
         ScrollView scroll=new ScrollView(this);root.addView(scroll);body=ProgressUi.column(this);int p=ProgressUi.dp(this,16);body.setPadding(p,p,p,p);scroll.addView(body);
         ProgressUi.text(this,body,Objects.toString(foodName,foodId),22,true);status=ProgressUi.text(this,body,"",15,false);
+        ProgressUi.button(this,body,R.string.ref_action,()->{if(ready())sourceReference();});
         ProgressUi.button(this,body,R.string.na_label,()->{if(ready())label();});ProgressUi.button(this,body,R.string.na_alternative,()->{if(ready())alternatives();});
         ProgressUi.button(this,body,R.string.na_delete,()->{if(ready()&&revision>0)new AlertDialog.Builder(this).setMessage(R.string.na_remove_note).setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.na_delete,(d,w)->{if(!ready())return;busy=true;repository.delete(revision).addOnCompleteListener(task->{busy=false;if(!visible())return;if(task.isSuccessful()){setResult(RESULT_OK);finish();}else error(task.getException());});}).show();});
         ProgressUi.button(this,body,R.string.fl_retry,()->{if(!busy)load();});load();
@@ -27,7 +28,7 @@ public final class PersonalNutritionActivity extends AppCompatActivity {
     @Override protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);state.putString("mutation",mutation);}
     private boolean visible(){FirebaseUser u=FirebaseAuth.getInstance().getCurrentUser();return !isDestroyed()&&!isFinishing()&&u!=null&&uid.equals(u.getUid());}
     private boolean ready(){return visible()&&loaded&&!busy;}
-    private void load(){busy=true;loaded=false;status.setText(R.string.fl_loading);repository.get().addOnCompleteListener(task->{busy=false;if(!visible())return;if(task.isSuccessful()){DocumentSnapshot doc=task.getResult();revision=doc.exists()?doc.getLong("revision"):0;existing=doc.exists()?doc.getData():Collections.emptyMap();loaded=true;status.setText(doc.exists()?Objects.toString(doc.get("source_database"),"")+"\n"+Objects.toString(doc.get("source_note"),""):getString(R.string.na_label_note));}else error(task.getException());});}
+    private void load(){busy=true;loaded=false;status.setText(R.string.fl_loading);repository.get().addOnCompleteListener(task->{busy=false;if(!visible())return;if(task.isSuccessful()){DocumentSnapshot doc=task.getResult();revision=doc.exists()?doc.getLong("revision"):0;existing=doc.exists()?doc.getData():Collections.emptyMap();loaded=true;status.setText(doc.exists()?Objects.toString(doc.get("source_database"),"")+"\n"+Objects.toString(doc.get("source_note"),""):getString(R.string.na_label_note));if(launchReference){launchReference=false;sourceReference();}}else error(task.getException());});}
     private EditText input(LinearLayout form,String label,boolean numeric){ProgressUi.text(this,form,label,16,true);EditText edit=new EditText(this);edit.setHint(label);edit.setInputType(numeric?8194:1);form.addView(edit);return edit;}
     private void label(){LinearLayout form=ProgressUi.column(this);ProgressUi.text(this,form,getString(R.string.na_label_note),14,false);EditText reference=input(form,getString(R.string.na_reference),true);reference.setText("100");Spinner unit=new Spinner(this);unit.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"g","ml"}));form.addView(unit);
         String[] labels={"Calories (kcal)","Protein (g)","Carbohydrate (g)","Fat (g)","Fibre (g)","Sodium (mg)"};List<EditText> fields=new ArrayList<>();for(String name:labels)fields.add(input(form,name,true));EditText note=input(form,getString(R.string.na_source_note),false);CheckBox confirm=new CheckBox(this);confirm.setText(R.string.na_confirm);form.addView(confirm);
@@ -37,6 +38,28 @@ public final class PersonalNutritionActivity extends AppCompatActivity {
         dialog.setOnShowListener(v->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(w->{if(!ready())return;try{if(!confirm.isChecked())throw new IllegalArgumentException(getString(R.string.na_confirm));Map<String,Object> values=new HashMap<>();for(int i=0;i<fields.size();i++){String text=fields.get(i).getText().toString().trim();if(!text.isEmpty())values.put(FoodNutrition.KEYS[i],parse(text));}
             Map<String,Object> result=PersonalNutritionService.label(foodId,Objects.toString(foodName,foodId),parse(reference.getText().toString()),unit.getSelectedItem().toString(),values,note.getText().toString());save(result,dialog);
         }catch(RuntimeException invalid){Toast.makeText(this,invalid.getMessage(),Toast.LENGTH_LONG).show();}}));dialog.show();}
+    private void sourceReference(){
+        if(!ready())return;busy=true;status.setText(R.string.fl_loading);
+        FirebaseFirestore.getInstance().collection("foods").document(foodId).get(Source.SERVER).addOnCompleteListener(task->{busy=false;if(!visible())return;
+            try{if(!task.isSuccessful())throw task.getException();DocumentSnapshot doc=task.getResult();if(!doc.exists()||!(doc.get("nutrition") instanceof Map))throw new IllegalStateException("Source nutrition is unavailable.");
+                @SuppressWarnings("unchecked") Map<String,Object> source=new HashMap<>((Map<String,Object>)doc.get("nutrition"));
+                if(FoodNutrition.number(FoodNutrition.withEstimatedEnergy(source).get("energy_kcal"))==null)throw new IllegalArgumentException("This record has no usable calories or complete macros. Enter label nutrition or log without calories.");
+                referenceDialog(source,Objects.toString(doc.get("nutrition_basis"),"unknown"));
+            }catch(Exception invalid){error(invalid);}
+        });
+    }
+    private void referenceDialog(Map<String,Object> source,String storedBasis){
+        LinearLayout form=ProgressUi.column(this);ProgressUi.text(this,form,getString(R.string.ref_note),15,false);
+        ProgressUi.text(this,form,getString(R.string.ref_values),18,true);ProgressUi.text(this,form,FoodUi.nutrients(this,source,null,0),16,false);
+        EditText amount=input(form,getString(R.string.ref_amount),true);String knownUnit=FoodNutrition.portionUnit(storedBasis);
+        if(knownUnit!=null)amount.setText("100");
+        Spinner unit=new Spinner(this);unit.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"g","ml"}));unit.setSelection("ml".equals(knownUnit)?1:0);form.addView(unit);
+        EditText evidence=input(form,getString(R.string.ref_evidence),false);CheckBox confirm=new CheckBox(this);confirm.setText(R.string.ref_confirm);form.addView(confirm);
+        ScrollView scroll=new ScrollView(this);scroll.addView(form);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(R.string.ref_action).setView(scroll).setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.sm_save,null).create();
+        dialog.setOnShowListener(v->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(w->{if(!ready())return;try{
+            Map<String,Object> data=PersonalNutritionService.reference(foodId,Objects.toString(foodName,foodId),source,parse(amount.getText().toString()),unit.getSelectedItem().toString(),evidence.getText().toString(),confirm.isChecked());save(data,dialog);
+        }catch(RuntimeException invalid){amount.setError(invalid.getMessage());}}));dialog.show();
+    }
     private double parse(String text){return Double.parseDouble(text.trim().replace(',','.'));}
     private void alternatives(){LinearLayout form=ProgressUi.column(this);ProgressUi.text(this,form,getString(R.string.na_alt_note),14,false);EditText search=input(form,getString(R.string.rp_search),false);Button go=ProgressUi.button(this,form,R.string.rp_search_go,()->{});TextView message=ProgressUi.text(this,form,"",14,false);LinearLayout results=ProgressUi.column(this);form.addView(results);
         ScrollView scroll=new ScrollView(this);scroll.addView(form);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(R.string.na_alternative).setView(scroll).setNegativeButton(android.R.string.cancel,null).create();
@@ -50,5 +73,5 @@ public final class PersonalNutritionActivity extends AppCompatActivity {
         if(docs.size()==30){Button more=new Button(this);more.setText(R.string.fl_more);results.addView(more);more.setOnClickListener(v->{if(ready()&&go.isEnabled()){results.removeView(more);go.setEnabled(false);page(query.startAfter(docs.get(docs.size()-1)),dialog,go,message,results);}});}
     });}
     private void save(Map<String,Object> data,AlertDialog dialog){busy=true;status.setText(R.string.fl_loading);repository.save(data,revision,mutation).addOnCompleteListener(task->{busy=false;if(!visible())return;if(task.isSuccessful()){dialog.dismiss();Toast.makeText(this,R.string.na_saved,Toast.LENGTH_LONG).show();setResult(RESULT_OK);finish();}else error(task.getException());});}
-    private void error(Exception e){status.setText(getString(R.string.sm_error,e==null?"":Objects.toString(e.getMessage(),"")));}
+    private void error(Exception e){String message=getString(R.string.sm_error,e==null?"":Objects.toString(e.getMessage(),""));status.setText(message);Toast.makeText(this,message,Toast.LENGTH_LONG).show();}
 }

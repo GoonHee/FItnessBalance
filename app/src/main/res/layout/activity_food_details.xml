@@ -47,6 +47,9 @@
         <TextView style="@style/FoodBody" android:text="@string/ps_note" />
         <Button style="@style/FoodSecondaryAction" android:id="@+id/foodNutritionSource" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:text="@string/na_personal" />
+        <Button style="@style/FoodPrimaryAction" android:id="@+id/foodConfirmSource"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/ref_action" android:visibility="gone" />
         <TextView android:id="@+id/foodNutritionNote" style="@style/FoodBody" />
         <CheckBox android:id="@+id/foodUnknownCalories" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/na_unknown" />

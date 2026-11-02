@@ -13,4 +13,26 @@ public class PersonalNutritionServiceTest {
     @Test(expected=IllegalArgumentException.class)public void missingEnergyAndIncompleteMacrosRejected(){PersonalNutritionService.label("id","Food",100,"g",Values.of("fat_g",5),"Label");}
     @Test(expected=IllegalArgumentException.class)public void impossibleReferenceRejected(){PersonalNutritionService.label("id","Food",0,"g",Values.of("energy_kcal",100),"Label");}
     @Test(expected=IllegalArgumentException.class)public void invalidNutrientRejected(){PersonalNutritionService.label("id","Food",100,"g",Values.of("energy_kcal",Double.POSITIVE_INFINITY),"Label");}
+    @Test public void riceSourceReferenceUnlocksCorrectPortionMathWithoutRetypingNutrients(){
+        Map<String,Object> source=Values.of("energy_kcal",130,"protein_g",2.3,"carbohydrate_g",30,"fat_g",.1,"fiber_g",0,"sodium_mg",6);
+        Map<String,Object> reference=PersonalNutritionService.reference("rice","Cooked rice",source,100,"g","Confirmed source header",true);
+        Map<String,Object> logged=FoodNutrition.servingNutrition((Map<String,Object>)reference.get("nutrition"),(String)reference.get("nutrition_basis"),"g",150,1);
+        assertEquals(195.0,(Double)logged.get("energy_kcal"),1e-9);assertEquals(3.45,(Double)logged.get("protein_g"),1e-9);
+        assertEquals(45.0,(Double)logged.get("carbohydrate_g"),1e-9);assertEquals(.15,(Double)logged.get("fat_g"),1e-9);assertEquals(9.0,(Double)logged.get("sodium_mg"),1e-9);
+        assertEquals(PersonalNutritionService.CONFIRMED_REFERENCE,reference.get("source_database"));assertEquals("user_entered",reference.get("nutrition_verification"));assertEquals(130,source.get("energy_kcal"));
+    }
+    @Test public void sourceValueIsNotAutomaticallyAssumedPer100Grams(){
+        Map<String,Object> reference=PersonalNutritionService.reference("rice","Rice",Values.of("energy_kcal",130),200,"g","Confirmed 200 g reference",true);
+        assertEquals(65.0,((Map<?,?>)reference.get("nutrition")).get("energy_kcal"));
+    }
+    @Test public void sourceVolumeReferenceRemainsMillilitres(){
+        Map<String,Object> reference=PersonalNutritionService.reference("milk","Milk",Values.of("energy_kcal",150),250,"ml","Label reference",true);
+        assertEquals("per_100ml",reference.get("nutrition_basis"));assertEquals(60.0,((Map<?,?>)reference.get("nutrition")).get("energy_kcal"));
+    }
+    @Test public void explicitZeroRemainsKnownAfterReferenceConfirmation(){
+        Map<String,Object> reference=PersonalNutritionService.reference("water","Water",Values.of("energy_kcal",0),100,"ml","Confirmed reference",true);
+        assertEquals(0.0,((Map<?,?>)reference.get("nutrition")).get("energy_kcal"));
+    }
+    @Test(expected=IllegalArgumentException.class) public void sourceReferenceRequiresConfirmation(){PersonalNutritionService.reference("rice","Rice",Values.of("energy_kcal",130),100,"g","Source",false);}
+    @Test(expected=IllegalArgumentException.class) public void sourceReferenceRequiresActualQuantity(){PersonalNutritionService.reference("rice","Rice",Values.of("energy_kcal",130),Double.NaN,"g","Source",true);}
 }

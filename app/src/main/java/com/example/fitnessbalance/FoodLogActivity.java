@@ -543,9 +543,10 @@ public class FoodLogActivity extends AppCompatActivity {
                         FoodUi.number(entry.get("calories"))
                 );
 
-                if ("manual".equals(entry.get("calculationMode")) || "user_ingredient".equals(entry.get("calculationMode")) || "label".equals(entry.get("personalNutritionKind"))) {
+                if ("manual".equals(entry.get("calculationMode")) || "user_ingredient".equals(entry.get("calculationMode")) || ("label".equals(entry.get("personalNutritionKind"))&&!PersonalNutritionService.CONFIRMED_REFERENCE.equals(entry.get("sourceDatabase")))) {
                     line += " · " + getString(R.string.fs_user_entered);
                 }
+                if(PersonalNutritionService.CONFIRMED_REFERENCE.equals(entry.get("sourceDatabase")))line += " · "+getString(R.string.ref_tag);
                 if ("macro_estimate".equals(entry.get("calculationMode"))) {
                     line += " · " + getString(R.string.fc_estimated);
                 }

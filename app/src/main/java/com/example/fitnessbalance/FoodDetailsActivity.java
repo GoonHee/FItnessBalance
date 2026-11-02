@@ -98,6 +98,8 @@ public class FoodDetailsActivity extends AppCompatActivity {
         totalAmount = findViewById(R.id.foodTotalAmount);
         logButton = findViewById(R.id.foodLogButton);
         retry = findViewById(R.id.foodRetry);
+        findViewById(R.id.foodConfirmSource).setOnClickListener(v->{if(!saving&&food!=null&&barcode==null)
+            nutritionEditor.launch(new Intent(this,PersonalNutritionActivity.class).putExtra("foodId",foodId).putExtra("foodName",text("food_name")).putExtra("confirmSource",true));});
         unknownCalories=findViewById(R.id.foodUnknownCalories);unknownPortion=findViewById(R.id.foodUnknownPortion);
         unknownCalories.setChecked(state!=null&&state.getBoolean("unknownCalories"));
         unknownPortion.setText(state==null?"":state.getString("unknownPortion",""));
@@ -627,6 +629,13 @@ public class FoodDetailsActivity extends AppCompatActivity {
                 : Collections.emptyMap();
 
         basis = text("nutrition_basis");
+        boolean canConfirm=barcode==null&&FoodNutrition.portionUnit(basis)==null
+            &&FoodNutrition.number(FoodNutrition.withEstimatedEnergy(nutrition).get("energy_kcal"))!=null;
+        findViewById(R.id.foodConfirmSource).setVisibility(canConfirm?View.VISIBLE:View.GONE);
+        if(canConfirm)((TextView)findViewById(R.id.foodNutritionNote)).setText(R.string.ref_note);
+        if(PersonalNutritionService.CONFIRMED_REFERENCE.equals(food.get("source_database")))
+            ((TextView)findViewById(R.id.foodNutritionNote)).setText(getString(R.string.ref_saved_note,Objects.toString(food.get("source_note"),"")));
+
         findViewById(R.id.foodRecommendationPreference).setVisibility(barcode == null ? View.VISIBLE : View.GONE);
         if (getIntent().hasExtra("recommendedAmount")) {
             TextView recommendationNote = findViewById(R.id.foodRecommendationContext);
@@ -765,7 +774,8 @@ public class FoodDetailsActivity extends AppCompatActivity {
         if (reference == null) {
             basisText.setText(requiresBasisConfirmation()
                     ? R.string.bc_needs_confirmation
-                    : R.string.fs_basis_unknown);
+                    : barcode==null&&FoodNutrition.number(FoodNutrition.withEstimatedEnergy(nutrition).get("energy_kcal"))!=null
+                    ? R.string.ref_note : R.string.fs_basis_unknown);
         } else {
             basisText.setText(getString(
                     requiresBasisConfirmation()
@@ -938,6 +948,10 @@ public class FoodDetailsActivity extends AppCompatActivity {
     }
 
     private void personalProvenance(Map<String,Object> entry){
+        if(PersonalNutritionService.CONFIRMED_REFERENCE.equals(food.get("source_database"))){
+            entry.put("basisConfirmationSource","user_reference_confirmation");
+            if(!unknownCalories.isChecked()&&!manual.isChecked())entry.put("energyMethod",FoodNutrition.usesEstimatedEnergy(nutrition)?"atwater_4_4_9":"user_confirmed_reference");
+        }
         if(food.get("source_kind")==null)return;
         entry.put("personalNutritionKind",food.get("source_kind"));if(food.get("revision")!=null)entry.put("personalNutritionRevision",food.get("revision"));
         for(String key:new String[]{"alternativeFoodId","alternativeName"})if(food.get(key)!=null)entry.put(key,food.get(key));
