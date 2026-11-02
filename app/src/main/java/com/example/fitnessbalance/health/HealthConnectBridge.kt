@@ -69,7 +69,9 @@ class HealthConnectBridge(context: Context) {
             mapOf("state" to if (avg == null) "unavailable" else "available", "value" to avg,
                 "min" to result[HeartRateRecord.BPM_MIN], "max" to result[HeartRateRecord.BPM_MAX], "observedAt" to latest)
         }
+        snapshot["workouts"] = workouts(granted, now)
         val after = client.permissionController.getGrantedPermissions()
+        if (EXERCISE !in after) snapshot["workouts"] = mapOf("state" to "permission_required")
         for ((key, permission) in mapOf("steps" to STEPS, "sleep" to SLEEP, "heart" to HEART)) {
             if (permission !in after) snapshot[key] = mapOf("state" to "permission_required")
         }
@@ -77,6 +79,43 @@ class HealthConnectBridge(context: Context) {
                 (snapshot[it] as? Map<*, *>)?.get("state") in listOf("available", "unavailable")
             }) snapshot["syncedAt"] = Instant.now().toEpochMilli()
         callback.onResult(snapshot, after)
+    }
+
+    fun syncWorkouts(callback: Callback) = launch(callback) {
+        val granted = client.permissionController.getGrantedPermissions()
+        var workouts = workouts(granted, Instant.now())
+        val after = client.permissionController.getGrantedPermissions()
+        if (EXERCISE !in after) workouts = mapOf("state" to "permission_required")
+        callback.onResult(mapOf("workouts" to workouts), after)
+    }
+
+    private suspend fun workouts(granted: Set<String>, now: Instant): Map<String, Any?> {
+        if (EXERCISE !in granted) return mapOf("state" to "permission_required")
+        return try {
+            val start = now.minus(Duration.ofDays(7))
+            val rows = mutableListOf<Map<String, Any?>>()
+            var token: String? = null
+            var pages = 0
+            do {
+                if (++pages > 20) error("Incomplete exercise read")
+                val response = client.readRecords(ReadRecordsRequest(ExerciseSessionRecord::class,
+                    TimeRangeFilter.between(start, now), pageSize = 200, pageToken = token))
+                for (record in response.records) {
+                    // This rolling cache contains completed sessions starting inside the window.
+                    if (record.startTime.isBefore(start) || !record.startTime.isBefore(now) || record.endTime.isAfter(now)) continue
+                    rows.add(mapOf("id" to record.metadata.id, "source" to record.metadata.dataOrigin.packageName,
+                        "type" to record.exerciseType, "activity" to activityName(record.exerciseType),
+                        "title" to (record.title ?: "").take(200), "start" to record.startTime.toEpochMilli(),
+                        "end" to record.endTime.toEpochMilli(), "modified" to record.metadata.lastModifiedTime.toEpochMilli()))
+                    if (rows.size > 1000) error("Exercise read limit exceeded")
+                }
+                token = response.pageToken
+            } while (token != null)
+            mapOf("state" to "available", "windowStart" to start.toEpochMilli(), "windowEnd" to now.toEpochMilli(),
+                "syncedAt" to Instant.now().toEpochMilli(), "records" to rows)
+        } catch (cancel: CancellationException) { throw cancel }
+          catch (_: SecurityException) { mapOf("state" to "permission_required") }
+          catch (_: Exception) { mapOf("state" to "error") }
     }
 
     private suspend fun <T : Record> latest(type: KClass<T>, range: TimeRangeFilter, event: (T) -> Instant?): Long? {
@@ -101,10 +140,30 @@ class HealthConnectBridge(context: Context) {
     fun close() { scope.cancel() }
 
     companion object {
+        @JvmStatic fun activityName(type: Int): String = when(type) {
+            ExerciseSessionRecord.EXERCISE_TYPE_WALKING -> "Walking"
+            ExerciseSessionRecord.EXERCISE_TYPE_RUNNING -> "Running"
+            ExerciseSessionRecord.EXERCISE_TYPE_RUNNING_TREADMILL -> "Treadmill running"
+            ExerciseSessionRecord.EXERCISE_TYPE_BIKING -> "Cycling"
+            ExerciseSessionRecord.EXERCISE_TYPE_BIKING_STATIONARY -> "Stationary cycling"
+            ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_POOL -> "Pool swimming"
+            ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_OPEN_WATER -> "Open-water swimming"
+            ExerciseSessionRecord.EXERCISE_TYPE_HIKING -> "Hiking"
+            ExerciseSessionRecord.EXERCISE_TYPE_YOGA -> "Yoga"
+            ExerciseSessionRecord.EXERCISE_TYPE_PILATES -> "Pilates"
+            ExerciseSessionRecord.EXERCISE_TYPE_STRENGTH_TRAINING -> "Strength training"
+            ExerciseSessionRecord.EXERCISE_TYPE_WEIGHTLIFTING -> "Weight lifting"
+            ExerciseSessionRecord.EXERCISE_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING -> "HIIT"
+            ExerciseSessionRecord.EXERCISE_TYPE_DANCING -> "Dancing"
+            ExerciseSessionRecord.EXERCISE_TYPE_ROWING, ExerciseSessionRecord.EXERCISE_TYPE_ROWING_MACHINE -> "Rowing"
+            ExerciseSessionRecord.EXERCISE_TYPE_OTHER_WORKOUT -> "Other workout"
+            else -> "Workout (type $type)"
+        }
+        @JvmField val EXERCISE = HealthPermission.getReadPermission(ExerciseSessionRecord::class)
         @JvmField val STEPS = HealthPermission.getReadPermission(StepsRecord::class)
         @JvmField val SLEEP = HealthPermission.getReadPermission(SleepSessionRecord::class)
         @JvmField val HEART = HealthPermission.getReadPermission(HeartRateRecord::class)
-        @JvmStatic fun permissions(): Set<String> = setOf(STEPS, SLEEP, HEART)
+        @JvmStatic fun permissions(): Set<String> = setOf(STEPS, SLEEP, HEART, EXERCISE)
         @JvmStatic fun availability(context: Context): Int = HealthConnectClient.getSdkStatus(context)
         @JvmStatic fun permissionContract(): ActivityResultContract<Set<String>, Set<String>> = PermissionController.createRequestPermissionResultContract()
         @JvmStatic fun settings(context: Context): Intent = HealthConnectClient.getHealthConnectManageDataIntent(context)

@@ -18,7 +18,7 @@ public final class HealthConnectActivity extends AppCompatActivity {
     private String uid;
     private HealthConnectBridge bridge;
     private HealthSummaryStore store;
-    private TextView availability, permissionStatus, summary, lastSync, status;
+    private TextView availability, permissionStatus, summary, lastSync, status,workoutStatus;
     private Button connect, sync, settings;
     private boolean busy;
     private int version;
@@ -59,14 +59,19 @@ public final class HealthConnectActivity extends AppCompatActivity {
         lastSync = text(form, R.string.hc_never_synced);
         summary = text(form, R.string.hc_no_summary);
         text(form, R.string.hc_freshness_note);
+        workoutStatus=text(form,R.string.ww_never);
+        button(form,R.string.ww_title).setOnClickListener(v->startActivity(new Intent(this,WearableWorkoutsActivity.class)));
+        text(form,R.string.ww_note);
         status = text(form, 0); status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         button(form, R.string.hc_retry).setOnClickListener(v -> refresh());
         button(form, R.string.hc_privacy).setOnClickListener(v -> startActivity(new Intent(this, HealthPermissionRationaleActivity.class)));
         button(form, R.string.hc_clear).setOnClickListener(v -> {
             version++; bridge.cancelPending(); store.clear();
             new HealthRecommendationStore(this, uid).clear();
+            boolean workoutsCleared=true;
+            try(WearableWorkoutStore workouts=new WearableWorkoutStore(this)){workouts.clear(uid);}catch(RuntimeException error){workoutsCleared=false;}
             snapshot.clear(); busy = false;
-            render(); refresh(); status.setText(R.string.hc_cleared);
+            render(); refresh(); status.setText(workoutsCleared?R.string.hc_cleared:R.string.hc_cache_error);
         });
     }
     private TextView text(LinearLayout form, int resource) {
@@ -81,7 +86,7 @@ public final class HealthConnectActivity extends AppCompatActivity {
     private void refresh() {
         if (bridge == null) return;
         int request = ++version; bridge.cancelPending(); busy = true; granted = Collections.emptySet();
-        summary.setText(R.string.hc_no_summary); status.setText("");
+        summary.setText(R.string.hc_no_summary);workoutStatus.setText(R.string.hc_permissions_checking); status.setText("");
         Object cachedSync = store.read().get("syncedAt");
         lastSync.setText(cachedSync == null ? getString(R.string.hc_never_synced)
                 : getString(R.string.hc_last_sync, date(cachedSync)));
@@ -107,6 +112,7 @@ public final class HealthConnectActivity extends AppCompatActivity {
                     catch (java.io.IOException e) { status.setText(R.string.hc_cache_error); }
                 }
                 try { store.write(snapshot); } catch (java.io.IOException e) { status.setText(R.string.hc_cache_error); }
+                if(!granted.contains(HealthConnectBridge.EXERCISE))try(WearableWorkoutStore workouts=new WearableWorkoutStore(HealthConnectActivity.this)){workouts.clear(uid);}catch(RuntimeException error){status.setText(R.string.hc_cache_error);}
                 busy = false; render();
             }
             @Override public void onError() {
@@ -123,29 +129,32 @@ public final class HealthConnectActivity extends AppCompatActivity {
         if (granted.contains(HealthConnectBridge.HEART)) result.add("heart"); return result;
     }
     private void sync() {
-        if (busy || allowed().isEmpty()) return;
+        if (busy || (allowed().isEmpty()&&!granted.contains(HealthConnectBridge.EXERCISE))) return;
         int request = ++version; busy = true; render(); status.setText(R.string.hc_syncing);
         bridge.sync(new HealthConnectBridge.Callback() {
             @Override public void onResult(Map<String, ? extends Object> data, Set<String> permissions) {
                 if (!current(request)) return;
                 Map<String,Object> latest = new HashMap<>(data);
+                Map<String,Object> workoutData=com.example.fitnessbalance.util.Values.map(latest.remove("workouts"));
                 if (!latest.containsKey("syncedAt") && snapshot.containsKey("syncedAt")) latest.put("syncedAt", snapshot.get("syncedAt"));
                 granted = new HashSet<>(permissions); snapshot = HealthSummaryPolicy.mask(latest, allowed());
                 boolean saved = true;
                 try {
                     store.write(snapshot);
+                    try(WearableWorkoutStore workouts=new WearableWorkoutStore(HealthConnectActivity.this)){workouts.apply(uid,workoutData);}
                     HealthRecommendationStore recommendations = new HealthRecommendationStore(HealthConnectActivity.this, uid);
                     if (!granted.contains(HealthConnectBridge.SLEEP)) recommendations.removeSleepInputs();
                     else recommendations.observe(snapshot, System.currentTimeMillis(), java.time.ZoneId.systemDefault());
-                } catch (java.io.IOException e) { saved = false; }
+                } catch (java.io.IOException | RuntimeException e) { saved = false; }
                 busy = false; render();
                 boolean partial = false;
                 for (String key : Arrays.asList("steps", "sleep", "heart")) partial |= !"available".equals(metric(key).get("state"));
+                partial |= !"available".equals(workoutData.get("state"));
                 status.setText(!saved ? R.string.hc_cache_error : partial ? R.string.hc_partial : R.string.hc_synced);
             }
             @Override public void onError() {
                 if (!current(request)) return;
-                busy = false; render(); status.setText(R.string.hc_error);
+                busy = false;granted=Collections.emptySet(); render(); status.setText(R.string.hc_error);
             }
         });
     }
@@ -169,8 +178,12 @@ public final class HealthConnectActivity extends AppCompatActivity {
         return getString(label) + ": " + value;
     }
     private void render() {
-        connect.setEnabled(!busy); settings.setEnabled(!busy); sync.setEnabled(!busy && !allowed().isEmpty());
+        connect.setEnabled(!busy); settings.setEnabled(!busy); sync.setEnabled(!busy && (!allowed().isEmpty()||granted.contains(HealthConnectBridge.EXERCISE)));
         permissionStatus.setText(getString(R.string.hc_permissions, permission("steps"), permission("sleep"), permission("heart")));
+        if(!granted.contains(HealthConnectBridge.EXERCISE))workoutStatus.setText(getString(R.string.ww_permission,getString(R.string.hc_not_granted)));
+        else try(WearableWorkoutStore workouts=new WearableWorkoutStore(this)){
+            WearableWorkoutStore.Snapshot cached=workouts.read(uid);Object time=cached.meta.get("syncedAt");workoutStatus.setText(getString(R.string.ww_permission,getString(R.string.hc_granted))+"\n"+(time==null?getString(R.string.ww_never):getString(R.string.ww_last,date(time),cached.records.size()))+("error".equals(cached.meta.get("status"))?"\n"+getString(R.string.ww_failed):""));
+        }catch(RuntimeException error){workoutStatus.setText(R.string.hc_cache_error);}
         Object synced = snapshot.get("syncedAt");
         lastSync.setText(synced == null ? getString(R.string.hc_never_synced) : getString(R.string.hc_last_sync, date(synced)));
         String window = snapshot.get("windowStart") instanceof Number ? getString(R.string.hc_window,

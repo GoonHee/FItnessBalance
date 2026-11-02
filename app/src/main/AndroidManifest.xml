@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.READ_SLEEP" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
         <intent><action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" /></intent>
@@ -96,6 +97,7 @@
     <activity android:name=".RecipeEditorActivity" android:exported="false" />
     <activity android:name=".SavedMealsActivity" android:exported="false" />
     <activity android:name=".FoodRecommendationsActivity" android:exported="false" />
+    <activity android:name=".WearableWorkoutsActivity" android:exported="false" />
     <activity android:name=".HealthConnectActivity" android:exported="false" />
     <activity android:name=".HealthPermissionRationaleActivity" android:exported="true">
         <intent-filter><action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" /></intent-filter>

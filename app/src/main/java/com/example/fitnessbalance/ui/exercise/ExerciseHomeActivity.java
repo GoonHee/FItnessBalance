@@ -68,6 +68,7 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
               Values.integer(decision.inputs.get("preferredMinutes"),10), decision.baselineDays))
           .setPositiveButton(android.R.string.ok, null).show();
     });
+    findViewById(R.id.exWearableWorkouts).setOnClickListener(v->startActivity(new android.content.Intent(this,com.example.fitnessbalance.WearableWorkoutsActivity.class)));
     new LocalDayObserver(this, this, null, this::reload);
     findViewById(R.id.exPath).setOnClickListener(v -> open(WorkoutPathActivity.class, null));
     findViewById(R.id.exQuick).setOnClickListener(v -> open(ExerciseActivity.class, null));

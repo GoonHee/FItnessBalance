@@ -1,12 +1,16 @@
+# Wearable workout update
+
+Exercise-session imports are now supported as a separate local seven-day cache. See [Wearable workouts](WEARABLE_WORKOUTS.md) for the current permission, import and duplicate-review behavior. Imported workouts do not add calories or XP.
+
 # Health Connect: foreground summary module
 
-Open **Profile → Connect health data**. Install/update Health Connect if prompted, grant the read permissions you choose, then tap **Sync health summaries now**. Returning from settings refreshes connection/permission state but does not read new health records until Sync is tapped.
+Open **Profile → Connect health data**. Install/update Health Connect if prompted, grant the read permissions you choose, then tap **Sync health data now**. Returning from settings refreshes connection/permission state but does not read new health records until Sync is tapped.
 
 ## Scope and compatibility
 
 - AndroidX Health Connect client 1.1.0, read-only. The library requires minSdk 26, so the app minimum increases from 23 to 26. Compatible Android 9+ devices can use Health Connect; Android 8 can run the app but receives the unavailable screen. Android 14+ normally provides Health Connect through the system; compatible older versions need the provider app.
 - Java screen, cache and freshness policy; one small Kotlin bridge calls the SDK's official suspend APIs. The repository already uses the Kotlin Android plugin. This does not convert the existing application screens to Kotlin.
-- Declares READ_STEPS, READ_SLEEP and READ_HEART_RATE only. No background/history access, exercise-session access, calorie access or health writes.
+- Declares READ_STEPS, READ_SLEEP, READ_HEART_RATE and READ_EXERCISE. No background/history access, calorie access or health writes. Exercise sessions use the separate seven-day import described above.
 - Android 13 rationale intent and Android 14+ permission-usage alias open the same public explanation screen; that activity never displays user data.
 
 ## Windows and data meaning
@@ -21,9 +25,9 @@ A summary is stale after 24 hours or a day/time-zone change. A metric is also ma
 
 ## Storage and isolation
 
-Only aggregate summaries, status and window/source timestamps are saved. Cache files are account-specific (SHA-256 UID filename), Android-private and inside getNoBackupFilesDir. They are excluded from Android backup. No health data is uploaded to Firestore or analytics by this module. Raw source records are not retained.
+The summary cache saves aggregate summaries, status and window/source timestamps. The separate wearable cache retains the limited exercise-session metadata documented in WEARABLE_WORKOUTS.md. Cache files are account-specific (SHA-256 UID filename), Android-private and inside getNoBackupFilesDir. They are excluded from Android backup. No health data is uploaded to Firestore or analytics by this module. Raw step, sleep and heart-rate records are not retained.
 
-Permission checks mask and remove revoked metric values from the local cache. Clear saved summaries removes this account's cache; it does not delete records from Health Connect or their source apps. Manage Health Connect access/data opens provider controls. Uninstall removes the local cache. Switching accounts uses separate cache files and stale callbacks cannot display the previous account's results. Backgrounding cancels pending work; there is no background sync job.
+Permission checks mask and remove revoked metric values from the local cache. Remove saved health data removes this account's summary and wearable caches; it does not delete records from Health Connect or their source apps. Manage Health Connect access/data opens provider controls. Uninstall removes the local cache. Switching accounts uses separate cache files and stale callbacks cannot display the previous account's results. Backgrounding cancels pending work; there is no background sync job.
 
 Nothing writes exerciseLogs, workoutRecords, dailyData, caloriesBurned, goals, XP or achievements. Fresh sleep summaries can influence recommendations only after separate opt-in on Exercise; see ADAPTIVE_RECOMMENDATIONS.md. This separation prevents exercise calorie double counting and provides a foundation for later adaptive logic without implying it already exists.
 

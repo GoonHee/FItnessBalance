@@ -36,6 +36,7 @@ public final class ExerciseActivity extends ExerciseBaseActivity
             state == null ? null : state.getString("selectedDay"),
             state == null ? null : state.getString("observedDay"),
             today);
+    if(state==null){String requested=getIntent().getStringExtra("date");if(FoodUi.validDate(requested)&&requested.compareTo(today)<=0)selectedDay=requested;}
     days =
         new LocalDayObserver(
             this,

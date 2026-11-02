@@ -1,0 +1,24 @@
+<resources>
+<string name="ww_title">Wearable workouts</string>
+<string name="ww_intro">Completed exercise sessions exported to Health Connect by Mi Fitness or other apps. Sync imports sessions starting in the last seven days.</string>
+<string name="ww_sync">Sync wearable workouts</string><string name="ww_permission">Read exercise sessions: %1$s</string>
+<string name="ww_note">Imported workouts are separate from your counted logs. They do not add calories, XP, quests or weekly workout counts. Elapsed time can include pauses; calories and active time are not imported.</string>
+<string name="ww_none">No completed exercise sessions were returned for this seven-day window. Check that your companion app has exported them to Health Connect.</string>
+<string name="ww_never">No wearable workout snapshot has been synced yet.</string>
+<string name="ww_window">Imported window: %1$s to %2$s. Times use this phone’s current time zone.</string>
+<string name="ww_last">Last successful workout sync: %1$s · %2$d sessions</string>
+<string name="ww_failed">The last workout read failed or was incomplete. Previous cached sessions and their successful sync time were kept. Retry sync.</string>
+<string name="ww_clear">Remove imported workouts from this device</string>
+<string name="ww_review">View counted activity logs for this date</string>
+<string name="ww_overlap">Possible time overlap with a guided workout. Review before logging this activity again.</string>
+<string name="ww_manual">A counted manual activity exists on one of these dates. Its exact times are unavailable, so this is not a confirmed duplicate.</string>
+<string name="ww_other">Possible time overlap with another imported record. These may describe the same workout or legitimate overlapping sessions.</string>
+<string name="ww_checks_failed">Comparison with your existing logs is unavailable. Imported workouts still remain separate and uncounted.</string>
+<string name="ww_checks_loading">Checking possible overlaps with existing logs…</string>
+<string name="ww_elapsed">Elapsed duration: %1$s minutes</string>
+<string name="ww_source">Source app: %1$s</string>
+<string name="ww_updated">Source record updated: %1$s</string>
+<string name="ww_calories">Calories: not imported · XP: not awarded</string>
+<string name="ww_more">Show more imported sessions</string>
+<string name="ww_cleared">Imported cache removed. Original Health Connect and Mi Fitness records were not deleted.</string>
+</resources>
