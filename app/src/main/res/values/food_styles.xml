@@ -8,7 +8,7 @@
         <item name="android:textStyle">bold</item>
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:layout_marginBottom">12dp</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@color/gm_ink</item>
     </style>
 
     <style name="FoodBody">
@@ -17,16 +17,25 @@
         <item name="android:textSize">16sp</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@color/gm_ink</item>
     </style>
 
     <style name="FoodPanel">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:padding">16dp</item>
+        <item name="android:padding">20dp</item>
         <item name="android:layout_marginBottom">12dp</item>
         <item name="android:background">@drawable/food_panel</item>
     </style>
 
+    <style name="FoodPrimaryAction" parent="Widget.Material3.Button">
+      <item name="android:minHeight">48dp</item><item name="android:textAllCaps">false</item>
+      <item name="backgroundTint">@color/journal_primary</item><item name="android:backgroundTint">@color/journal_primary</item>
+      <item name="android:textColor">@color/journal_primary_text</item><item name="cornerRadius">16dp</item>
+    </style>
+    <style name="FoodSecondaryAction" parent="FoodPrimaryAction">
+      <item name="backgroundTint">@color/journal_secondary</item><item name="android:backgroundTint">@color/journal_secondary</item>
+      <item name="android:textColor">@color/journal_secondary_text</item>
+    </style>
 </resources>

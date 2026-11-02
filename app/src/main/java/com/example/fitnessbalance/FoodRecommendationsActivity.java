@@ -21,7 +21,7 @@ public final class FoodRecommendationsActivity extends AppCompatActivity {
         ScrollView root=new ScrollView(this); root.setId(R.id.foodRoot);
         LinearLayout form=new LinearLayout(this); form.setOrientation(LinearLayout.VERTICAL);
         int pad=(int)(20*getResources().getDisplayMetrics().density); form.setPadding(pad,pad,pad,pad);
-        root.addView(form); setContentView(root); FoodUi.insets(this);
+        root.addView(form); setContentView(root);ProgressUi.theme(this,root); FoodUi.insets(this);
         Button back=button(form,R.string.back); back.setOnClickListener(v->finish());
         text(form,R.string.fr_title).setTextSize(24); text(form,R.string.fr_intro);
         TextView date=text(form,0); date.setText(getString(R.string.fl_date,day));
@@ -51,8 +51,8 @@ public final class FoodRecommendationsActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> p) {}
         });
     }
-    private TextView text(LinearLayout form,int id) { TextView t=new TextView(this); if(id!=0)t.setText(id); t.setTextSize(16); t.setPadding(0,12,0,12); form.addView(t); return t; }
-    private Button button(LinearLayout form,int id) { Button b=new Button(this); b.setText(id); form.addView(b); return b; }
+    private TextView text(LinearLayout form,int id) { TextView t=new TextView(this); if(id!=0)t.setText(id); t.setTextColor(ProgressUi.ink(this));t.setTextSize(16); t.setPadding(0,12,0,12); form.addView(t); return t; }
+    private Button button(LinearLayout form,int id) { Button b=ProgressUi.action(this); b.setText(id); form.addView(b); return b; }
     private boolean current(int request) { FirebaseUser u=FirebaseAuth.getInstance().getCurrentUser(); return request==version && !isDestroyed() && !isFinishing() && u!=null && uid.equals(u.getUid()); }
     private void invalidateResults() { version++; latest=null; if(results!=null)results.removeAllViews(); if(context!=null)context.setText(""); if(status!=null)status.setText(""); if(generate!=null)generate.setEnabled(true); }
     private void generate() {

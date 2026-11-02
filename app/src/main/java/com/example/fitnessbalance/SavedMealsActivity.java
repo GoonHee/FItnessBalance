@@ -17,7 +17,7 @@ public final class SavedMealsActivity extends AppCompatActivity {
     private String uid,date;
     private LinearLayout body;
     private TextView status;
-    private Button dateButton,retry,saveFromDiary;
+    private Button dateButton,retry,saveFromDiary,mealsTabButton,recipesTabButton;
     private SavedMealRepository repository;
     private final List<DocumentSnapshot> meals=new ArrayList<>();
     private DocumentSnapshot cursor;
@@ -36,19 +36,20 @@ public final class SavedMealsActivity extends AppCompatActivity {
         date=state==null?getIntent().getStringExtra("date"):state.getString("date");
         if(!FoodUi.validDate(date))date=LocalDate.now().toString();
         if(pending==null && state!=null && uid.equals(state.getString("uid"))){try{String value=state.getString("pending");if(value!=null)pending=decode(new JSONObject(value));}catch(Exception ignored){pending=null;}}
-        LinearLayout root=ProgressUi.column(this);root.setBackgroundColor(0xFFF5F5F5);setContentView(root);FoodUi.insets(this);
-        MaterialToolbar toolbar=new MaterialToolbar(this);toolbar.setTitle(R.string.library_title);toolbar.setNavigationIcon(R.drawable.ic_arrow_back);toolbar.setNavigationOnClickListener(v->finish());root.addView(toolbar);
-        LinearLayout tabs=new LinearLayout(this);root.addView(tabs);
-        ProgressUi.button(this,tabs,R.string.rp_tab_meals,()->switchTab(false));
-        ProgressUi.button(this,tabs,R.string.rp_tab_recipes,()->switchTab(true));
-        ProgressUi.button(this,root,R.string.rp_new,()->{if(ready())startActivity(new android.content.Intent(this,RecipeEditorActivity.class));});
-        dateButton=ProgressUi.button(this,root,R.string.sm_title,()->{if(ready())pick(date,value->{date=value;dateButton.setText(getString(R.string.sm_target,date));});});
+        LinearLayout root=ProgressUi.column(this);ProgressUi.theme(this,root);setContentView(root);ProgressUi.theme(this,root);FoodUi.insets(this);
+        MaterialToolbar toolbar=new MaterialToolbar(this);toolbar.setTitle(R.string.library_title);toolbar.setNavigationIcon(R.drawable.ic_arrow_back);toolbar.setNavigationOnClickListener(v->finish());root.addView(toolbar);ProgressUi.toolbar(this,toolbar);
+        ScrollView scroll=new ScrollView(this);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));LinearLayout page=ProgressUi.column(this);int pad=ProgressUi.dp(this,16);page.setPadding(pad,pad,pad,pad);scroll.addView(page);
+        LinearLayout tabs=new LinearLayout(this);page.addView(tabs);
+        mealsTabButton=ProgressUi.button(this,tabs,R.string.rp_tab_meals,()->switchTab(false));
+        recipesTabButton=ProgressUi.button(this,tabs,R.string.rp_tab_recipes,()->switchTab(true));
+        ProgressUi.button(this,page,R.string.rp_new,()->{if(ready())startActivity(new android.content.Intent(this,RecipeEditorActivity.class));});
+        dateButton=ProgressUi.button(this,page,R.string.sm_title,()->{if(ready())pick(date,value->{date=value;dateButton.setText(getString(R.string.sm_target,date));});});
         dateButton.setText(getString(R.string.sm_target,date));
-        saveFromDiary=ProgressUi.button(this,root,R.string.sm_create,()->{if(ready())pick(date,this::chooseFoods);});
-        ProgressUi.button(this,root,R.string.sm_refresh,()->{if(!busy)load(true);});
-        retry=ProgressUi.button(this,root,R.string.sm_retry,this::submitPending);
-        status=ProgressUi.text(this,root,"",14,false);status.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
-        ScrollView scroll=new ScrollView(this);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));body=ProgressUi.column(this);int pad=ProgressUi.dp(this,16);body.setPadding(pad,pad,pad,pad);scroll.addView(body);
+        saveFromDiary=ProgressUi.button(this,page,R.string.sm_create,()->{if(ready())pick(date,this::chooseFoods);});
+        ProgressUi.button(this,page,R.string.sm_refresh,()->{if(!busy)load(true);});
+        retry=ProgressUi.button(this,page,R.string.sm_retry,this::submitPending);
+        status=ProgressUi.text(this,page,"",14,false);status.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        body=ProgressUi.column(this);page.addView(body);
         render();
     }
     @Override protected void onResume(){super.onResume();if(!same()){finish();return;}if(!busy)load(true);}
@@ -67,7 +68,9 @@ public final class SavedMealsActivity extends AppCompatActivity {
             else error(task.getException());render();});
     }
     private void render(){
-        if(body==null)return;saveFromDiary.setVisibility(recipeTab?android.view.View.GONE:android.view.View.VISIBLE);body.removeAllViews();retry.setVisibility(pending==null?android.view.View.GONE:android.view.View.VISIBLE);retry.setEnabled(!busy);
+        if(body==null)return;
+        Button[] tabs={mealsTabButton,recipesTabButton};for(int i=0;i<2;i++){boolean active=(i==1)==recipeTab;tabs[i].setSelected(active);tabs[i].setBackgroundTintList(android.content.res.ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(this,active?R.color.gm_purple:R.color.gm_lavender)));tabs[i].setTextColor(active?android.graphics.Color.WHITE:ProgressUi.ink(this));}
+        saveFromDiary.setVisibility(recipeTab?android.view.View.GONE:android.view.View.VISIBLE);body.removeAllViews();retry.setVisibility(pending==null?android.view.View.GONE:android.view.View.VISIBLE);retry.setEnabled(!busy);
         if(pending!=null){
             ProgressUi.text(this,body,getString(R.string.sm_pending),16,true);
             ProgressUi.button(this,body,R.string.sm_discard,()->{if(!visible()||busy)return;
@@ -76,6 +79,7 @@ public final class SavedMealsActivity extends AppCompatActivity {
                         if(busy||!visible())return;pendingStore.clear();pending=null;status.setText("");render();
                     }).show();});
         }
+        ProgressUi.hero(this,body,R.string.ui_library_intro,R.string.ui_library_note);
         ProgressUi.text(this,body,getString(recipeTab?R.string.rp_note:R.string.sm_note),14,false);
         ProgressUi.text(this,body,getString(recipeTab?R.string.rp_tab_recipes:R.string.rp_tab_meals),22,true);
         if(meals.isEmpty())ProgressUi.text(this,body,getString(recipeTab?R.string.rp_empty:R.string.sm_empty),16,false);

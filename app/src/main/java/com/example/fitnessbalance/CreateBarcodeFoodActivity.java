@@ -56,10 +56,10 @@ public class CreateBarcodeFoodActivity extends AppCompatActivity {
         );
 
         root.addView(content);
-        setContentView(root);
+        setContentView(root);ProgressUi.theme(this,root);
         FoodUi.insets(this);
 
-        Button back = new Button(this);
+        Button back = ProgressUi.action(this);
         back.setText(R.string.back);
         back.setOnClickListener(v -> finish());
         content.addView(back);
@@ -138,12 +138,12 @@ public class CreateBarcodeFoodActivity extends AppCompatActivity {
         confirmation.setText(R.string.sb_confirm);
         content.addView(confirmation);
 
-        save = new Button(this);
+        save = ProgressUi.action(this);
         save.setText(R.string.sb_save);
         content.addView(save);
         save.setOnClickListener(v -> saveProduct());
 
-        retry = new Button(this);
+        retry = ProgressUi.action(this);
         retry.setText(R.string.fl_retry);
         retry.setVisibility(View.GONE);
         content.addView(retry);

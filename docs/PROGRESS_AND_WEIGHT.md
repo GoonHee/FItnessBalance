@@ -1,14 +1,16 @@
 # Progress charts and dated weight history
 
+The current visual layout is documented in [Food journal and Progress studio](COLOURFUL_FOOD_AND_PROGRESS.md). The data model below is unchanged.
+
 See [Nutrition availability](NUTRITION_AVAILABILITY.md) for incomplete-calorie behavior. Net calories are withheld for incomplete or legacy-unknown energy coverage, and weekly goal-difference comparisons are suppressed for an incomplete week.
 
 ## Open the feature
 
-Home → **Progress · charts and weight history** opens Overview, Calories, Nutrients and Macros tabs. Weeks run Monday–Sunday. Previous/next controls and the date selector browse weeks; future weeks cannot be selected. Refresh is in the toolbar menu. Changing tabs reuses the loaded snapshot rather than querying again.
+Home → **Progress** opens Progress studio with Week journal, Food energy, Nutrient ledger and Macro balance sections. Weeks run Monday–Sunday. Previous/next controls and the date selector browse weeks; future weeks cannot be selected. Refresh is in the toolbar menu. Changing tabs reuses the loaded snapshot rather than querying again.
 
-Overview contains weekly food-calorie bars, a weight card and trend, estimated exercise calories and three macro charts. The Calories tab switches between stacked meal calories and food minus logged exercise, includes available-day averages, daily values and the highest recorded food calorie totals. Nutrients shows saved totals, available-day averages/coverage and current explicit goal references. Macros shows grams over the week and, only with complete recorded macro coverage, a 4/9/4 energy-share chart.
+Week journal contains a week snapshot, calorie availability, dated journal entries and a compact weight shortcut. Food energy switches between horizontal stacked meal calories and food minus logged exercise, includes available-day averages, daily values and the highest recorded food calorie totals. Nutrients shows saved totals, available-day averages/coverage and current explicit goal references. Macros shows grams over the week and, only with complete recorded macro coverage, a labelled 4/9/4 macro-energy contribution strip.
 
-The UI follows the supplied examples' card/tab/chart organisation, using FitnessBalance's own implementation and colours. No MyFitnessPal code, assets or external chart dependency was copied. Custom Java Canvas charts have text descriptions/exact-value context; weight entries are available as text.
+The current UI uses FitnessBalance's journal layout, section buttons, horizontal energy charts and macro contribution strip. No MyFitnessPal code, assets or external chart dependency was copied. Custom Java Canvas charts have text descriptions/exact-value context; weight entries are available as text.
 
 ## What the charts mean
 

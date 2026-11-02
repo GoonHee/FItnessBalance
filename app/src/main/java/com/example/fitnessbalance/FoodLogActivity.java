@@ -363,7 +363,7 @@ public class FoodLogActivity extends AppCompatActivity {
                     snapshot.getDocuments();
 
             for (DocumentSnapshot food : page) {
-                Button row = new Button(this);
+                Button row = ProgressUi.action(this);
                 String name = food.getString("food_name");
 
                 row.setText(name == null
@@ -504,10 +504,15 @@ public class FoodLogActivity extends AppCompatActivity {
         NutritionAvailabilityService.Stats calorieStatus=NutritionAvailabilityService.stats(entries);
         if(calorieStatus.missing>0)totals.append("\n\n"+(calorieStatus.known==0?getString(R.string.na_all_unknown,calorieStatus.missing):getString(R.string.na_known,FoodUi.number(calorieStatus.subtotal),calorieStatus.missing)));
 
-        for (Map<String, Object> entry : entries) {
+        java.util.List<Map<String,Object>> displayed=new java.util.ArrayList<>(entries);
+        displayed.sort(java.util.Comparator.comparingInt(e->ProgressUi.mealIndex(e.get("meal"))));int previousMeal=-1;
+        for (Map<String, Object> entry : displayed) {
+            int group=ProgressUi.mealIndex(entry.get("meal"));
+            if(group!=previousMeal){int count=0;for(Map<String,Object> item:displayed)if(ProgressUi.mealIndex(item.get("meal"))==group)count++;
+                TextView heading=new TextView(this);heading.setText(getString(R.string.ui_food_group,ProgressService.MEALS[group],count));heading.setTextSize(21);heading.setTextColor(ProgressUi.ink(this));heading.setTypeface(null,android.graphics.Typeface.BOLD);heading.setPadding(0,ProgressUi.dp(this,16),0,ProgressUi.dp(this,10));history.addView(heading);previousMeal=group;}
             LinearLayout panel = new LinearLayout(this);
             panel.setOrientation(LinearLayout.VERTICAL);
-            panel.setBackgroundResource(R.drawable.food_panel);
+            ProgressUi.mealPanel(this,panel,group);
 
             int padding = (int) (
                     16 * getResources().getDisplayMetrics().density
@@ -523,7 +528,7 @@ public class FoodLogActivity extends AppCompatActivity {
                     ? (String) entry.get("name")
                     : getString(R.string.fl_name_missing));
 
-            title.setTextSize(18);
+            title.setTextSize(18);title.setTextColor(ProgressUi.ink(this));
             panel.addView(title);
 
             TextView subtitle = new TextView(this);
@@ -563,10 +568,10 @@ public class FoodLogActivity extends AppCompatActivity {
                 ));
             }
 
-            panel.addView(subtitle);
+            subtitle.setTextColor(ProgressUi.ink(this));panel.addView(subtitle);
             if(NutritionAvailabilityService.energy(entry)==null){
                 TextView unavailable=new TextView(this);unavailable.setText(getString(R.string.na_unknown_note)+"\n"+java.util.Objects.toString(entry.get("portionDescription"),""));panel.addView(unavailable);
-                if(entry.get("entryId") instanceof String){Button addCalories=new Button(this);addCalories.setText(R.string.na_add_calories);panel.addView(addCalories);addCalories.setOnClickListener(v->addKnownCalories(uid,date,entry));}
+                if(entry.get("entryId") instanceof String){Button addCalories=ProgressUi.action(this);addCalories.setText(R.string.na_add_calories);panel.addView(addCalories);addCalories.setOnClickListener(v->addKnownCalories(uid,date,entry));}
             }
             if("alternative".equals(entry.get("personalNutritionKind"))){TextView approximate=new TextView(this);approximate.setText(getString(R.string.na_alternative_used,java.util.Objects.toString(entry.get("alternativeName"),"")));panel.addView(approximate);}
 
@@ -576,12 +581,12 @@ public class FoodLogActivity extends AppCompatActivity {
                 panel.addView(recipeSource);
             }
 
-            Button edit = new Button(this);
+            Button edit = ProgressUi.action(this);
             edit.setText(R.string.fe_edit);
             edit.setOnClickListener(v -> editEntry(uid, date, entry));
             panel.addView(edit);
 
-            Button remove = new Button(this);
+            Button remove = ProgressUi.action(this);
             remove.setText(R.string.fl_remove);
 
             remove.setOnClickListener(v ->

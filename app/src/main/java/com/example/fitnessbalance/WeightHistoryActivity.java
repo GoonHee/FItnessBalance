@@ -20,11 +20,11 @@ public final class WeightHistoryActivity extends AppCompatActivity {
     private final ActivityResultLauncher<String> exportFile=registerForActivityResult(new ActivityResultContracts.CreateDocument("text/csv"),uri->{if(same())ProgressUi.export(this,uri,pendingCsv);pendingCsv=null;});
     @Override protected void onCreate(Bundle state){super.onCreate(state);FirebaseUser user=FirebaseAuth.getInstance().getCurrentUser();if(user==null){finish();return;}uid=user.getUid();
         if(state!=null){range=state.getInt("range");if(uid.equals(state.getString("uid")))pendingCsv=state.getString("csv");}
-        LinearLayout root=ProgressUi.column(this);root.setId(R.id.foodRoot);root.setBackgroundColor(0xFFF1F6FC);setContentView(root);FoodUi.insets(this);
+        LinearLayout root=ProgressUi.column(this);root.setId(R.id.foodRoot);ProgressUi.theme(this,root);setContentView(root);ProgressUi.theme(this,root);FoodUi.insets(this);
         com.google.android.material.appbar.MaterialToolbar toolbar=new com.google.android.material.appbar.MaterialToolbar(this);
-        toolbar.setTitle(R.string.wh_title);toolbar.setTitleTextColor(ProgressUi.INK);toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
-        toolbar.setNavigationIconTint(ProgressUi.INK);toolbar.setNavigationContentDescription(R.string.back);toolbar.setNavigationOnClickListener(v->finish());
-        toolbar.getMenu().add(0,100,0,R.string.pr_refresh);toolbar.setOnMenuItemClickListener(item->{load();return true;});root.addView(toolbar);
+        toolbar.setTitle(R.string.ui_weight_journal);toolbar.setTitleTextColor(ProgressUi.ink(this));toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
+        toolbar.setNavigationIconTint(ProgressUi.ink(this));toolbar.setNavigationContentDescription(R.string.back);toolbar.setNavigationOnClickListener(v->finish());
+        toolbar.getMenu().add(0,100,0,R.string.pr_refresh);toolbar.setOnMenuItemClickListener(item->{load();return true;});root.addView(toolbar);ProgressUi.toolbar(this,toolbar);
         Spinner period=new Spinner(this);period.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,getResources().getStringArray(R.array.wh_ranges)));root.addView(period);period.setSelection(Math.max(0,Math.min(3,range)));
         period.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onItemSelected(AdapterView<?> p,View v,int position,long id){range=position;shown=100;render();}public void onNothingSelected(AdapterView<?> p){}});
         add=ProgressUi.button(this,root,R.string.wh_add,()->edit(null));add.setEnabled(false);
@@ -40,7 +40,7 @@ public final class WeightHistoryActivity extends AppCompatActivity {
         Tasks.whenAll(history,user).addOnSuccessListener(this,unused->{if(!current(request))return;if(!user.getResult().exists()){failed=true;render();return;}entries=history.getResult();profile=user.getResult().getData();render();})
                 .addOnFailureListener(this,error->{if(!current(request))return;failed=true;render();});
     }
-    private void render(){if(body==null||export==null)return;body.removeAllViews();add.setEnabled(entries!=null&&!saving);export.setEnabled(false);displayed=new ArrayList<>();
+    private void render(){if(body==null||export==null)return;body.removeAllViews();ProgressUi.hero(this,body,R.string.ui_weight_journal,R.string.ui_weight_intro);add.setEnabled(entries!=null&&!saving);export.setEnabled(false);displayed=new ArrayList<>();
         if(entries==null){LinearLayout c=ProgressUi.card(this,body,null);ProgressUi.text(this,c,getString(failed?R.string.wh_load_error:R.string.fl_loading),16,false);if(failed)ProgressUi.button(this,c,R.string.fl_retry,this::load);return;}
         LinearLayout c=ProgressUi.card(this,body,getString(R.string.pr_weight));
         if(entries.isEmpty())ProgressUi.text(this,c,getString(R.string.wh_empty),17,false);else{
@@ -59,9 +59,9 @@ public final class WeightHistoryActivity extends AppCompatActivity {
         LinearLayout form=ProgressUi.column(this);form.setBackgroundColor(android.graphics.Color.WHITE);int pad=ProgressUi.dp(this,18);form.setPadding(pad,pad,pad,pad);
         String[] day={original==null?LocalDate.now().toString():original.day};long[] revision={original==null?(entries.containsKey(day[0])?entries.get(day[0]).revision:0):original.revision};
         Button date=ProgressUi.button(this,form,R.string.wh_date,()->{});date.setText(day[0]);date.setEnabled(original==null);
-        TextView label=ProgressUi.text(this,form,getString(R.string.wh_kg),16,false);EditText weight=new EditText(this);weight.setId(View.generateViewId());weight.setTextColor(ProgressUi.INK);label.setLabelFor(weight.getId());weight.setInputType(android.text.InputType.TYPE_CLASS_NUMBER|android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);form.addView(weight);
+        TextView label=ProgressUi.text(this,form,getString(R.string.wh_kg),16,false);EditText weight=new EditText(this);weight.setId(View.generateViewId());weight.setTextColor(ProgressUi.ink(this));label.setLabelFor(weight.getId());weight.setInputType(android.text.InputType.TYPE_CLASS_NUMBER|android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);form.addView(weight);
         WeightHistoryService.Entry initial=original==null?entries.get(day[0]):original;if(initial!=null)weight.setText(String.valueOf(initial.kg));
-        CheckBox update=new CheckBox(this);update.setText(R.string.wh_update_profile);update.setTextColor(ProgressUi.INK);update.setChecked(day[0].equals(LocalDate.now().toString()));form.addView(update);
+        CheckBox update=new CheckBox(this);update.setText(R.string.wh_update_profile);update.setTextColor(ProgressUi.ink(this));update.setChecked(day[0].equals(LocalDate.now().toString()));form.addView(update);
         ProgressUi.text(this,form,getString(R.string.wh_save_note),14,false);TextView error=ProgressUi.text(this,form,"",15,false);
         date.setOnClickListener(v->{LocalDate selected=LocalDate.parse(day[0]);android.app.DatePickerDialog picker=new android.app.DatePickerDialog(this,(d,y,m,dd)->{day[0]=LocalDate.of(y,m+1,dd).toString();date.setText(day[0]);WeightHistoryService.Entry existing=entries.get(day[0]);revision[0]=existing==null?0:existing.revision;weight.setText(existing==null?"":String.valueOf(existing.kg));update.setChecked(day[0].equals(LocalDate.now().toString()));},selected.getYear(),selected.getMonthValue()-1,selected.getDayOfMonth());picker.getDatePicker().setMaxDate(System.currentTimeMillis());picker.show();});
         String[] mutation={UUID.randomUUID().toString()},payload={""};

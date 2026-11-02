@@ -3,7 +3,7 @@
     android:id="@+id/foodRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true" android:background="@color/gm_canvas">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <Button
+        <Button style="@style/FoodSecondaryAction"
             android:id="@+id/foodBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,6 +21,7 @@
             style="@style/FoodHeading"
             android:text="@string/fl_details" />
 
+        <TextView style="@style/FoodBody" android:text="@string/ui_food_details_intro" />
         <TextView
             android:id="@+id/foodDetailsName"
             style="@style/FoodHeading" />
@@ -35,16 +36,16 @@
 
         <TextView android:id="@+id/foodRecommendationContext"
             style="@style/FoodBody" android:visibility="gone" />
-        <Button android:id="@+id/foodRecommendationPreference"
+        <Button style="@style/FoodPrimaryAction" android:id="@+id/foodRecommendationPreference"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="@string/fr_food_preference" android:visibility="gone" />
 
-        <Button android:id="@+id/foodPersonalServings" android:layout_width="match_parent"
+        <Button style="@style/FoodSecondaryAction" android:id="@+id/foodPersonalServings" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:text="@string/ps_choose" />
-        <Button android:id="@+id/foodSaveServing" android:layout_width="match_parent"
+        <Button style="@style/FoodSecondaryAction" android:id="@+id/foodSaveServing" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:text="@string/ps_save" />
         <TextView style="@style/FoodBody" android:text="@string/ps_note" />
-        <Button android:id="@+id/foodNutritionSource" android:layout_width="match_parent"
+        <Button style="@style/FoodSecondaryAction" android:id="@+id/foodNutritionSource" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:text="@string/na_personal" />
         <TextView android:id="@+id/foodNutritionNote" style="@style/FoodBody" />
         <CheckBox android:id="@+id/foodUnknownCalories" android:layout_width="match_parent"
@@ -229,28 +230,28 @@
 
         </LinearLayout>
 
-        <Button
+        <Button style="@style/FoodPrimaryAction"
             android:id="@+id/foodLogButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
             android:text="@string/fl_log" />
 
-        <Button
+        <Button style="@style/FoodPrimaryAction"
             android:id="@+id/foodRetry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/fl_retry"
             android:visibility="gone" />
 
-        <Button
+        <Button style="@style/FoodPrimaryAction"
             android:id="@+id/barcodeSaveProduct"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/sb_add"
             android:visibility="gone" />
 
-        <Button
+        <Button style="@style/FoodPrimaryAction"
             android:id="@+id/barcodeManualFallback"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

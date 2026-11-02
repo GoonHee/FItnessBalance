@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/gm_canvas">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <Button
+        <Button style="@style/FoodSecondaryAction"
             android:id="@+id/foodBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -20,22 +20,23 @@
 
         <TextView
             style="@style/FoodHeading"
-            android:text="@string/fl_title" />
+            android:text="@string/ui_food_title" />
 
-        <Button
+        <TextView style="@style/FoodBody" android:text="@string/ui_food_intro" />
+        <Button style="@style/FoodSecondaryAction"
             android:id="@+id/foodDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/fl_date"
             android:visibility="visible" />
 
-        <Button
+        <Button style="@style/FoodPrimaryAction"
             android:id="@+id/foodSuggestions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/fr_title" />
 
-        <LinearLayout style="@style/FoodPanel">
+        <LinearLayout style="@style/FoodPanel" android:background="@drawable/reward_panel_teal">
 
             <TextView
                 style="@style/FoodHeading"
@@ -53,6 +54,7 @@
 
         <LinearLayout style="@style/FoodPanel">
 
+            <TextView style="@style/FoodHeading" android:text="@string/ui_food_find" />
             <EditText
                 android:id="@+id/foodSearchInput"
                 android:layout_width="match_parent"
@@ -63,19 +65,19 @@
                 android:imeOptions="actionSearch"
                 android:maxLines="1" />
 
-            <Button
+            <Button style="@style/FoodPrimaryAction"
                 android:id="@+id/foodSearchButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/fl_search" />
 
-            <Button
+            <Button style="@style/FoodSecondaryAction"
                 android:id="@+id/foodBarcodeScan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/bc_scan" />
 
-            <Button
+            <Button style="@style/FoodSecondaryAction"
                 android:id="@+id/foodBarcodeEnter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -96,7 +98,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
-            <Button
+            <Button style="@style/FoodPrimaryAction"
                 android:id="@+id/foodMore"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -105,7 +107,7 @@
 
         </LinearLayout>
 
-        <Button android:id="@+id/foodSavedMeals"
+        <Button style="@style/FoodPrimaryAction" android:id="@+id/foodSavedMeals"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="@string/library_title" />
 
@@ -118,7 +120,7 @@
             style="@style/FoodBody"
             android:accessibilityLiveRegion="polite" />
 
-        <Button
+        <Button style="@style/FoodPrimaryAction"
             android:id="@+id/foodRetry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

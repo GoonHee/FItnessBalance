@@ -1,0 +1,17 @@
+<resources>
+<string name="ui_food_title">Food journal</string><string name="ui_food_intro">Find a food, choose your portion, and keep your day in view.</string>
+<string name="ui_food_find">Find your next food</string><string name="ui_food_group">%1$s · %2$d entries</string>
+<string name="ui_progress_title">Progress studio</string><string name="ui_progress_intro">Your week in focus</string><string name="ui_progress_note">Explore your recorded food, activity and measurements. Missing data stays visible.</string>
+<string-array name="ui_progress_sections"><item>Week journal</item><item>Food energy</item><item>Nutrient ledger</item><item>Macro balance</item></string-array>
+<string name="ui_week_snapshot">Week at a glance</string><string name="ui_food_average">Average available food energy</string><string name="ui_exercise_total">Logged exercise estimate</string>
+<string name="ui_coverage">Calorie availability</string><string name="ui_coverage_count">%1$d of %2$d recorded food entries have calorie values.</string>
+<string name="ui_coverage_legacy">Some older summaries have unknown entry coverage.</string>
+<string name="ui_days_recorded">Food data is recorded on %1$d days in this week. This does not confirm that every meal was logged.</string>
+<string name="ui_day_trail">Your daily journal</string><string name="ui_day_values">Food: %1$s kcal · Logged exercise: %2$s kcal</string>
+<string name="ui_weight_journal">Weight journal</string><string name="ui_weight_intro">Your recorded measurements, on your timeline.</string>
+<string name="ui_food_sources">Where recorded energy came from</string><string name="ui_food_sources_note">Top five foods by available recorded calories in this week.</string>
+<string name="ui_nutrient_coverage">Available in %1$d of %2$d recorded entries.</string>
+<string name="ui_library_intro">Your reusable food collection</string><string name="ui_library_note">Saved meals keep familiar portions. Recipes divide ingredient nutrition by your chosen yield.</string>
+<string name="ui_recipe_intro">Build a dish, one ingredient at a time</string>
+<string name="ui_food_details_intro">Review the portion and source before logging.</string>
+</resources>
