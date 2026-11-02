@@ -113,6 +113,7 @@ public final class HealthConnectActivity extends AppCompatActivity {
                 }
                 try { store.write(snapshot); } catch (java.io.IOException e) { status.setText(R.string.hc_cache_error); }
                 if(!granted.contains(HealthConnectBridge.EXERCISE))try(WearableWorkoutStore workouts=new WearableWorkoutStore(HealthConnectActivity.this)){workouts.clear(uid);}catch(RuntimeException error){status.setText(R.string.hc_cache_error);}
+                if(granted.contains(HealthConnectBridge.EXERCISE)&&!granted.contains(HealthConnectBridge.ACTIVE_CALORIES))try(WearableWorkoutStore workouts=new WearableWorkoutStore(HealthConnectActivity.this)){workouts.removeCalories(uid);}
                 busy = false; render();
             }
             @Override public void onError() {

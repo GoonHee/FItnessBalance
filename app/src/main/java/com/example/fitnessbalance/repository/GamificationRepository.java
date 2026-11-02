@@ -152,7 +152,8 @@ public final class GamificationRepository {
                   day,
                   session,
                   (int) Math.round(calories),
-                  activeDuration);
+                  activeDuration,
+                  start.getTimestamp("startedAt").toDate().getTime());
               for (int n = 0; n < 3; n++)
                 if (eligible[n] && !quests.get(n).exists())
                   tx.set(

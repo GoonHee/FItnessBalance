@@ -20,6 +20,10 @@ public final class WearableWorkoutService {
             long from=number(row.get("start")),to=number(row.get("end")),modified=number(row.get("modified")),type=number(row.get("type"));
             if(from<start||from>=end||to<=from||to>end||modified<0||type<0||type>Integer.MAX_VALUE)throw new IllegalArgumentException("Invalid interval");
             Map<String,Object> record=new HashMap<>();record.put("id",id);record.put("source",source);record.put("activity",activity);record.put("title",title);record.put("start",from);record.put("end",to);record.put("modified",modified);record.put("type",type);
+            String calorieState=Objects.toString(row.get("calorieState"),"unavailable");
+            if(!Arrays.asList("available","unavailable","permission_required","error").contains(calorieState))throw new IllegalArgumentException("Invalid calorie state");
+            record.put("calorieState",calorieState);
+            if("available".equals(calorieState)){Object v=row.get("activeCalories");if(!(v instanceof Number)||!Double.isFinite(((Number)v).doubleValue())||((Number)v).doubleValue()<0||((Number)v).doubleValue()>200000)throw new IllegalArgumentException("Invalid active calories");record.put("activeCalories",((Number)v).doubleValue());}
             Map<String,Object> old=unique.get(id);if(old!=null&&!source.equals(old.get("source")))throw new IllegalArgumentException("Conflicting record identity");
             if(old==null||modified>=number(old.get("modified")))unique.put(id,record);
         }

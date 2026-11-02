@@ -128,6 +128,30 @@ public final class ExerciseLogRepository {
             });
   }
 
+  /** Explicit confirmation only. A permanent receipt prevents cross-device/retry duplication. */
+  public Task<ActivityDay> confirmWearable(Map<String,Object> plan,Map<String,Object> session) {
+    final Map<String,Object> entry;final String day,key;
+    try {
+      entry=com.example.fitnessbalance.health.WearableWorkoutLinkService.entry(plan,session,java.time.ZoneId.systemDefault(),System.currentTimeMillis());
+      day=(String)entry.get("localDay");key=com.example.fitnessbalance.health.WearableWorkoutLinkService.key(session);validateDay(day);
+    }catch(RuntimeException e){return Tasks.forException(e);}
+    // A guided session can end after midnight. Read a full possible guided duration beyond
+    // this session, then compare actual intervals inside the confirmation transaction.
+    long from=((Number)entry.get("startedAtMillis")).longValue(),to=((Number)entry.get("endedAtMillis")).longValue();
+    return user.collection(RECORDS).whereGreaterThanOrEqualTo("completedAt",new Date(from))
+      .whereLessThanOrEqualTo("completedAt",new Date(to+86400000L)).limit(501).get(Source.SERVER).continueWithTask(task->{
+        if(!task.isSuccessful())return Tasks.forException(task.getException());
+        if(task.getResult().size()>500)return Tasks.forException(new IllegalStateException("Too many workouts to check. Confirmation stopped."));
+        for(DocumentSnapshot doc:task.getResult()) {
+          com.google.firebase.Timestamp a=doc.getTimestamp("startedAt"),b=doc.getTimestamp("completedAt");
+          if(a==null||b==null)return Tasks.forException(new IllegalStateException("A guided workout has incomplete timing. Review its log before importing."));
+          if(com.example.fitnessbalance.health.WearableWorkoutService.overlaps(from,to,a.toDate().getTime(),b.toDate().getTime()))
+            return Tasks.forException(new IllegalStateException("This overlaps a counted guided workout. It cannot be counted again."));
+        }
+        return guidedRecords(day).continueWithTask(records->{if(!records.isSuccessful())return Tasks.forException(records.getException());return write(day,records.getResult(),key,0,entry,true,false,key);});
+      });
+  }
+
   private Task<ActivityDay> write(
       String day,
       List<Map<String, Object>> guided,
@@ -136,16 +160,35 @@ public final class ExerciseLogRepository {
       Map<String, Object> entry,
       boolean add,
       boolean remove) {
+    return write(day,guided,id,revision,entry,add,remove,null);
+  }
+
+  private Task<ActivityDay> write(String day,List<Map<String,Object>> guided,String id,int revision,
+      Map<String,Object> entry,boolean add,boolean remove,String wearableKey) {
     DocumentReference manualRef = user.collection(MANUAL_LOGS).document(day),
         dailyRef = user.collection(DAILY_DATA).document(day);
     return db.runTransaction(
         tx -> {
+          DocumentReference receipt=wearableKey==null?null:user.collection("wearableWorkoutLinks").document(wearableKey);
+          if(receipt!=null&&tx.get(receipt).exists())throw new IllegalStateException("This wearable session was already recorded. Check the activity log; it will not be counted again.");
           DocumentSnapshot manual = tx.get(manualRef), daily = tx.get(dailyRef);
+          // Serialise against guided completions, which also update this daily document.
+          if(receipt!=null&&daily.contains("lastGuidedCompletedAt")) {
+            Long completed=daily.getLong("lastGuidedCompletedAt");
+            if(completed!=null&&completed>=((Number)entry.get("startedAtMillis")).longValue())
+              throw new IllegalStateException("A guided workout was completed on this date. Review its log before importing.");
+          }
           List<Map<String, Object>> entries =
               service.manualEntries(
                   day,
                   manual.getData() == null ? Collections.emptyMap() : manual.getData(),
                   daily.getData() == null ? Collections.emptyMap() : daily.getData());
+          if(receipt!=null)for(Map<String,Object> row:entries){
+            if("health_connect".equals(row.get("source"))&&Boolean.TRUE.equals(row.get("completed"))
+                && row.get("startedAtMillis") instanceof Number&&row.get("endedAtMillis") instanceof Number
+                && com.example.fitnessbalance.health.WearableWorkoutService.overlaps(((Number)entry.get("startedAtMillis")).longValue(),((Number)entry.get("endedAtMillis")).longValue(),((Number)row.get("startedAtMillis")).longValue(),((Number)row.get("endedAtMillis")).longValue()))
+              throw new IllegalStateException("An overlapping wearable workout is already counted. Review the activity log.");
+          }
           if (id != null) entries = service.mutate(entries, id, revision, entry, add, remove);
           Map<String, Object> contributions =
               service.contributions(daily.get("structuredExerciseContributions"));
@@ -173,6 +216,7 @@ public final class ExerciseLogRepository {
           if (id != null || manual.exists() || daily.exists() || !guided.isEmpty())
             tx.set(
                 dailyRef, update, SetOptions.mergeFields(update.keySet().toArray(new String[0])));
+          if(receipt!=null)tx.set(receipt,Values.of("date",day,"entryId",id,"createdAt",FieldValue.serverTimestamp()));
           return new ActivityDay(
               day, entries, guided, totals, Values.integer(daily.get("caloriesConsumed"), 0));
         });
@@ -187,7 +231,8 @@ public final class ExerciseLogRepository {
       String day,
       String session,
       int calories,
-      int activeSeconds) {
+      int activeSeconds,
+      long startedAtMillis) {
     ExerciseLogService service = new ExerciseLogService();
     List<Map<String, Object>> entries =
         service.manualEntries(
@@ -200,8 +245,15 @@ public final class ExerciseLogRepository {
         contributions,
         session,
         Values.of("estimatedCaloriesBurned", calories, "activeDurationSeconds", activeSeconds));
+    // If an import wins the race with a guided completion, retain the guided result/rewards
+    // but suppress its second daily calorie/time contribution.
+    for(Map<String,Object> row:entries)if("health_connect".equals(row.get("source"))&&Boolean.TRUE.equals(row.get("completed"))
+        && row.get("startedAtMillis") instanceof Number&&row.get("endedAtMillis") instanceof Number
+        && com.example.fitnessbalance.health.WearableWorkoutService.overlaps(startedAtMillis,System.currentTimeMillis(),((Number)row.get("startedAtMillis")).longValue(),((Number)row.get("endedAtMillis")).longValue()))
+      contributions.put(session,Values.of("calories",0,"activeSeconds",0,"suppressedByWearable",true,"wearableEntryId",row.get("entryId"),"originalCalories",calories,"originalActiveSeconds",activeSeconds));
     Map<String, Object> update = service.totals(entries, contributions);
     update.put("structuredExerciseContributions", contributions);
+    update.put("lastGuidedCompletedAt",System.currentTimeMillis());
     update.put("lastUpdated", FieldValue.serverTimestamp());
     tx.set(dailyRef, update, SetOptions.mergeFields(update.keySet().toArray(new String[0])));
   }

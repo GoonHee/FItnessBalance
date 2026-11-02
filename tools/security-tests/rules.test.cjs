@@ -126,3 +126,32 @@ test('personal nutrition validates reference metadata identity and revisions',as
 test('alternative nutrition requires explicit source identity and keeps private source kind',async()=>{const r=ref(db(),'foodNutrition/missing'),data=personalLabel();delete data.label_amount;delete data.label_unit;delete data.label_nutrition;Object.assign(data,{source_kind:'alternative',nutrition_verification:'approximate_substitution',alternativeFoodId:'other',alternativeName:'Similar cooked food'});await assertSucceeds(setDoc(r,data));assert.equal((await getDoc(r)).data().source_kind,'alternative')});
 test('unknown calorie log and coverage metadata remain authorized without zero nutrient values',async()=>{const d=db(),batch=writeBatch(d);batch.set(ref(d,`foodLogs/${DAY}`),{foodItems:[{entryId:'unknown',name:'Unknown meal',nutrients:{},calculationMode:'unknown',nutritionStatus:'calories_unavailable'}],totalCalories:0,nutrientTotals:{},nutrientCoverage:{energy_kcal:0},knownCalorieCount:0,missingCalorieCount:1,caloriesComplete:false});batch.set(ref(d,`dailyData/${DAY}`),{caloriesConsumed:0,foodEntryCount:1,nutrientTotals:{},nutrientCoverage:{energy_kcal:0},knownCalorieCount:0,missingCalorieCount:1,caloriesComplete:false},{merge:true});await assertSucceeds(batch.commit());const row=(await getDoc(ref(d,`foodLogs/${DAY}`))).data().foodItems[0];assert.equal(Object.hasOwn(row.nutrients,'energy_kcal'),false);assert.equal((await getDoc(ref(d,`dailyData/${DAY}`))).data().caloriesComplete,false)});
 test('confirmed source reference uses existing private nutrition schema',async()=>{const data=personalLabel();Object.assign(data,{source_database:'User-confirmed source reference',source_note:'Confirmed source header: per 100 g',label_amount:100,label_nutrition:{energy_kcal:130,protein_g:2.3},nutrition:{energy_kcal:130,protein_g:2.3}});const refData=ref(db(),'foodNutrition/missing');await assertSucceeds(setDoc(refData,data));assert.equal((await getDoc(refData)).data().nutrition.energy_kcal,130)});
+
+test('wearable confirmation receipt is private and immutable',async()=>{
+ const id='wearable_'+'a'.repeat(64),d=db(),r=ref(d,`wearableWorkoutLinks/${id}`);
+ const value={date:DAY,entryId:id,createdAt:serverTimestamp()};
+ await assertSucceeds(setDoc(r,value));await assertSucceeds(getDoc(r));
+ await assertFails(getDoc(ref(db('bob'),`wearableWorkoutLinks/${id}`)));
+ await assertFails(updateDoc(r,{date:'2026-10-29'}));await assertFails(deleteDoc(r));
+});
+test('wearable receipt rejects malformed IDs and payloads',async()=>{
+ const d=db(),id='wearable_'+'b'.repeat(64),value={date:DAY,entryId:id,createdAt:serverTimestamp()};
+ await assertFails(setDoc(ref(d,'wearableWorkoutLinks/random'),value));
+ await assertFails(setDoc(ref(d,`wearableWorkoutLinks/${id}`),{...value,entryId:'different'}));
+ await assertFails(setDoc(ref(d,`wearableWorkoutLinks/${id}`),{...value,xpEarned:50}));
+ await assertFails(setDoc(ref(d,`wearableWorkoutLinks/${id}`),{...value,createdAt:Timestamp.fromMillis(1)}));
+});
+test('anonymous and other users cannot create wearable receipts',async()=>{
+ const id='wearable_'+'c'.repeat(64),value={date:DAY,entryId:id,createdAt:serverTimestamp()};
+ await assertFails(setDoc(ref(env.unauthenticatedContext().firestore(),`wearableWorkoutLinks/${id}`),value));
+ await assertFails(setDoc(ref(db('bob'),`wearableWorkoutLinks/${id}`),value));
+});
+test('wearable confirmation can atomically save activity, totals and receipt',async()=>{
+ const d=db(),id='wearable_'+'d'.repeat(64),b=writeBatch(d);
+ b.set(ref(d,`wearableWorkoutLinks/${id}`),{date:DAY,entryId:id,createdAt:serverTimestamp()});
+ b.set(ref(d,`exerciseLogs/${DAY}`),{exercises:[{entryId:id,name:'Running',duration:30,calories:180,completed:true,source:'health_connect',calorieSource:'wearable_active'}],totalCaloriesBurned:180});
+ b.set(ref(d,`dailyData/${DAY}`),{manualCaloriesBurned:180,caloriesBurned:180,exerciseActiveSeconds:1800,exerciseEntryCount:1},{merge:true});
+ await assertSucceeds(b.commit());assert.equal((await getDoc(ref(d,`dailyData/${DAY}`))).data().caloriesBurned,180);
+ const retry=writeBatch(d);retry.set(ref(d,`wearableWorkoutLinks/${id}`),{date:DAY,entryId:id,createdAt:serverTimestamp()});retry.set(ref(d,`dailyData/${DAY}`),{caloriesBurned:360},{merge:true});
+ await assertFails(retry.commit());assert.equal((await getDoc(ref(d,`dailyData/${DAY}`))).data().caloriesBurned,180);
+});

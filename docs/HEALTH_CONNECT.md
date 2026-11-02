@@ -1,6 +1,8 @@
+Current wearable workout confirmation, active-calorie permission, Firebase storage consent and rule requirements are documented in [Workout confirmation](WEARABLE_WORKOUT_LINKING.md). The summary-only storage statements below apply to automatic sync, not explicitly confirmed account activity entries.
+
 # Wearable workout update
 
-Exercise-session imports are now supported as a separate local seven-day cache. See [Wearable workouts](WEARABLE_WORKOUTS.md) for the current permission, import and duplicate-review behavior. Imported workouts do not add calories or XP.
+Exercise-session imports are now supported as a separate local seven-day cache. See [Wearable workouts](WEARABLE_WORKOUTS.md) for the current permission, import and duplicate-review behavior. Sync alone does not add calories or XP. Explicit workout confirmation can save duration and active calories; see [Workout confirmation](WEARABLE_WORKOUT_LINKING.md).
 
 # Health Connect: foreground summary module
 
@@ -10,7 +12,7 @@ Open **Profile → Connect health data**. Install/update Health Connect if promp
 
 - AndroidX Health Connect client 1.1.0, read-only. The library requires minSdk 26, so the app minimum increases from 23 to 26. Compatible Android 9+ devices can use Health Connect; Android 8 can run the app but receives the unavailable screen. Android 14+ normally provides Health Connect through the system; compatible older versions need the provider app.
 - Java screen, cache and freshness policy; one small Kotlin bridge calls the SDK's official suspend APIs. The repository already uses the Kotlin Android plugin. This does not convert the existing application screens to Kotlin.
-- Declares READ_STEPS, READ_SLEEP, READ_HEART_RATE and READ_EXERCISE. No background/history access, calorie access or health writes. Exercise sessions use the separate seven-day import described above.
+- Declares READ_STEPS, READ_SLEEP, READ_HEART_RATE READ_EXERCISE and READ_ACTIVE_CALORIES_BURNED. No background/history access or health writes. Exercise sessions use the separate seven-day import described above.
 - Android 13 rationale intent and Android 14+ permission-usage alias open the same public explanation screen; that activity never displays user data.
 
 ## Windows and data meaning
@@ -31,7 +33,7 @@ Permission checks mask and remove revoked metric values from the local cache. Re
 
 Nothing writes exerciseLogs, workoutRecords, dailyData, caloriesBurned, goals, XP or achievements. Fresh sleep summaries can influence recommendations only after separate opt-in on Exercise; see ADAPTIVE_RECOMMENDATIONS.md. This separation prevents exercise calorie double counting and provides a foundation for later adaptive logic without implying it already exists.
 
-No Firebase schema, rule deployment, service account or seed is needed. First-time library downloads require Gradle network access. This change does not establish production Health Connect/Play distribution approval.
+Summary-only sync needs no Firebase schema or rule changes. Explicit wearable confirmation requires the updated receipt rules described in WEARABLE_WORKOUT_LINKING.md; no service account or seed is needed. First-time library downloads require Gradle network access. This change does not establish production Health Connect/Play distribution approval.
 
 ## Device acceptance checklist
 

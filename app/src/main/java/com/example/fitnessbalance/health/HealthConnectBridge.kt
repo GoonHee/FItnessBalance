@@ -72,6 +72,7 @@ class HealthConnectBridge(context: Context) {
         snapshot["workouts"] = workouts(granted, now)
         val after = client.permissionController.getGrantedPermissions()
         if (EXERCISE !in after) snapshot["workouts"] = mapOf("state" to "permission_required")
+        else if (ACTIVE_CALORIES !in after) snapshot["workouts"] = withoutCalories(snapshot["workouts"])
         for ((key, permission) in mapOf("steps" to STEPS, "sleep" to SLEEP, "heart" to HEART)) {
             if (permission !in after) snapshot[key] = mapOf("state" to "permission_required")
         }
@@ -86,6 +87,7 @@ class HealthConnectBridge(context: Context) {
         var workouts = workouts(granted, Instant.now())
         val after = client.permissionController.getGrantedPermissions()
         if (EXERCISE !in after) workouts = mapOf("state" to "permission_required")
+        else if (ACTIVE_CALORIES !in after) workouts = withoutCalories(workouts)
         callback.onResult(mapOf("workouts" to workouts), after)
     }
 
@@ -93,7 +95,7 @@ class HealthConnectBridge(context: Context) {
         if (EXERCISE !in granted) return mapOf("state" to "permission_required")
         return try {
             val start = now.minus(Duration.ofDays(7))
-            val rows = mutableListOf<Map<String, Any?>>()
+            val rows = mutableListOf<MutableMap<String, Any?>>()
             var token: String? = null
             var pages = 0
             do {
@@ -103,19 +105,55 @@ class HealthConnectBridge(context: Context) {
                 for (record in response.records) {
                     // This rolling cache contains completed sessions starting inside the window.
                     if (record.startTime.isBefore(start) || !record.startTime.isBefore(now) || record.endTime.isAfter(now)) continue
-                    rows.add(mapOf("id" to record.metadata.id, "source" to record.metadata.dataOrigin.packageName,
+                    val row = mutableMapOf<String, Any?>("id" to record.metadata.id, "source" to record.metadata.dataOrigin.packageName,
                         "type" to record.exerciseType, "activity" to activityName(record.exerciseType),
                         "title" to (record.title ?: "").take(200), "start" to record.startTime.toEpochMilli(),
-                        "end" to record.endTime.toEpochMilli(), "modified" to record.metadata.lastModifiedTime.toEpochMilli()))
+                        "end" to record.endTime.toEpochMilli(), "modified" to record.metadata.lastModifiedTime.toEpochMilli())
+                    row["calorieState"] = if (ACTIVE_CALORIES in granted) "unavailable" else "permission_required"
+                    rows.add(row)
                     if (rows.size > 1000) error("Exercise read limit exceeded")
                 }
                 token = response.pageToken
             } while (token != null)
+            if (ACTIVE_CALORIES in granted) {
+                try {
+                    val energy = mutableListOf<ActiveCaloriesBurnedRecord>()
+                    var energyToken: String? = null
+                    var energyPages = 0
+                    do {
+                        if (++energyPages > 20) error("Incomplete active calorie read")
+                        val page = client.readRecords(ReadRecordsRequest(ActiveCaloriesBurnedRecord::class,
+                            TimeRangeFilter.between(start, now), pageSize = 1000, pageToken = energyToken))
+                        energy.addAll(page.records)
+                        if (energy.size > 10000) error("Active calorie limit exceeded")
+                        energyToken = page.pageToken
+                    } while (energyToken != null)
+                    val intervals = energy.map { r -> mapOf<String, Any>("source" to r.metadata.dataOrigin.packageName,
+                        "start" to r.startTime.toEpochMilli(), "end" to r.endTime.toEpochMilli(),
+                        "kcal" to r.energy.inKilocalories) }
+                    for (row in rows) {
+                        val overlapping = rows.any { other -> other !== row && other["source"] == row["source"] &&
+                            WearableWorkoutService.overlaps(row["start"] as Long,row["end"] as Long,other["start"] as Long,other["end"] as Long) }
+                        if (overlapping) continue
+                        val kcal = WearableWorkoutLinkService.matchCalories(row, intervals)
+                        if (kcal != null) { row["activeCalories"] = kcal; row["calorieState"] = "available" }
+                    }
+                } catch (cancel: CancellationException) { throw cancel }
+                  catch (_: SecurityException) { rows.forEach { it["calorieState"] = "permission_required" } }
+                  catch (_: Exception) { rows.forEach { it["calorieState"] = "error" } }
+            }
             mapOf("state" to "available", "windowStart" to start.toEpochMilli(), "windowEnd" to now.toEpochMilli(),
                 "syncedAt" to Instant.now().toEpochMilli(), "records" to rows)
         } catch (cancel: CancellationException) { throw cancel }
           catch (_: SecurityException) { mapOf("state" to "permission_required") }
           catch (_: Exception) { mapOf("state" to "error") }
+    }
+
+    private fun withoutCalories(raw: Any?): Map<String, Any?> {
+        @Suppress("UNCHECKED_CAST") val data = (raw as? Map<String, Any?>)?.toMutableMap() ?: return emptyMap()
+        @Suppress("UNCHECKED_CAST") val rows = data["records"] as? List<Map<String, Any?>> ?: return data
+        data["records"] = rows.map { it.toMutableMap().apply { remove("activeCalories"); put("calorieState", "permission_required") } }
+        return data
     }
 
     private suspend fun <T : Record> latest(type: KClass<T>, range: TimeRangeFilter, event: (T) -> Instant?): Long? {
@@ -159,11 +197,12 @@ class HealthConnectBridge(context: Context) {
             ExerciseSessionRecord.EXERCISE_TYPE_OTHER_WORKOUT -> "Other workout"
             else -> "Workout (type $type)"
         }
+        @JvmField val ACTIVE_CALORIES = HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class)
         @JvmField val EXERCISE = HealthPermission.getReadPermission(ExerciseSessionRecord::class)
         @JvmField val STEPS = HealthPermission.getReadPermission(StepsRecord::class)
         @JvmField val SLEEP = HealthPermission.getReadPermission(SleepSessionRecord::class)
         @JvmField val HEART = HealthPermission.getReadPermission(HeartRateRecord::class)
-        @JvmStatic fun permissions(): Set<String> = setOf(STEPS, SLEEP, HEART, EXERCISE)
+        @JvmStatic fun permissions(): Set<String> = setOf(STEPS, SLEEP, HEART, EXERCISE, ACTIVE_CALORIES)
         @JvmStatic fun availability(context: Context): Int = HealthConnectClient.getSdkStatus(context)
         @JvmStatic fun permissionContract(): ActivityResultContract<Set<String>, Set<String>> = PermissionController.createRequestPermissionResultContract()
         @JvmStatic fun settings(context: Context): Intent = HealthConnectClient.getHealthConnectManageDataIntent(context)

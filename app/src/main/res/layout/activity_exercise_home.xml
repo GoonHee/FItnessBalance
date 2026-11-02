@@ -159,7 +159,7 @@
                         android:text="@string/al_loading" />
                 </LinearLayout>
                 <com.google.android.material.button.MaterialButton android:id="@+id/exWearableWorkouts"
-                    style="@style/ExerciseButton" android:text="@string/ww_title" />
+                    style="@style/ExerciseButton" android:text="@string/ww_track" />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/exPath"
                     style="@style/ExerciseButton"

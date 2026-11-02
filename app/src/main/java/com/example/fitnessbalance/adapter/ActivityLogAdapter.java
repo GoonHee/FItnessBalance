@@ -58,8 +58,9 @@ public final class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAd
   public void onBindViewHolder(@NonNull Holder h, int position) {
     Map<String, Object> row = rows.get(position);
     boolean manual = position < manualCount;
+    boolean wearable=manual&&"health_connect".equals(row.get("source"));
     Context c = h.itemView.getContext();
-    h.source.setText(manual ? R.string.al_manual : R.string.al_guided);
+    h.source.setText(wearable?R.string.ww_logged_source:manual ? R.string.al_manual : R.string.al_guided);
     String name = Values.text(row.get(manual ? "name" : "lessonName"), "");
     h.name.setText(
         name.isEmpty() ? c.getString(manual ? R.string.al_legacy : R.string.al_guided) : name);
@@ -72,6 +73,7 @@ public final class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAd
         manual && Boolean.TRUE.equals(row.get("legacySummary"))
             ? c.getString(R.string.al_legacy_duration, calories)
             : c.getString(R.string.al_row, minutes, calories));
+    if(wearable)h.details.setText(c.getString(R.string.ww_logged_duration,minutes)+" · "+("unavailable".equals(row.get("calorieSource"))?c.getString(R.string.ww_logged_unknown):c.getString(R.string.ww_energy,String.format(Locale.getDefault(),"%.1f",calories))));
     h.state.setText(
         manual
             ? c.getString(
@@ -86,7 +88,7 @@ public final class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAd
                 + c.getString(
                     R.string.al_guided_completion,
                     Values.decimal(row.get("completionPercentage"), 0)));
-    h.edit.setVisibility(manual ? View.VISIBLE : View.GONE);
+    h.edit.setVisibility(manual&&!wearable ? View.VISIBLE : View.GONE);
     h.delete.setVisibility(manual ? View.VISIBLE : View.GONE);
     h.view.setVisibility(manual ? View.GONE : View.VISIBLE);
     h.edit.setOnClickListener(v -> actions.edit(row));

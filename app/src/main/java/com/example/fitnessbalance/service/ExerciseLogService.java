@@ -129,6 +129,8 @@ public final class ExerciseLogService {
 
   public void guided(
       Map<String, Object> contributions, String recordId, Map<String, Object> record) {
+    Map<String,Object> existing=Values.map(contributions.get(recordId));
+    if(Boolean.TRUE.equals(existing.get("suppressedByWearable")))return;
     double calories = number(record.get("estimatedCaloriesBurned"), 0);
     double seconds = number(record.get("activeDurationSeconds"), 0);
     contributions.put(recordId, Values.of("calories", calories, "activeSeconds", seconds));
@@ -136,9 +138,10 @@ public final class ExerciseLogService {
 
   public Map<String, Object> totals(List<Map<String, Object>> manual, Map<String, Object> guided) {
     double manualCalories = 0, guidedCalories = 0, seconds = 0;
-    int count = 0;
+    int count = 0, unavailableCalories=0;
     for (Map<String, Object> row : manual)
       if (Boolean.TRUE.equals(row.get("completed"))) {
+        if("unavailable".equals(row.get("calorieSource")))unavailableCalories++;
         manualCalories += number(row.get("calories"), 0);
         seconds += number(row.get("duration"), 0) * 60;
         count++;
@@ -146,6 +149,12 @@ public final class ExerciseLogService {
     for (Object raw : guided.values()) {
       if (!(raw instanceof Map)) throw new IllegalStateException("Invalid guided contribution");
       Map<String, Object> row = Values.map(raw);
+      if(Boolean.TRUE.equals(row.get("suppressedByWearable"))){
+        boolean stillCounted=false;
+        for(Map<String,Object> item:manual)if(Objects.equals(row.get("wearableEntryId"),item.get("entryId"))&&Boolean.TRUE.equals(item.get("completed")))stillCounted=true;
+        if(stillCounted)continue;
+        guidedCalories+=number(row.get("originalCalories"),0);seconds+=number(row.get("originalActiveSeconds"),0);count++;continue;
+      }
       guidedCalories += number(row.get("calories"), 0);
       seconds += number(row.get("activeSeconds"), 0);
       count++;
@@ -163,6 +172,7 @@ public final class ExerciseLogService {
         Math.round(seconds),
         "exerciseEntryCount",
         count,
+        "exerciseCaloriesUnavailableCount",unavailableCalories,
         "exerciseTotalsVersion",
         2);
   }

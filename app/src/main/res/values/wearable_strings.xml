@@ -2,7 +2,7 @@
 <string name="ww_title">Wearable workouts</string>
 <string name="ww_intro">Completed exercise sessions exported to Health Connect by Mi Fitness or other apps. Sync imports sessions starting in the last seven days.</string>
 <string name="ww_sync">Sync wearable workouts</string><string name="ww_permission">Read exercise sessions: %1$s</string>
-<string name="ww_note">Imported workouts are separate from your counted logs. They do not add calories, XP, quests or weekly workout counts. Elapsed time can include pauses; calories and active time are not imported.</string>
+<string name="ww_note">Imported workouts are separate from your counted logs. Only confirmed sessions add duration and available active calories to your activity log. No XP, quests or weekly guided-workout credit is awarded. Elapsed duration can include pauses.</string>
 <string name="ww_none">No completed exercise sessions were returned for this seven-day window. Check that your companion app has exported them to Health Connect.</string>
 <string name="ww_never">No wearable workout snapshot has been synced yet.</string>
 <string name="ww_window">Imported window: %1$s to %2$s. Times use this phone’s current time zone.</string>
@@ -18,7 +18,24 @@
 <string name="ww_elapsed">Elapsed duration: %1$s minutes</string>
 <string name="ww_source">Source app: %1$s</string>
 <string name="ww_updated">Source record updated: %1$s</string>
-<string name="ww_calories">Calories: not imported · XP: not awarded</string>
+<string name="ww_calories">Calories remain uncounted until you confirm a matching workout.</string>
 <string name="ww_more">Show more imported sessions</string>
 <string name="ww_cleared">Imported cache removed. Original Health Connect and Mi Fitness records were not deleted.</string>
+<string name="ww_track">Workout with wearable</string>
+<string name="ww_choose">Choose the activity to track</string>
+<string name="ww_start_plan">Prepare this workout</string>
+<string name="ww_cancel_plan">Cancel pending workout</string>
+<string name="ww_waiting">%1$s · prepared at %2$s</string>
+<string name="ww_band_steps">Start the same activity on your band within 30 minutes. Finish on the band, let Mi Fitness sync to Health Connect, then tap Sync here and confirm the matching session below. This screen does not control the band or show live sensor readings.</string>
+<string name="ww_confirm">Record this workout</string>
+<string name="ww_confirm_note">Save the wearable duration and available active calories to your activity log. Confirm that you have not logged this workout manually. Overlapping counted guided or wearable workouts are blocked. Missing calories are excluded from calorie totals and labelled unavailable. This explicitly saves the session metadata to your Firebase account.</string>
+<string name="ww_energy">Wearable active calories: %1$s kcal</string>
+<string name="ww_energy_missing">Active calories unavailable (%1$s). Allow active-calorie access and check Mi Fitness exports. Total or daily calories are never substituted.</string>
+<string name="ww_sync_first">Sync successfully again before recording this workout. The snapshot must be less than five minutes old.</string>
+<string name="ww_saved">Workout recorded. View it in your counted activity log. No XP or guided-workout rewards were added.</string>
+<string name="ww_save_failed">Workout was not confirmed: %1$s</string>
+<string name="ww_logged_source">Wearable workout · Health Connect</string>
+<string name="ww_logged_duration">%1$.1f min elapsed</string>
+<string name="ww_logged_unknown">Calories unavailable · excluded from total</string>
+<string name="ww_partial">Calorie total is partial: a wearable workout has unavailable calories. Its duration is recorded.</string>
 </resources>

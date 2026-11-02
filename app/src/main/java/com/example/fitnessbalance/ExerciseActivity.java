@@ -131,6 +131,7 @@ public final class ExerciseActivity extends ExerciseBaseActivity
     enabled(R.id.alAdd, !deleting);
     enabled(R.id.alDate, !deleting);
     loaded();
+    for(Map<String,Object> row:day.manual)if("unavailable".equals(row.get("calorieSource"))){status(R.string.ww_partial);break;}
     if (day.manual.isEmpty() && day.guided.isEmpty()) status(R.string.al_empty);
   }
 
