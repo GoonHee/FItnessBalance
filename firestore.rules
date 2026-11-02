@@ -19,6 +19,90 @@ service cloud.firestore {
     && getAfter(r).data.xpEarned == d.totalXp - (exists(/databases/$(database)/documents/users/$(uid)) ? resource.data.get('totalXp',0) : 0)
     && d.level == int(d.totalXp / 100) + 1;
   }
+  function freshWearableReward(uid,id) {
+   let ref = /databases/$(database)/documents/users/$(uid)/wearableWorkoutRewards/$(id);
+   return id is string && !exists(ref) && existsAfter(ref) && getAfter(ref).data.createdAt == request.time;
+  }
+  function atomicWearableAward(uid) {
+   let d = request.resource.data;
+   let id = d.get('lastRecordId','');
+   let reward = getAfter(/databases/$(database)/documents/users/$(uid)/wearableWorkoutRewards/$(id)).data;
+   return freshWearableReward(uid,id)
+    && d.diff(resource.data).affectedKeys().hasOnly(['lastRecordId','totalXp','level','metGoalWeeks','achievementIds','lastWorkoutAt'])
+    && d.totalXp is int && d.totalXp >= 0 && d.totalXp <= 1000000000
+    && d.totalXp == reward.totalXpAfter && d.totalXp == resource.data.get('totalXp',0) + reward.xpEarned
+    && d.level == int(d.totalXp / 100) + 1
+    && d.metGoalWeeks is list && d.metGoalWeeks.toSet() == (reward.weeklyBonusXp == 30 ? resource.data.get('metGoalWeeks',[]).toSet().union([reward.week].toSet()) : resource.data.get('metGoalWeeks',[]).toSet())
+    && d.achievementIds is list && d.achievementIds.toSet() == resource.data.get('achievementIds',[]).toSet().union(reward.unlocked.toSet())
+    && d.lastWorkoutAt == (resource.data.get('lastWorkoutAt',timestamp.value(0)) > timestamp.value(reward.endedAtMillis) ? resource.data.lastWorkoutAt : timestamp.value(reward.endedAtMillis));
+  }
+  function wearableWeekBonus(uid,d) {
+   let weekRef = /databases/$(database)/documents/users/$(uid)/exerciseWeeks/$(d.week);
+   let profile = get(/databases/$(database)/documents/users/$(uid)).data;
+   let prior = exists(weekRef) && get(weekRef).data.get('bonusAwarded',false);
+   return d.weeklyCompleted >= d.weeklyTarget && !prior && !profile.get('metGoalWeeks',[]).hasAny([d.week]) ? 30 : 0;
+  }
+  function wearableWeekUpdate(uid,id,week) {
+   let award = getAfter(/databases/$(database)/documents/users/$(uid)/wearableWorkoutRewards/$(id)).data;
+   let ref = /databases/$(database)/documents/users/$(uid)/exerciseWeeks/$(week);
+   let before = exists(ref) ? get(ref).data : {};
+   let d = request.resource.data;
+   return freshWearableReward(uid,id) && award.week == week
+    && d.completed == award.weeklyCompleted && d.target == award.weeklyTarget
+    && d.categories is list && d.categories.toSet() == before.get('categories',[]).toSet().union([award.category].toSet())
+    && d.bonusAwarded == (before.get('bonusAwarded',false) || award.weeklyBonusXp > 0 || get(/databases/$(database)/documents/users/$(uid)).data.get('metGoalWeeks',[]).hasAny([week]));
+  }
+  function wearableAchievement(uid,id,record) {
+   let award = getAfter(/databases/$(database)/documents/users/$(uid)/wearableWorkoutRewards/$(record)).data;
+   let before = get(/databases/$(database)/documents/users/$(uid)).data;
+   let after = getAfter(/databases/$(database)/documents/users/$(uid)).data;
+   let categories = getAfter(/databases/$(database)/documents/users/$(uid)/exerciseWeeks/$(award.week)).data.categories;
+   return freshWearableReward(uid,record) && award.unlocked.hasAny([id])
+    && (id == 'first_step'
+     || (id == 'routine_builder' && after.metGoalWeeks.size() >= 2)
+     || (id == 'welcome_back' && before.get('lastWorkoutAt',timestamp.value(0)) > timestamp.value(0) && timestamp.value(award.startedAtMillis) >= before.lastWorkoutAt + duration.value(7,'d'))
+     || (id == 'balanced_week' && categories.hasAll(['strength','mobility','recovery'])));
+  }
+  function wearableUnlockProof(uid,award,unlocked,id) {
+   let ref = /databases/$(database)/documents/users/$(uid)/unlockedAchievements/$(id);
+   return !unlocked.hasAny([id]) || (!exists(ref) && getAfter(ref).data.recordId == award && getAfter(ref).data.unlockedAt == request.time);
+  }
+  function validWearableReward(uid,id) {
+   let d = request.resource.data;
+   let userRef = /databases/$(database)/documents/users/$(uid);
+   let profile = get(userRef).data;
+   let weekRef = /databases/$(database)/documents/users/$(uid)/exerciseWeeks/$(d.week);
+   let dayRef = /databases/$(database)/documents/users/$(uid)/wearableRewardDays/$(d.day);
+   let receipt = getAfter(/databases/$(database)/documents/users/$(uid)/wearableWorkoutLinks/$(id)).data;
+   let count = exists(weekRef) ? get(weekRef).data.get('completed',0) : profile.get('weeklyCounts',{}).get(d.week,0);
+   let target = profile.get('weeklyWorkoutTarget',3);
+   return id.matches('^wearable_[0-9a-f]{64}$')
+    && d.keys().hasOnly(['source','activity','entryId','day','week','category','baseXp','questXp','weeklyBonusXp','xpEarned','weeklyCompleted','weeklyTarget','totalXpAfter','newDayCredit','unlocked','ruleVersion','durationSeconds','startedAtMillis','endedAtMillis','createdAt'])
+    && d.entryId == id && receipt.entryId == id && receipt.date == d.day
+    && d.source == 'health_connect' && d.activity is string && d.activity.size() > 0 && d.activity.size() <= 100 && d.ruleVersion == 'wearable-rewards-v1'
+    && d.day is string && d.day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') && d.week is string && d.week.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+    && d.startedAtMillis is int && d.endedAtMillis is int && d.startedAtMillis >= request.time.toMillis() - 604800000
+    && d.endedAtMillis <= request.time.toMillis() && d.endedAtMillis - d.startedAtMillis >= 300000 && d.endedAtMillis - d.startedAtMillis <= 86400000
+    && d.durationSeconds == int((d.endedAtMillis - d.startedAtMillis) / 1000)
+    && d.category in ['cardio','strength','mobility','mixed']
+    && d.newDayCredit is bool && d.newDayCredit == !exists(dayRef)
+    && (!d.newDayCredit || getAfter(dayRef).data.awardId == id)
+    && d.baseXp == (d.newDayCredit ? 20 : 0)
+    && d.questXp == ((!exists(/databases/$(database)/documents/users/$(uid)/questProgress/$(d.day + '_planned')) ? 5 : 0) + (!exists(/databases/$(database)/documents/users/$(uid)/questProgress/$(d.day + '_minutes')) ? 5 : 0))
+    && getAfter(/databases/$(database)/documents/users/$(uid)/questProgress/$(d.day + '_planned')).data.completed == true
+    && getAfter(/databases/$(database)/documents/users/$(uid)/questProgress/$(d.day + '_minutes')).data.completed == true
+    && d.weeklyCompleted == count + (d.newDayCredit ? 1 : 0)
+    && d.weeklyTarget == (target < 1 ? 1 : (target > 7 ? 7 : target))
+    && d.weeklyBonusXp == wearableWeekBonus(uid,d)
+    && d.xpEarned is int && d.xpEarned == d.baseXp + d.questXp + d.weeklyBonusXp
+    && d.totalXpAfter == profile.get('totalXp',0) + d.xpEarned
+    && getAfter(userRef).data.totalXp == d.totalXpAfter && getAfter(userRef).data.lastRecordId == id
+    && getAfter(weekRef).data.completed == d.weeklyCompleted && getAfter(weekRef).data.lastRecordId == id
+    && d.unlocked is list && d.unlocked.size() <= 4 && ['first_step','routine_builder','welcome_back','balanced_week'].hasAll(d.unlocked)
+    && wearableUnlockProof(uid,id,d.unlocked,'first_step') && wearableUnlockProof(uid,id,d.unlocked,'routine_builder')
+    && wearableUnlockProof(uid,id,d.unlocked,'welcome_back') && wearableUnlockProof(uid,id,d.unlocked,'balanced_week')
+    && d.createdAt == request.time;
+  }
   function lessonAvailable(uid,path,id) {
    let l = get(/databases/$(database)/documents/workoutPaths/$(path)/lessons/$(id)).data;
    let prerequisite = l.get('prerequisiteLessonId',null);
@@ -42,7 +126,7 @@ service cloud.firestore {
    allow create: if owner(uid) && noPassword(request.resource.data)
     && (!request.resource.data.keys().hasAny(protectedFields()) || atomicAward(uid));
    allow update: if owner(uid) && noPassword(request.resource.data)
-    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(protectedFields()) || atomicAward(uid));
+    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(protectedFields()) || atomicAward(uid) || atomicWearableAward(uid));
    // Dated manual weights and their transaction-maintained private index.
    match /weightLogs/{day} {
     function validWeight() {
@@ -155,6 +239,19 @@ service cloud.firestore {
      && request.resource.data.createdAt == request.time;
    }
    match /foodLogs/{day} { allow read, write: if owner(uid); }
+   match /wearableWorkoutRewards/{id} {
+    allow read: if owner(uid);
+    allow create: if owner(uid) && validWearableReward(uid,id);
+   }
+   match /wearableRewardDays/{day} {
+    allow read: if owner(uid);
+    allow create: if owner(uid)
+     && request.resource.data.keys().hasOnly(['day','week','awardId','createdAt'])
+     && request.resource.data.day == day && request.resource.data.createdAt == request.time
+     && freshWearableReward(uid,request.resource.data.awardId)
+     && getAfter(/databases/$(database)/documents/users/$(uid)/wearableWorkoutRewards/$(request.resource.data.awardId)).data.day == day
+     && getAfter(/databases/$(database)/documents/users/$(uid)/wearableWorkoutRewards/$(request.resource.data.awardId)).data.week == request.resource.data.week;
+   }
    // Confirmation receipts survive deletion of an activity log, preventing re-import.
    match /wearableWorkoutLinks/{id} {
     allow read: if owner(uid);
@@ -195,7 +292,7 @@ service cloud.firestore {
      && request.resource.data.completed is int && request.resource.data.completed >= 0
      && request.resource.data.categories is list && request.resource.data.bonusAwarded is bool
      && request.resource.data.target is int && request.resource.data.target >= 1 && request.resource.data.target <= 7
-     && request.resource.data.updatedAt == request.time && freshRecord(uid,request.resource.data.lastRecordId);
+     && request.resource.data.updatedAt == request.time && (freshRecord(uid,request.resource.data.lastRecordId) || wearableWeekUpdate(uid,request.resource.data.lastRecordId,week));
    }
    match /questProgress/{id} {
     allow read: if owner(uid);
@@ -205,14 +302,18 @@ service cloud.firestore {
      && id == request.resource.data.day + '_' + request.resource.data.questId
      && request.resource.data.completed == true && request.resource.data.completedAt == request.time
      && request.resource.data.xpEarned == (request.resource.data.questId == 'feedback' ? 0 : 5)
-     && freshRecord(uid,request.resource.data.recordId);
+     && (freshRecord(uid,request.resource.data.recordId) || (request.resource.data.questId in ['planned','minutes']
+      && freshWearableReward(uid,request.resource.data.recordId)
+      && request.resource.data.day == getAfter(/databases/$(database)/documents/users/$(uid)/wearableWorkoutRewards/$(request.resource.data.recordId)).data.day));
    }
    match /unlockedAchievements/{id} {
     allow read: if owner(uid);
     allow create: if owner(uid)
      && id in ['first_step','routine_builder','path_explorer','welcome_back','honest_reflection','balanced_week']
      && request.resource.data.keys().hasOnly(['recordId','unlockedAt']) && request.resource.data.unlockedAt == request.time
-     && freshRecord(uid,request.resource.data.recordId);
+     && (freshRecord(uid,request.resource.data.recordId) || (id in ['first_step','routine_builder','welcome_back','balanced_week']
+      && freshWearableReward(uid,request.resource.data.recordId)
+      && wearableAchievement(uid,id,request.resource.data.recordId)));
    }
   }
   function validRecord(uid,id) {

@@ -84,7 +84,8 @@ public final class GamificationRepository {
                   || calories > 100000)
                 throw new IllegalArgumentException("Invalid session totals");
               double percentage = game.completion(completed, planned);
-              boolean qualifying = percentage >= 50;
+              boolean countedWearable=new WearableRewardService().countedOverlap(new ExerciseLogService().entries(day,manualLog.getData()==null?Collections.emptyMap():manualLog.getData()),start.getTimestamp("startedAt").toDate().getTime(),now.getTime());
+              boolean qualifying = percentage >= 50 && !countedWearable;
               int stars = game.stars(percentage, difficulty);
               Map<String, Object> attempts = Values.map(progress.get("completionCounts")),
                   best = Values.map(progress.get("bestPercent")),
@@ -110,13 +111,13 @@ public final class GamificationRepository {
               List<String> categories = Values.strings(weekly.get("categories"));
               if (qualifying && !categories.contains(lesson.getCategory()))
                 categories.add(lesson.getCategory());
-              boolean[] eligible = {qualifying, activeDuration >= 300, true};
+              boolean[] eligible = {qualifying, activeDuration >= 300 && !countedWearable, true};
               int[] questXp = {5, 5, 0};
               int questBonus = 0;
               for (int n = 0; n < 3; n++)
                 questBonus += game.dailyBonus(eligible[n], quests.get(n).exists(), questXp[n]);
               int earned =
-                  game.workoutXp(lesson.getBaseXp(), percentage, previousAttempts)
+                  (countedWearable?0:game.workoutXp(lesson.getBaseXp(), percentage, previousAttempts))
                       + game.feedbackXp(false)
                       + questBonus
                       + weeklyBonus;

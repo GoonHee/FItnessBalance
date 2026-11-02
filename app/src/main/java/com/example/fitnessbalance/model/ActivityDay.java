@@ -8,6 +8,7 @@ public final class ActivityDay {
   public final List<Map<String, Object>> manual, guided;
   public final Map<String, Object> totals;
   public final int caloriesConsumed;
+  public final Map<String,Object> wearableReward;
 
   public ActivityDay(
       String day,
@@ -15,6 +16,10 @@ public final class ActivityDay {
       List<Map<String, Object>> guided,
       Map<String, Object> totals,
       int consumed) {
+    this(day,manual,guided,totals,consumed,Collections.emptyMap());
+  }
+  public ActivityDay(String day,List<Map<String,Object>> manual,List<Map<String,Object>> guided,Map<String,Object> totals,int consumed,Map<String,Object> reward) {
+    wearableReward=reward;
     this.day = day;
     this.manual = manual;
     this.guided = guided;

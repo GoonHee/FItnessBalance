@@ -16,6 +16,7 @@ import java.util.*;
 
 public final class WearableWorkoutsActivity extends AppCompatActivity {
     private String uid;private int version,shown=50;private boolean busy,permitted,comparisonReady;
+    private androidx.appcompat.app.AlertDialog rewardDialog;
     private HealthConnectBridge bridge;private WearableWorkoutStore store;private WearableWorkoutStore.Snapshot snapshot;
     private LinearLayout planPanel,body;private TextView status,permission;private Button connect,sync;
     private final Map<String,String> sourceLabels=new HashMap<>();
@@ -100,7 +101,7 @@ public final class WearableWorkoutsActivity extends AppCompatActivity {
             if(!granted.contains(HealthConnectBridge.EXERCISE)){busy=false;refresh();return;}
             Map<String,Object> selected=new HashMap<>(record);if(!granted.contains(HealthConnectBridge.ACTIVE_CALORIES)){selected.remove("activeCalories");selected.put("calorieState","permission_required");store.removeCalories(uid);}
             new com.example.fitnessbalance.repository.ExerciseLogRepository(uid).confirmWearable(plan,selected).addOnCompleteListener(WearableWorkoutsActivity.this,task->{if(!current(token))return;busy=false;
-                if(task.isSuccessful()){store.cancelPlan(uid);status.setText(R.string.ww_saved);render();compare(token);}
+                if(task.isSuccessful()){store.cancelPlan(uid);status.setText(R.string.ww_saved);render();compare(token);if(getLifecycle().getCurrentState().isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED))rewardDialog=WearableRewardDialog.show(WearableWorkoutsActivity.this,task.getResult().wearableReward);}
                 else{status.setText(getString(R.string.ww_save_failed,task.getException()==null?"Unknown error":task.getException().getMessage()));render();}
             });
         }public void onError(){if(!current(token))return;busy=false;status.setText(R.string.hc_error);controls();}});
@@ -119,6 +120,6 @@ public final class WearableWorkoutsActivity extends AppCompatActivity {
         });
     }
     @Override protected void onResume(){super.onResume();if(uid!=null){if(!same())finish();else refresh();}}
-    @Override protected void onStop(){version++;if(bridge!=null)bridge.cancelPending();super.onStop();}
+    @Override protected void onStop(){if(rewardDialog!=null){rewardDialog.dismiss();rewardDialog=null;}version++;if(bridge!=null)bridge.cancelPending();super.onStop();}
     @Override protected void onDestroy(){if(bridge!=null)bridge.close();if(store!=null)store.close();super.onDestroy();}
 }

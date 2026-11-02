@@ -17,6 +17,7 @@ public final class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAd
     void delete(Map<String, Object> item);
 
     void view(String recordId);
+    default void reward(Map<String,Object> item) {}
   }
 
   private final List<Map<String, Object>> rows = new ArrayList<>();
@@ -90,10 +91,11 @@ public final class ActivityLogAdapter extends RecyclerView.Adapter<ActivityLogAd
                     Values.decimal(row.get("completionPercentage"), 0)));
     h.edit.setVisibility(manual&&!wearable ? View.VISIBLE : View.GONE);
     h.delete.setVisibility(manual ? View.VISIBLE : View.GONE);
-    h.view.setVisibility(manual ? View.GONE : View.VISIBLE);
+    h.view.setVisibility(!manual||wearable ? View.VISIBLE : View.GONE);
+    ((TextView)h.view).setText(wearable?R.string.wr_claim:R.string.al_view);
     h.edit.setOnClickListener(v -> actions.edit(row));
     h.delete.setOnClickListener(v -> actions.delete(row));
-    h.view.setOnClickListener(v -> actions.view(Values.text(row.get("recordId"), "")));
+    h.view.setOnClickListener(v -> {if(wearable)actions.reward(row);else actions.view(Values.text(row.get("recordId"), ""));});
   }
 
   @Override

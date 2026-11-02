@@ -165,6 +165,28 @@ public final class ExerciseLogRepository {
 
   private Task<ActivityDay> write(String day,List<Map<String,Object>> guided,String id,int revision,
       Map<String,Object> entry,boolean add,boolean remove,String wearableKey) {
+    Task<ActivityDay> first=writeAttempt(day,guided,id,revision,entry,add,remove,wearableKey);
+    if(wearableKey==null)return first;
+    return first.continueWithTask(outcome->{
+      if(outcome.isSuccessful())return Tasks.forResult(outcome.getResult());
+      Exception error=outcome.getException();
+      if(!(error instanceof FirebaseFirestoreException)||!Arrays.asList(FirebaseFirestoreException.Code.PERMISSION_DENIED,FirebaseFirestoreException.Code.ABORTED,FirebaseFirestoreException.Code.UNAVAILABLE).contains(((FirebaseFirestoreException)error).getCode()))return Tasks.forException(error);
+      return user.collection("wearableWorkoutLinks").document(wearableKey).get(Source.SERVER).continueWithTask(saved->{
+        if(saved.isSuccessful()&&saved.getResult().exists())return loadDay(day).continueWithTask(loaded->{
+          if(!loaded.isSuccessful())return Tasks.forException(loaded.getException());
+          return new WearableGamificationRepository().claim(user.getId(),day,wearableKey).continueWith(claimed->{
+            if(!claimed.isSuccessful())throw claimed.getException();ActivityDay value=loaded.getResult();return new ActivityDay(day,value.manual,value.guided,value.totals,value.caloriesConsumed,claimed.getResult());
+          });
+        });
+        // An immutable date-lock rule can reject the losing concurrent writer before the SDK
+        // retries. Re-read all transaction state once; never bypass the award/date receipts.
+        return writeAttempt(day,guided,id,revision,entry,add,remove,wearableKey);
+      });
+    });
+  }
+
+  private Task<ActivityDay> writeAttempt(String day,List<Map<String,Object>> guided,String id,int revision,
+      Map<String,Object> entry,boolean add,boolean remove,String wearableKey) {
     DocumentReference manualRef = user.collection(MANUAL_LOGS).document(day),
         dailyRef = user.collection(DAILY_DATA).document(day);
     return db.runTransaction(
@@ -196,6 +218,7 @@ public final class ExerciseLogRepository {
           // preserving contributions committed after the queries started.
           for (Map<String, Object> record : guided)
             service.guided(contributions, (String) record.get("recordId"), record);
+          WearableGamificationRepository.Award award=receipt==null?null:WearableGamificationRepository.prepare(tx,user,id,entry,System.currentTimeMillis());
           Map<String, Object> totals = service.totals(entries, contributions);
           if (id != null)
             tx.set(
@@ -217,8 +240,9 @@ public final class ExerciseLogRepository {
             tx.set(
                 dailyRef, update, SetOptions.mergeFields(update.keySet().toArray(new String[0])));
           if(receipt!=null)tx.set(receipt,Values.of("date",day,"entryId",id,"createdAt",FieldValue.serverTimestamp()));
+          if(award!=null)award.apply(tx);
           return new ActivityDay(
-              day, entries, guided, totals, Values.integer(daily.get("caloriesConsumed"), 0));
+              day, entries, guided, totals, Values.integer(daily.get("caloriesConsumed"), 0),award==null?Collections.emptyMap():award.result);
         });
   }
 

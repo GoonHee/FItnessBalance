@@ -155,3 +155,83 @@ test('wearable confirmation can atomically save activity, totals and receipt',as
  const retry=writeBatch(d);retry.set(ref(d,`wearableWorkoutLinks/${id}`),{date:DAY,entryId:id,createdAt:serverTimestamp()});retry.set(ref(d,`dailyData/${DAY}`),{caloriesBurned:360},{merge:true});
  await assertFails(retry.commit());assert.equal((await getDoc(ref(d,`dailyData/${DAY}`))).data().caloriesBurned,180);
 });
+
+// Wearable reward contract: independent immutable award + date lock, shared quests and week.
+async function wearableReward(id,options={},attempt=0) {
+ const d=db(),user=doc(d,'users/alice'),end=Date.now()-60000,startMs=end-600000;
+ const day=options.day||new Date(startMs).toISOString().slice(0,10),cal=new Date(day+'T12:00:00Z');cal.setUTCDate(cal.getUTCDate()-((cal.getUTCDay()+6)%7));const week=cal.toISOString().slice(0,10);
+ return runTransaction(d,async tx=>{
+  const awardRef=ref(d,`wearableWorkoutRewards/${id}`),existing=await tx.get(awardRef);if(existing.exists())return existing.data();
+  const profile=await tx.get(user),weekly=await tx.get(ref(d,`exerciseWeeks/${week}`)),lock=await tx.get(ref(d,`wearableRewardDays/${day}`)),receipt=await tx.get(ref(d,`wearableWorkoutLinks/${id}`));
+  const planned=await tx.get(ref(d,`questProgress/${day}_planned`)),minutes=await tx.get(ref(d,`questProgress/${day}_minutes`)),first=await tx.get(ref(d,'unlockedAchievements/first_step'));
+  const p=profile.data()||{},w=weekly.data()||{},newDay=!lock.exists(),base=newDay?20:0,quest=(planned.exists()?0:5)+(minutes.exists()?0:5),count=(w.completed||0)+(newDay?1:0),target=p.weeklyWorkoutTarget||3,bonus=count>=target&&!w.bonusAwarded&&!(p.metGoalWeeks||[]).includes(week)?30:0;
+  const unlocked=options.unlocked||(!first.exists()?['first_step']:[]),xp=options.xpOverride??base+quest+bonus,total=(p.totalXp||0)+xp;
+  const ownedAchievements={};for(const achievement of unlocked)ownedAchievements[achievement]=await tx.get(ref(d,`unlockedAchievements/${achievement}`));
+  const category=options.category||'cardio';
+  const a={source:'health_connect',activity:'Running',entryId:id,day,week,category,baseXp:base,questXp:quest,weeklyBonusXp:bonus,xpEarned:xp,weeklyCompleted:count,weeklyTarget:target,totalXpAfter:total,newDayCredit:newDay,unlocked,ruleVersion:'wearable-rewards-v1',durationSeconds:options.short?60:600,startedAtMillis:options.short?end-60000:startMs,endedAtMillis:end,createdAt:serverTimestamp()};
+  if(!receipt.exists())tx.set(ref(d,`wearableWorkoutLinks/${id}`),{date:day,entryId:id,createdAt:serverTimestamp()});
+  tx.set(awardRef,a);if(newDay&&!options.skipLock)tx.set(ref(d,`wearableRewardDays/${day}`),{day,week,awardId:id,createdAt:serverTimestamp()});
+  if(!planned.exists()&&!options.skipQuest)tx.set(ref(d,`questProgress/${day}_planned`),{day,questId:options.feedback?'feedback':'planned',completed:true,xpEarned:5,recordId:id,completedAt:serverTimestamp()});
+  if(!minutes.exists())tx.set(ref(d,`questProgress/${day}_minutes`),{day,questId:'minutes',completed:true,xpEarned:5,recordId:id,completedAt:serverTimestamp()});
+  for(const achievement of unlocked)if(!ownedAchievements[achievement].exists())tx.set(ref(d,`unlockedAchievements/${achievement}`),{recordId:id,unlockedAt:serverTimestamp()});
+  tx.set(ref(d,`exerciseWeeks/${week}`),{completed:count,categories:[...new Set([...(w.categories||[]),category])],bonusAwarded:!!w.bonusAwarded||bonus>0,target,lastRecordId:id,updatedAt:serverTimestamp()});
+  const goals=[...(p.metGoalWeeks||[])];if(bonus&&!goals.includes(week))goals.push(week);
+  tx.set(user,{lastRecordId:id,totalXp:total,level:Math.floor(total/100)+1,metGoalWeeks:goals,achievementIds:[...new Set([...(p.achievementIds||[]),...unlocked])],lastWorkoutAt:p.lastWorkoutAt&&p.lastWorkoutAt.toMillis()>end?p.lastWorkoutAt:Timestamp.fromMillis(end),...(options.profileOverride||{})},{merge:true});
+  return a;
+ }).catch(error=>{if(attempt===0&&['permission-denied','aborted','unavailable'].includes(error.code))return wearableReward(id,options,1);throw error;});
+}
+const wearableId=n=>'wearable_'+n.toString(16).padStart(64,'0');
+test('eligible wearable workout awards XP, shared quests, weekly credit and first achievement',async()=>{
+ const r=await assertSucceeds(wearableReward(wearableId(1)));assert.equal(r.xpEarned,30);assert.equal(r.weeklyCompleted,1);
+ assert.equal((await getDoc(doc(db(),'users/alice'))).data().totalXp,30);
+ assert.equal((await getDoc(ref(db(),'unlockedAchievements/first_step'))).data().recordId,wearableId(1));
+});
+test('wearable award replay gives no extra XP or progress',async()=>{
+ await wearableReward(wearableId(2));await assertSucceeds(wearableReward(wearableId(2)));assert.equal((await getDoc(doc(db(),'users/alice'))).data().totalXp,30);
+});
+test('two distinct wearable sessions on one date share the daily cap',async()=>{
+ await wearableReward(wearableId(3));const r=await assertSucceeds(wearableReward(wearableId(4)));assert.equal(r.xpEarned,0);assert.equal(r.weeklyCompleted,1);
+});
+test('concurrent wearable confirmations serialize the daily reward cap',async()=>{
+ const result=await Promise.all([wearableReward(wearableId(5)),wearableReward(wearableId(6))]);assert.equal(result.reduce((n,r)=>n+r.xpEarned,0),30);assert.equal((await getDoc(doc(db(),'users/alice'))).data().totalXp,30);
+});
+test('wearable can earn the shared weekly target bonus',async()=>{
+ await updateDoc(doc(db(),'users/alice'),{weeklyWorkoutTarget:1});const r=await assertSucceeds(wearableReward(wearableId(7)));assert.equal(r.weeklyBonusXp,30);assert.equal(r.xpEarned,60);const second=await wearableReward(wearableId(8));assert.equal(second.weeklyBonusXp,0);
+});
+test('wearable awards cannot inflate XP or omit the shared quest writes',async()=>{
+ await assertFails(wearableReward(wearableId(9),{xpOverride:100}));await assertFails(wearableReward(wearableId(10),{skipQuest:true}));await assertFails(wearableReward(wearableId(11),{skipLock:true}));
+});
+test('wearable rewards reject sessions shorter than five minutes',async()=>{await assertFails(wearableReward(wearableId(12),{short:true}))});
+test('wearable award cannot grant path or feedback achievements',async()=>{await assertFails(wearableReward(wearableId(13),{unlocked:['path_explorer']}));await assertFails(wearableReward(wearableId(14),{feedback:true}))});
+test('wearable award cannot change protected feedback or invent goal weeks',async()=>{
+ await assertFails(wearableReward(wearableId(15),{profileOverride:{feedbackCount:500}}));await assertFails(wearableReward(wearableId(16),{profileOverride:{metGoalWeeks:['invented']}}));
+});
+test('wearable reward ledgers and date locks are owner-private and immutable',async()=>{
+ const r=await wearableReward(wearableId(17)),d=db();
+ for(const path of [`wearableWorkoutRewards/${wearableId(17)}`,`wearableRewardDays/${r.day}`]){
+  await assertFails(getDoc(ref(db('bob'),path)));await assertFails(getDoc(ref(env.unauthenticatedContext().firestore(),path)));await assertFails(updateDoc(ref(d,path),{xpEarned:200}));await assertFails(deleteDoc(ref(d,path)));
+ }
+});
+test('wearable and guided workouts share daily quest receipts',async()=>{
+ const day=new Date(Date.now()-660000).toISOString().slice(0,10);
+ await env.withSecurityRulesDisabled(async c=>{
+  const d=c.firestore();for(const q of ['planned','minutes'])await setDoc(doc(d,`users/alice/questProgress/${day}_${q}`),{day,questId:q,completed:true,xpEarned:5,recordId:'guided-prior',completedAt:Timestamp.now()});
+ });
+ const r=await assertSucceeds(wearableReward(wearableId(18)));assert.equal(r.questXp,0);assert.equal(r.xpEarned,20);
+ assert.equal((await getDoc(ref(db(),`questProgress/${day}_planned`))).data().recordId,'guided-prior');
+});
+test('wearable cannot declare unearned general achievements',async()=>{
+ await assertFails(wearableReward(wearableId(19),{unlocked:['routine_builder']}));await assertFails(wearableReward(wearableId(20),{unlocked:['welcome_back']}));await assertFails(wearableReward(wearableId(21),{unlocked:['balanced_week']}));
+});
+test('previously confirmed wearable can claim rewards without changing calorie logs',async()=>{
+ const id=wearableId(22),day=new Date(Date.now()-660000).toISOString().slice(0,10),d=db();
+ await setDoc(ref(d,`wearableWorkoutLinks/${id}`),{date:day,entryId:id,createdAt:serverTimestamp()});
+ await setDoc(ref(d,`exerciseLogs/${day}`),{exercises:[{entryId:id,source:'health_connect',calories:180,duration:10,completed:true}],totalCaloriesBurned:180});
+ await assertSucceeds(wearableReward(id));assert.equal((await getDoc(ref(d,`exerciseLogs/${day}`))).data().totalCaloriesBurned,180);
+});
+test('wearable may legitimately unlock consistency, comeback and balanced-week achievements',async()=>{
+ const day=new Date(Date.now()-660000).toISOString().slice(0,10),cal=new Date(day+'T12:00:00Z');cal.setUTCDate(cal.getUTCDate()-((cal.getUTCDay()+6)%7));const week=cal.toISOString().slice(0,10);
+ await env.withSecurityRulesDisabled(async c=>{const d=c.firestore();await updateDoc(doc(d,'users/alice'),{metGoalWeeks:['2026-09-07','2026-09-14'],lastWorkoutAt:Timestamp.fromMillis(Date.now()-8*86400000)});await setDoc(doc(d,`users/alice/exerciseWeeks/${week}`),{completed:0,categories:['strength','recovery'],bonusAwarded:false,target:3});});
+ const r=await assertSucceeds(wearableReward(wearableId(23),{category:'mobility',unlocked:['first_step','routine_builder','welcome_back','balanced_week']}));assert.equal(r.xpEarned,30);
+ for(const id of ['first_step','routine_builder','welcome_back','balanced_week'])assert.equal((await getDoc(ref(db(),`unlockedAchievements/${id}`))).data().recordId,wearableId(23));
+});

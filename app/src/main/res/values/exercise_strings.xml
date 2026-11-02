@@ -37,8 +37,8 @@
     <string name="ex_recommended">Recommended for You</string>
     <string name="ex_recommendation_meta">About %1$d minutes · %2$d base XP</string>
     <string name="ex_quests">Today’s Quests</string>
-    <string name="ex_quest_planned">Complete a planned workout · +5 XP</string>
-    <string name="ex_quest_minutes">Complete five active exercise minutes · +5 XP</string>
+    <string name="ex_quest_planned">Complete a workout · +5 XP</string>
+    <string name="ex_quest_minutes">Complete five exercise minutes · +5 XP</string>
     <string name="ex_quest_feedback">Submit workout feedback · +2 XP per workout</string>
     <string name="ex_done">Completed</string>
     <string name="ex_pending">In progress</string>

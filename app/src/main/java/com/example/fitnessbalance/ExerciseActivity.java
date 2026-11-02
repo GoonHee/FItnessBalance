@@ -25,6 +25,7 @@ public final class ExerciseActivity extends ExerciseBaseActivity
   private ExerciseLogRepository logs;
   private int request;
   private boolean deleting;
+  private androidx.appcompat.app.AlertDialog wearableRewardDialog;
 
   @Override
   protected void onCreate(Bundle state) {
@@ -175,7 +176,7 @@ public final class ExerciseActivity extends ExerciseBaseActivity
     if (deleting) return;
     String day = selectedDay;
     new AlertDialog.Builder(this)
-        .setMessage(R.string.al_delete_confirm)
+        .setMessage("health_connect".equals(item.get("source"))?R.string.wr_delete_note:R.string.al_delete_confirm)
         .setPositiveButton(
             R.string.al_delete,
             (d, w) -> {
@@ -208,6 +209,15 @@ public final class ExerciseActivity extends ExerciseBaseActivity
         .setNegativeButton(R.string.cancel, null)
         .show();
   }
+
+  @Override public void reward(Map<String,Object> item){
+    if(deleting)return;deleting=true;String day=selectedDay,account=uid;int token=++request;
+    new com.example.fitnessbalance.repository.WearableGamificationRepository().claim(account,day,Values.text(item.get("entryId"),""))
+      .addOnCompleteListener(this,task->{if(token!=request||!day.equals(selectedDay)||!account.equals(uid))return;deleting=false;
+        if(task.isSuccessful())wearableRewardDialog=WearableRewardDialog.show(this,task.getResult());else Toast.makeText(this,task.getException()==null?getString(R.string.al_error):task.getException().getMessage(),Toast.LENGTH_LONG).show();
+      });
+  }
+  @Override protected void onStop(){if(wearableRewardDialog!=null){wearableRewardDialog.dismiss();wearableRewardDialog=null;}super.onStop();}
 
   @Override
   public void view(String id) {
