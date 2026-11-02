@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fitnessbalance.R;
 import java.util.*;
 
-public class ExerciseRowsAdapter extends RecyclerView.Adapter<ExerciseRowsAdapter.Holder> {
+public class  ExerciseRowsAdapter extends RecyclerView.Adapter<ExerciseRowsAdapter.Holder> {
   public static final class Row {
     public final String title, body, state;
     public final Runnable action;
