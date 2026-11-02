@@ -29,7 +29,7 @@ public final class RecipeEditorActivity extends AppCompatActivity {
         id=state==null?getIntent().getStringExtra("recipeId"):state.getString("id");if(id==null)id=UUID.randomUUID().toString();
         mutation=state==null?UUID.randomUUID().toString():state.getString("mutation");
         initialized=!getIntent().hasExtra("recipeId")&&!getIntent().hasExtra("savedMealId");
-        LinearLayout root=ProgressUi.column(this);setContentView(root);ProgressUi.theme(this,root);FoodUi.insets(this);
+        LinearLayout root=ProgressUi.column(this);root.setId(R.id.foodRoot);setContentView(root);ProgressUi.theme(this,root);FoodUi.insets(this);
         MaterialToolbar toolbar=new MaterialToolbar(this);toolbar.setTitle(R.string.rp_edit);toolbar.setNavigationIcon(R.drawable.ic_arrow_back);toolbar.setNavigationOnClickListener(v->leave());root.addView(toolbar);ProgressUi.toolbar(this,toolbar);
         ScrollView scroll=new ScrollView(this);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));LinearLayout form=ProgressUi.column(this);int pad=ProgressUi.dp(this,16);form.setPadding(pad,pad,pad,pad);scroll.addView(form);
         ProgressUi.hero(this,form,R.string.rp_new,R.string.ui_recipe_intro);

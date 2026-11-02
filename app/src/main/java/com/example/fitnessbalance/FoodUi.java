@@ -141,6 +141,14 @@ final class FoodUi {
 
     static void insets(Activity activity) {
         View root = activity.findViewById(R.id.foodRoot);
+        // Programmatic screens may use a different root ID. Bind to their actual
+        // content view instead of passing null to ViewCompat and crashing.
+        if (root == null) {
+            android.view.ViewGroup content = activity.findViewById(android.R.id.content);
+            if (content == null || content.getChildCount() == 0) return;
+            root = content.getChildAt(0);
+        }
+
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 root,

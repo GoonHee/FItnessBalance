@@ -36,7 +36,7 @@ public final class SavedMealsActivity extends AppCompatActivity {
         date=state==null?getIntent().getStringExtra("date"):state.getString("date");
         if(!FoodUi.validDate(date))date=LocalDate.now().toString();
         if(pending==null && state!=null && uid.equals(state.getString("uid"))){try{String value=state.getString("pending");if(value!=null)pending=decode(new JSONObject(value));}catch(Exception ignored){pending=null;}}
-        LinearLayout root=ProgressUi.column(this);ProgressUi.theme(this,root);setContentView(root);ProgressUi.theme(this,root);FoodUi.insets(this);
+        LinearLayout root=ProgressUi.column(this);root.setId(R.id.foodRoot);ProgressUi.theme(this,root);setContentView(root);ProgressUi.theme(this,root);FoodUi.insets(this);
         MaterialToolbar toolbar=new MaterialToolbar(this);toolbar.setTitle(R.string.library_title);toolbar.setNavigationIcon(R.drawable.ic_arrow_back);toolbar.setNavigationOnClickListener(v->finish());root.addView(toolbar);ProgressUi.toolbar(this,toolbar);
         ScrollView scroll=new ScrollView(this);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));LinearLayout page=ProgressUi.column(this);int pad=ProgressUi.dp(this,16);page.setPadding(pad,pad,pad,pad);scroll.addView(page);
         LinearLayout tabs=new LinearLayout(this);page.addView(tabs);
