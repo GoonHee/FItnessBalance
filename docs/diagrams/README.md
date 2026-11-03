@@ -1,5 +1,11 @@
 # FitnessBalance database diagrams
 
+## Complete ERD — redrawn on one page
+
+[Editable complete diagram](FitnessBalance_Complete_ERD_Redrawn.drawio) · [Vector PDF](FitnessBalance_Complete_ERD_Redrawn.pdf) · [PNG preview](FitnessBalance_Complete_ERD_Redrawn.png) · [SVG](FitnessBalance_Complete_ERD_Redrawn.svg)
+
+This redraw keeps all 31 structures and 53 ownership, embedding, reference and summary/index relationships together on one page. Related entities occupy aligned food, exercise and progress/reward regions. Connectors use separate attachment points and right-angle routes that avoid entity boxes. Pale UID ownership links stay in the background; reference and derived links use distinct styles. The editable drawing retains native entity shapes and connectors. Selected key fields are shown; the complete field dictionary remains separate. Use a large landscape page or zoomable PDF for this complete model.
+
 [Editable draw.io file](FitnessBalance_Tidy_ERD.drawio) · [PDF preview](FitnessBalance_Tidy_ERD.pdf)
 
 To download, open the file on GitHub and use **Download raw file** (the down-arrow icon at the top right of the file panel). For the editable diagram, you can also download through the project's Git checkout.
