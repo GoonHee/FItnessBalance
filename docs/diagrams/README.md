@@ -1,5 +1,11 @@
 # FitnessBalance database diagrams
 
+## Simplified main-report view
+
+[Editable simplified ERD](FitnessBalance_Simplified_Core_ERD.drawio) · [PDF](FitnessBalance_Simplified_Core_ERD.pdf) · [PNG preview](FitnessBalance_Simplified_Core_ERD.png)
+
+This less dense view shows **11 core entities and nine principal relationships**. User ownership is expressed by grouping rather than repeated connectors. [Scope and suggested report explanation](FitnessBalance_Simplified_Core_ERD.md). Use the complete model below for supporting details.
+
 ## Collections as entities — report convention
 
 [Editable collections ERD](FitnessBalance_Collections_ERD.drawio) · [PDF](FitnessBalance_Collections_ERD.pdf) · [PNG](FitnessBalance_Collections_ERD.png)
