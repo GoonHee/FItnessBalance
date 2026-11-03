@@ -1,5 +1,11 @@
 # FitnessBalance database diagrams
 
+## Collections as entities — report convention
+
+[Editable collections ERD](FitnessBalance_Collections_ERD.drawio) · [PDF](FitnessBalance_Collections_ERD.pdf) · [PNG](FitnessBalance_Collections_ERD.png)
+
+This updated single-page version uses **28 collection/subcollection entities**. Embedded nutrition maps, food entries and activity entries are attributes rather than independent entities. [Read the modelling explanation](FitnessBalance_Collections_ERD.md).
+
 ## Complete ERD — redrawn on one page
 
 [Editable complete diagram](FitnessBalance_Complete_ERD_Redrawn.drawio) · [Vector PDF](FitnessBalance_Complete_ERD_Redrawn.pdf) · [PNG preview](FitnessBalance_Complete_ERD_Redrawn.png) · [SVG](FitnessBalance_Complete_ERD_Redrawn.svg)
