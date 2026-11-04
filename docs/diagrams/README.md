@@ -1,5 +1,14 @@
 # FitnessBalance database diagrams
 
+## Editable entity-table style
+
+These drawings use native draw.io tables: title row, underlined document-ID row marked PK, and separate attribute rows. REF marks a logical identifier reference; Firestore document identity is scoped to the parent path, not an enforced SQL key.
+
+- [Simplified table ERD — recommended for the main report](FitnessBalance_Simplified_Table_ERD.drawio) · [PDF](FitnessBalance_Simplified_Table_ERD.pdf)
+- [Complete table ERD](FitnessBalance_Complete_Table_ERD.drawio) · [PDF](FitnessBalance_Complete_Table_ERD.pdf)
+
+Download the `.drawio` file using GitHub’s **Download raw file** button, then open it in diagrams.net with **File → Open From → Device**. Equivalent uncompressed XML files are also available. Entities and individual rows/cells are editable.
+
 ## Simplified main-report view
 
 [Editable simplified ERD](FitnessBalance_Simplified_Core_ERD.drawio) · [PDF](FitnessBalance_Simplified_Core_ERD.pdf) · [PNG preview](FitnessBalance_Simplified_Core_ERD.png)
