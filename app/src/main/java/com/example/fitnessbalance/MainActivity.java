@@ -163,6 +163,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        FirebaseUser active = FirebaseAuth.getInstance().getCurrentUser();
+        if (active == null || !active.isEmailVerified()) { AuthGateActivity.open(this); return; }
         loadUserData();
         refreshToday();
     }

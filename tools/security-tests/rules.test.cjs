@@ -10,7 +10,7 @@ const achievements=['first_step','routine_builder','path_explorer','welcome_back
 before(async()=>{env=await initializeTestEnvironment({projectId:'demo-fitnessbalance',firestore:{host:'127.0.0.1',port:8080,rules:fs.readFileSync(path.resolve(__dirname,'../../firestore.rules'),'utf8')}})});
 after(async()=>{if(env)await env.cleanup()});
 beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{const db=c.firestore(),b=writeBatch(db);const seed=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../exercise-seed.json'),'utf8'));for(const [key,value]of Object.entries(seed))b.set(doc(db,key),value);for(const uid of ['alice','bob'])b.set(doc(db,`users/${uid}`),{fullName:uid,totalXp:0,level:1});await b.commit()});});
-const db=(uid='alice')=>env.authenticatedContext(uid).firestore();
+const db=(uid='alice')=>env.authenticatedContext(uid,{email_verified:true,email:`${uid}@example.test`}).firestore();
 const ref=(d,s)=>doc(d,`users/alice/${s}`);
 async function start(d,id='session1',lessonId='lesson_01') {return setDoc(ref(d,`workoutSessions/${id}`),{pathId:PATH,lessonId,plannedExercises:4,startedAt:serverTimestamp()})}
 // This exercises the same server-side atomic/idempotency contract, without claiming to run Android UI code.
@@ -234,4 +234,28 @@ test('wearable may legitimately unlock consistency, comeback and balanced-week a
  await env.withSecurityRulesDisabled(async c=>{const d=c.firestore();await updateDoc(doc(d,'users/alice'),{metGoalWeeks:['2026-09-07','2026-09-14'],lastWorkoutAt:Timestamp.fromMillis(Date.now()-8*86400000)});await setDoc(doc(d,`users/alice/exerciseWeeks/${week}`),{completed:0,categories:['strength','recovery'],bonusAwarded:false,target:3});});
  const r=await assertSucceeds(wearableReward(wearableId(23),{category:'mobility',unlocked:['first_step','routine_builder','welcome_back','balanced_week']}));assert.equal(r.xpEarned,30);
  for(const id of ['first_step','routine_builder','welcome_back','balanced_week'])assert.equal((await getDoc(ref(db(),`unlockedAchievements/${id}`))).data().recordId,wearableId(23));
+});
+
+// Verification is enforced by rules; only owner-scoped initial profile recovery is allowed.
+test('unverified owner can create and repair only a minimal profile',async()=>{
+ const d=env.authenticatedContext('new-user',{email_verified:false,email:'new@example.test'}).firestore();
+ const user=doc(d,'users/new-user');
+ await assertSucceeds(setDoc(user,{fullName:'New User',email:'new@example.test',weight:70,fitnessLevel:'Beginner',createdAt:serverTimestamp(),nutritionGoalSource:'not_set'}));
+ await assertSucceeds(getDoc(user));
+ await assertSucceeds(updateDoc(user,{weight:71}));
+ await assertFails(updateDoc(user,{dailyCalorieGoal:2000}));
+ await assertFails(updateDoc(user,{totalXp:999}));
+ await assertFails(getDoc(doc(d,'foods/rice')));
+ await assertFails(setDoc(doc(d,'users/new-user/foodLogs/2026-11-06'),{foodItems:[]}));
+ await assertFails(getDoc(doc(d,'users/alice')));
+});
+test('unverified profile setup rejects forged email, invalid weight and extra fields',async()=>{
+ const d=env.authenticatedContext('new-user',{email_verified:false,email:'new@example.test'}).firestore();
+ const base={fullName:'New User',email:'new@example.test',weight:70,fitnessLevel:'Beginner',createdAt:serverTimestamp(),nutritionGoalSource:'not_set'};
+ for(const changes of [{email:'other@example.test'},{weight:NaN},{weight:301},{fitnessLevel:'Expert'},{password:'secret'},{totalXp:10}])
+  await assertFails(setDoc(doc(d,'users/new-user'),{...base,...changes}));
+});
+test('verified account can resume protected catalogue access',async()=>{
+ const d=env.authenticatedContext('alice',{email_verified:true,email:'alice@example.test'}).firestore();
+ await assertSucceeds(getDoc(doc(d,'foods/rice')));
 });

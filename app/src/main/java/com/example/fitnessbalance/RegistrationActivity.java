@@ -3,7 +3,6 @@ package com.example.fitnessbalance;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -13,15 +12,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public class RegistrationActivity extends AppCompatActivity {
     private EditText fullNameEditText, emailEditText, passwordEditText, confirmPasswordEditText, weightEditText;
@@ -29,7 +23,15 @@ public class RegistrationActivity extends AppCompatActivity {
     private Button signUpButton;
     private ProgressBar progressBar;
     private FirebaseAuth auth;
-    private FirebaseFirestore firestore;
+    private AuthFlowViewModel model;
+    private boolean routing;
+
+    private void continueSetup() { if (!routing) { routing=true; AuthGateActivity.open(this); } }
+
+    @Override protected void onStart() {
+        super.onStart();
+        if (auth.getCurrentUser() != null && !model.state.getValue().busy) continueSetup();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +39,16 @@ public class RegistrationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_registration);
 
         auth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();
 
         initializeViews();
         setupFitnessLevelSpinner();
         setupClickListeners();
+        model = new androidx.lifecycle.ViewModelProvider(this).get(AuthFlowViewModel.class);
+        model.state.observe(this, state -> {
+            showLoading(state.busy);
+            if (state.gate) { continueSetup(); }
+            else if (!state.message.isEmpty()) Toast.makeText(this,state.message,Toast.LENGTH_LONG).show();
+        });
     }
 
     private void initializeViews() {
@@ -88,14 +95,14 @@ public class RegistrationActivity extends AppCompatActivity {
     private void attemptRegistration() {
         String fullName = fullNameEditText.getText().toString().trim();
         String email = emailEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
-        String confirmPassword = confirmPasswordEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString();
+        String confirmPassword = confirmPasswordEditText.getText().toString();
         String weightStr = weightEditText.getText().toString().trim();
         String fitnessLevel = fitnessLevelSpinner.getText().toString().trim();
 
         if (validateInputs(fullName, email, password, confirmPassword, weightStr, fitnessLevel)) {
             showLoading(true);
-            registerUser(fullName, email, password, Double.parseDouble(weightStr), fitnessLevel);
+            model.register(fullName, email, password, Double.parseDouble(weightStr), fitnessLevel);
         }
     }
 
@@ -104,8 +111,8 @@ public class RegistrationActivity extends AppCompatActivity {
 
         String passwordPattern = "^(?=.*[0-9])(?=.*[!@#$%^&*])(?=\\S+$).{8,}$";
 
-        if (TextUtils.isEmpty(fullName)) {
-            fullNameEditText.setError("Full name is required");
+        if (!AuthInput.validName(fullName)) {
+            fullNameEditText.setError("Enter a name of 1–200 characters");
             return false;
         }
 
@@ -123,7 +130,7 @@ public class RegistrationActivity extends AppCompatActivity {
             return false;
         }
         if (!password.matches(passwordPattern)) {
-            passwordEditText.setError("Password must be at least 8 characters and include at least one number and one special symbol (!@#$%^&*)");
+            passwordEditText.setError("Password must be at least 8 characters and include at least one number and one special symbol (!@#$%^&*), with no whitespace");
             return false;
         }
 
@@ -142,7 +149,7 @@ public class RegistrationActivity extends AppCompatActivity {
         }
         try {
             double weight = Double.parseDouble(weightStr);
-            if (weight <= 0 || weight > 300) {
+            if (!AuthInput.validWeight(weight)) {
                 weightEditText.setError("Enter a valid weight (1-300 kg)");
                 return false;
             }
@@ -151,7 +158,7 @@ public class RegistrationActivity extends AppCompatActivity {
             return false;
         }
 
-        if (TextUtils.isEmpty(fitnessLevel)) {
+        if (!AuthInput.validLevel(fitnessLevel)) {
             fitnessLevelSpinner.setError("Select your fitness level");
             return false;
         }
@@ -159,78 +166,11 @@ public class RegistrationActivity extends AppCompatActivity {
         return true;
     }
 
-    private void registerUser(String fullName, String email, String password,
-                              double weight, String fitnessLevel) {
-
-        auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        sendEmailVerification(fullName, weight, fitnessLevel);
-                    } else {
-                        showLoading(false);
-                        String errorMessage = task.getException() != null ?
-                                task.getException().getMessage() : "Registration failed";
-                        Toast.makeText(RegistrationActivity.this,
-                                "Error: " + errorMessage, Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
-
-    private void sendEmailVerification(String fullName, double weight, String fitnessLevel) {
-        FirebaseUser user = auth.getCurrentUser();
-
-        if (user != null) {
-            user.sendEmailVerification()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            saveUserToFirestore(user.getUid(), fullName, weight, fitnessLevel, user.getEmail());
-                            showVerificationDialog();
-                        } else {
-                            showLoading(false);
-                            Toast.makeText(RegistrationActivity.this,
-                                    "Failed to send verification email.", Toast.LENGTH_LONG).show();
-                        }
-                    });
-        }
-    }
-
-    private void saveUserToFirestore(String userId, String fullName, double weight,
-                                     String fitnessLevel, String email) {
-
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("fullName", fullName);
-        userData.put("weight", weight);
-        userData.put("fitnessLevel", fitnessLevel);
-        userData.put("email", email);
-        userData.put("createdAt", new java.util.Date());
-        userData.put("isVerified", false);
-        // Nutrition goals stay unset until the user explicitly chooses them.
-        userData.put("nutritionGoalSource", "not_set");
-
-        firestore.collection("users")
-                .document(userId)
-                .set(userData)
-                .addOnSuccessListener(aVoid -> Log.d("Registration", "User data saved to Firestore"))
-                .addOnFailureListener(e -> Log.e("Registration", "Error saving user data", e));
-    }
-
-    private void showVerificationDialog() {
-        showLoading(false);
-
-        new AlertDialog.Builder(this)
-                .setTitle("Verify Your Email")
-                .setMessage("We've sent a verification link to your email address. Please verify your account before logging in.")
-                .setPositiveButton("OK", (dialog, which) -> {
-                    startActivity(new Intent(RegistrationActivity.this, LoginActivity.class));
-                    finish();
-                })
-                .setCancelable(false)
-                .show();
-    }
-
     private void showLoading(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         signUpButton.setEnabled(!show);
+        findViewById(R.id.loginRedirectText).setEnabled(!show);
+        findViewById(R.id.backButton).setEnabled(!show);
         signUpButton.setText(show ? "Creating Account..." : "Create Account");
     }
 }

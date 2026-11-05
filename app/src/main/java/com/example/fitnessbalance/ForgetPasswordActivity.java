@@ -12,23 +12,27 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
 
 public class ForgetPasswordActivity extends AppCompatActivity {
 
     private EditText emailEditText;
     private Button sendResetButton;
     private ProgressBar progressBar;
-    private FirebaseAuth auth;
+    private AuthFlowViewModel model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forget_password);
 
-        auth = FirebaseAuth.getInstance();
+        model = new androidx.lifecycle.ViewModelProvider(this).get(AuthFlowViewModel.class);
         initializeViews();
         setupClickListeners();
+        model.state.observe(this,state->{
+            showLoading(state.busy);
+            if(AuthInput.RESET_ACCEPTED.equals(state.message))showSuccessDialog();
+            else if(!state.message.isEmpty())Toast.makeText(this,state.message,Toast.LENGTH_LONG).show();
+        });
     }
 
     private void initializeViews() {
@@ -65,25 +69,13 @@ public class ForgetPasswordActivity extends AppCompatActivity {
     }
 
     private void sendPasswordResetEmail(String email) {
-        auth.sendPasswordResetEmail(email)
-                .addOnCompleteListener(task -> {
-                    showLoading(false);
-                    if (task.isSuccessful()) {
-                        showSuccessDialog();
-                    } else {
-                        String errorMessage = task.getException() != null ?
-                                task.getException().getMessage() : "Failed to send reset email";
-                        Toast.makeText(ForgetPasswordActivity.this,
-                                "Error: " + errorMessage, Toast.LENGTH_LONG).show();
-                    }
-                });
+        model.reset(email);
     }
 
     private void showSuccessDialog() {
         new AlertDialog.Builder(this)
-                .setTitle("Reset Email Sent")
-                .setMessage("We've sent a password reset link to your email address. " +
-                        "Please check your inbox and follow the instructions.")
+                .setTitle("Password reset requested")
+                .setMessage(AuthInput.RESET_ACCEPTED)
                 .setPositiveButton("OK", (dialog, which) -> finish())
                 .setCancelable(false)
                 .show();

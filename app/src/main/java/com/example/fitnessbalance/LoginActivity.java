@@ -18,6 +18,8 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private ProgressBar progressBar;
     private FirebaseAuth auth;
+    private AuthFlowViewModel model;
+    private boolean routing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +29,8 @@ public class LoginActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         initializeViews();
         setupClickListeners();
+        model = new androidx.lifecycle.ViewModelProvider(this).get(AuthFlowViewModel.class);
+        model.state.observe(this,state->{showLoading(state.busy);if(state.gate)checkEmailVerification();else if(!state.message.isEmpty())showError(state.message);});
     }
 
     private void initializeViews() {
@@ -50,34 +54,21 @@ public class LoginActivity extends AppCompatActivity {
 
     private void attemptLogin() {
         String email = emailEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString();
 
         if (validateInputs(email, password)) {
             showLoading(true);
-            auth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, task -> {
-                        showLoading(false);
-                        if (task.isSuccessful()) {
-                            checkEmailVerification();
-                        } else {
-                            showError("Incorrect email or password. Please try again.");
-                        }
-                    });
+            model.login(email,password);
         }
     }
 
     private void checkEmailVerification() {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
-            if (user.isEmailVerified()) {
-                Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, MainActivity.class));
-                finish();
-            } else {
-                showError("Please verify your email before logging in.");
-                auth.signOut();
-            }
-        }
+        if (!routing && auth.getCurrentUser() != null) { routing=true; AuthGateActivity.open(this); }
+    }
+
+    @Override protected void onStart() {
+        super.onStart();
+        if (!model.state.getValue().busy) checkEmailVerification();
     }
 
     private boolean validateInputs(String email, String password) {
@@ -102,6 +93,8 @@ public class LoginActivity extends AppCompatActivity {
     private void showLoading(boolean isLoading) {
         progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         loginButton.setEnabled(!isLoading);
+        findViewById(R.id.signUpText).setEnabled(!isLoading);
+        findViewById(R.id.forgotPasswordText).setEnabled(!isLoading);
     }
 
     private void showError(String message) {

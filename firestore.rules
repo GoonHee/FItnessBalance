@@ -1,7 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
-  function signedIn() { return request.auth != null; }
+  function authenticatedOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+  function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+  // Unverified accounts can recover only their initial profile, not application data.
+  function setupProfile(uid) {
+   let d = request.resource.data;
+   return authenticatedOwner(uid)
+    && d.fullName is string && d.fullName.size() > 0 && d.fullName.size() <= 200
+    && d.weight is number && d.weight > 0 && d.weight <= 300
+    && d.fitnessLevel in ['Beginner','Intermediate','Advanced']
+    && d.email == request.auth.token.email;
+  }
   function owner(uid) { return signedIn() && request.auth.uid == uid; }
   function noPassword(data) { return !data.keys().hasAny(['password', 'passwordHash', 'confirmPassword']); }
   function protectedFields() { return ['totalXp','level','lastRecordId','metGoalWeeks','achievementIds','feedbackCount','lastWorkoutAt','lastDiscomfortAt','lastDifficulty','lastFeeling','weeklyCounts','weeklyCategories']; }
@@ -122,11 +132,14 @@ service cloud.firestore {
   // Existing shared food search and owner-scoped barcode data must keep working.
   match /foods/{id} { allow read: if signedIn(); }
   match /users/{uid} {
-   allow read: if owner(uid);
-   allow create: if owner(uid) && noPassword(request.resource.data)
-    && (!request.resource.data.keys().hasAny(protectedFields()) || atomicAward(uid));
-   allow update: if owner(uid) && noPassword(request.resource.data)
-    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(protectedFields()) || atomicAward(uid) || atomicWearableAward(uid));
+   allow get: if authenticatedOwner(uid);
+   allow create: if (owner(uid) && noPassword(request.resource.data)
+    && (!request.resource.data.keys().hasAny(protectedFields()) || atomicAward(uid)))
+    || (setupProfile(uid) && request.resource.data.keys().hasOnly(['fullName','email','weight','fitnessLevel','createdAt','nutritionGoalSource'])
+     && request.resource.data.createdAt == request.time && request.resource.data.nutritionGoalSource == 'not_set');
+   allow update: if (owner(uid) && noPassword(request.resource.data)
+    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(protectedFields()) || atomicAward(uid) || atomicWearableAward(uid)))
+    || (setupProfile(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName','email','weight','fitnessLevel']));
    // Dated manual weights and their transaction-maintained private index.
    match /weightLogs/{day} {
     function validWeight() {
