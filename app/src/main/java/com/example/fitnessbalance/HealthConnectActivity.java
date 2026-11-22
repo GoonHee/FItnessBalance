@@ -38,7 +38,9 @@ public final class HealthConnectActivity extends AppCompatActivity {
         root.addView(form); setContentView(root); FoodUi.insets(this);
         button(form, R.string.back).setOnClickListener(v -> finish());
         TextView title = text(form, R.string.hc_title); title.setTextSize(24);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
         text(form, R.string.hc_intro);
+        heading(form, R.string.hc_connection_section);
         availability = text(form, R.string.fl_loading);
         permissionStatus = text(form, R.string.hc_permissions_checking);
         connect = button(form, R.string.hc_connect);
@@ -56,9 +58,11 @@ public final class HealthConnectActivity extends AppCompatActivity {
             try { startActivity(HealthConnectBridge.settings(this)); }
             catch (RuntimeException e) { status.setText(R.string.hc_error); }
         });
+        heading(form, R.string.hc_summary_section);
         lastSync = text(form, R.string.hc_never_synced);
         summary = text(form, R.string.hc_no_summary);
         text(form, R.string.hc_freshness_note);
+        heading(form, R.string.hc_wearable_section);
         workoutStatus=text(form,R.string.ww_never);
         button(form,R.string.ww_title).setOnClickListener(v->startActivity(new Intent(this,WearableWorkoutsActivity.class)));
         text(form,R.string.ww_note);
@@ -73,6 +77,13 @@ public final class HealthConnectActivity extends AppCompatActivity {
             snapshot.clear(); busy = false;
             render(); refresh(); status.setText(workoutsCleared?R.string.hc_cleared:R.string.hc_cache_error);
         });
+    }
+    private TextView heading(LinearLayout form, int resource) {
+        TextView view = text(form, resource);
+        view.setTextSize(18);
+        view.setTypeface(null, android.graphics.Typeface.BOLD);
+        view.setPadding(0, 28, 0, 8);
+        return view;
     }
     private TextView text(LinearLayout form, int resource) {
         TextView view = new TextView(this); view.setTextSize(16); view.setPadding(0,12,0,12);
