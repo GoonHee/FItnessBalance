@@ -1,22 +1,22 @@
 <resources>
     <string name="ar_use_health">Use sleep summaries for workout suggestions</string>
-    <string name="ar_consent">Use synced sleep data to offer a shorter workout when your sleep is below your recent pattern. Requires 3 previous sleep records. The comparison stays on this device, and you can keep your usual workout.</string>
+    <string name="ar_consent">Use fresh, manually synced sleep summaries to suggest a shorter existing workout. The comparison needs at least 3 prior recorded days synced at similar times. Records may be incomplete and cannot assess recovery.\n\nYour baseline and last 20 explanations stay on this device for your account and are excluded from backup. Turning this off clears both. You can keep your usual workout. Calorie goals, nutrient targets, heart-rate data and exercise calories stay the same.</string>
     <string name="ar_enable">Enable suggestions</string>
     <string name="ar_usual">Keep my usual recommendation</string>
     <string name="ar_explain">Why this suggestion?</string>
     <string name="ar_details">Rule version: %1$s\n\nUsual recommendation: %2$s\n\nHealth context: %3$s\n\nPreferred duration: %4$d minutes\nComparable previous recorded days: %5$d\n\nOnly available, unlocked workouts are considered. Duration is the selected lesson’s estimate; the app does not generate or shorten its exercise targets.</string>
     <string name="ar_disabled">Sleep suggestions are off</string>
-    <string name="ar_permission_fallback">Sleep access is required. Connect Health Connect from Profile.</string>
-    <string name="ar_stale_fallback">No recent sleep data. Using your usual workout.</string>
-    <string name="ar_building">Building sleep pattern: %1$d of 3 days</string>
-    <string name="ar_sleep_shortfall">Shorter workout suggested · Recent sleep %1$.1f h · Usual pattern %2$.1f h</string>
-    <string name="ar_priority">Your recovery preference takes priority.</string>
+    <string name="ar_permission_fallback">Using your usual workout. To enable sleep suggestions, grant sleep access in Profile and sync.</string>
+    <string name="ar_stale_fallback">No usable recent sleep summary. Using your usual workout. Missing data is not counted as zero sleep.</string>
+    <string name="ar_building">Using your usual workout while building your sleep baseline (%1$d of 3 comparable days). Sync on different days at similar times.</string>
+    <string name="ar_sleep_shortfall">Shorter workout suggested. Recorded sleep: %1$.1f h. Median on comparable days: %2$.1f h. Records may be incomplete.</string>
+    <string name="ar_priority">Your existing recovery, discomfort, comeback or easier-workout rule takes priority.</string>
     <string name="ar_no_shorter">No shorter suitable workout is available. Keeping your usual recommendation.</string>
-    <string name="ar_no_adjustment">No sleep adjustment applied</string>
+    <string name="ar_no_adjustment">Keeping your usual workout. This does not assess recovery.</string>
     <string name="ar_chose_usual">Usual workout selected</string>
     <string name="ar_shorter_reason">Shorter session based on your recent sleep</string>
     <string name="ar_confirm_title">Review workout suggestion</string>
-    <string name="ar_confirm">%1$s · About %2$d min\n\n%3$s\n\nReview the workout before starting.</string>
+    <string name="ar_confirm">%1$s · About %2$d min\n\n%3$s\n\nReview the workout and decide whether to start. This step logs no workout or calories.</string>
     <string name="ar_review">Review workout</string>
-    <string name="ar_audit_error">Couldn’t save the recommendation explanation. Your records are unaffected.</string>
+    <string name="ar_audit_error">Couldn’t save the local explanation. Your food logs, workouts and goals are unchanged.</string>
 </resources>
