@@ -33,7 +33,7 @@
     <string name="ex_band_restart">Restart Opportunity</string>
     <string name="ex_band_building">Building Momentum</string>
     <string name="ex_band_strong">Strong Momentum</string>
-    <string name="ex_recovery_note">Recovery days support consistency. Your earned XP and achievements stay with you.</string>
+    <string name="ex_recovery_note">Recovery days keep your earned XP and achievements.</string>
     <string name="ex_recommended">Recommended for You</string>
     <string name="ex_recommendation_meta">About %1$d minutes · %2$d base XP</string>
     <string name="ex_quests">Today’s Quests</string>

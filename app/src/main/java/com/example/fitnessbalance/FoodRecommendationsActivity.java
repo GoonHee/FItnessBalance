@@ -23,7 +23,9 @@ public final class FoodRecommendationsActivity extends AppCompatActivity {
         int pad=(int)(20*getResources().getDisplayMetrics().density); form.setPadding(pad,pad,pad,pad);
         root.addView(form); setContentView(root);ProgressUi.theme(this,root); FoodUi.insets(this);
         Button back=button(form,R.string.back); back.setOnClickListener(v->finish());
-        text(form,R.string.fr_title).setTextSize(24); text(form,R.string.fr_intro);
+        TextView title = ProgressUi.text(this, form, getString(R.string.fr_title), 24, true);
+        androidx.core.view.ViewCompat.setAccessibilityHeading(title, true);
+        text(form,R.string.fr_intro);
         TextView date=text(form,0); date.setText(getString(R.string.fl_date,day));
         text(form,R.string.fs_meal); meal=new Spinner(this);
         meal.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,getResources().getStringArray(R.array.fs_meals))); form.addView(meal);
@@ -51,7 +53,7 @@ public final class FoodRecommendationsActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> p) {}
         });
     }
-    private TextView text(LinearLayout form,int id) { TextView t=new TextView(this); if(id!=0)t.setText(id); t.setTextColor(ProgressUi.ink(this));t.setTextSize(16); t.setPadding(0,12,0,12); form.addView(t); return t; }
+    private TextView text(LinearLayout form,int id) { TextView t=new TextView(this); if(id!=0)t.setText(id); t.setTextColor(ProgressUi.ink(this));t.setTextSize(16); t.setPadding(0,ProgressUi.dp(this,6),0,ProgressUi.dp(this,6)); form.addView(t); return t; }
     private Button button(LinearLayout form,int id) { Button b=ProgressUi.action(this); b.setText(id); form.addView(b); return b; }
     private boolean current(int request) { FirebaseUser u=FirebaseAuth.getInstance().getCurrentUser(); return request==version && !isDestroyed() && !isFinishing() && u!=null && uid.equals(u.getUid()); }
     private void invalidateResults() { version++; latest=null; if(results!=null)results.removeAllViews(); if(context!=null)context.setText(""); if(status!=null)status.setText(""); if(generate!=null)generate.setEnabled(true); }
@@ -77,8 +79,9 @@ public final class FoodRecommendationsActivity extends AppCompatActivity {
         }).addOnFailureListener(this,error->{ if(!current(request))return; generate.setEnabled(true); status.setText(R.string.fr_load_error); });
     }
     private void show(FoodRecommendationService.Result result,boolean emptyCatalogue,int selectedMeal,int request) {
-        context.setText(getString(R.string.fr_context,FoodUi.number(result.effectiveAllowance),
-                result.remainingCalories==null?getString(R.string.fr_remaining_unknown):FoodUi.number(result.remainingCalories)));
+        String remaining = result.remainingCalories == null ? getString(R.string.fr_remaining_unknown)
+                : getString(R.string.fr_remaining_value, FoodUi.number(result.remainingCalories));
+        context.setText(getString(R.string.fr_context, FoodUi.number(result.effectiveAllowance), remaining));
         List<String> dietaryLabels = new ArrayList<>();
         for (String diet : FoodRecommendationService.strictStrings(result.audit.get("dietaryPreferences"))) {
             int index = UserPreferences.DIETS.indexOf(diet);
@@ -97,8 +100,8 @@ public final class FoodRecommendationsActivity extends AppCompatActivity {
         if(result.partialCalories||result.partialMacros)context.append("\n"+getString(R.string.fr_partial));
         status.setText(result.suggestions.isEmpty() ? emptyCatalogue ? R.string.fr_not_ready : R.string.fr_no_matches : R.string.fr_results);
         for(FoodRecommendationService.Suggestion suggestion:result.suggestions) {
-            LinearLayout card=new LinearLayout(this); card.setOrientation(LinearLayout.VERTICAL); card.setBackgroundResource(R.drawable.food_panel);
-            TextView name=text(card,0); name.setText(suggestion.name); name.setTextSize(20);
+            LinearLayout card = ProgressUi.card(this, results, null);
+            ProgressUi.text(this, card, suggestion.name, 20, true);
             text(card,0).setText(getString(R.string.fr_portion,suggestion.label,FoodUi.number(suggestion.amount),suggestion.unit,FoodUi.number(suggestion.calories)));
             text(card,0).setText(FoodUi.nutrients(this,suggestion.nutrients,null,1));
             for(String reason:suggestion.reasons)text(card,reasonResource(reason));
@@ -110,7 +113,7 @@ public final class FoodRecommendationsActivity extends AppCompatActivity {
                 intent.putExtra("recommendedAmount",suggestion.amount); intent.putExtra("recommendedUnit",suggestion.unit);
                 intent.putExtra("recommendedMeal",getResources().getStringArray(R.array.fs_meals)[selectedMeal]);
                 startActivity(intent);
-            }); results.addView(card);
+            });
         }
     }
     private int reasonResource(String reason) {

@@ -34,11 +34,14 @@ public final class HealthConnectActivity extends AppCompatActivity {
         uid = user.getUid(); bridge = new HealthConnectBridge(this); store = new HealthSummaryStore(this, uid);
         ScrollView root = new ScrollView(this); root.setId(R.id.foodRoot);
         LinearLayout form = new LinearLayout(this); form.setOrientation(LinearLayout.VERTICAL);
-        int pad = (int) (20 * getResources().getDisplayMetrics().density); form.setPadding(pad,pad,pad,pad);
+        int pad = ProgressUi.dp(this, 20); form.setPadding(pad,pad,pad,pad);
         root.addView(form); setContentView(root); FoodUi.insets(this);
         button(form, R.string.back).setOnClickListener(v -> finish());
         TextView title = text(form, R.string.hc_title); title.setTextSize(24);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        androidx.core.view.ViewCompat.setAccessibilityHeading(title, true);
         text(form, R.string.hc_intro);
+        heading(form, R.string.hc_connection_section);
         availability = text(form, R.string.fl_loading);
         permissionStatus = text(form, R.string.hc_permissions_checking);
         connect = button(form, R.string.hc_connect);
@@ -56,14 +59,17 @@ public final class HealthConnectActivity extends AppCompatActivity {
             try { startActivity(HealthConnectBridge.settings(this)); }
             catch (RuntimeException e) { status.setText(R.string.hc_error); }
         });
+        button(form, R.string.hc_retry).setOnClickListener(v -> refresh());
+        status = text(form, 0);
+        status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        heading(form, R.string.hc_summary_section);
         lastSync = text(form, R.string.hc_never_synced);
         summary = text(form, R.string.hc_no_summary);
         text(form, R.string.hc_freshness_note);
+        heading(form, R.string.hc_wearable_section);
         workoutStatus=text(form,R.string.ww_never);
         button(form,R.string.ww_title).setOnClickListener(v->startActivity(new Intent(this,WearableWorkoutsActivity.class)));
         text(form,R.string.ww_note);
-        status = text(form, 0); status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-        button(form, R.string.hc_retry).setOnClickListener(v -> refresh());
         button(form, R.string.hc_privacy).setOnClickListener(v -> startActivity(new Intent(this, HealthPermissionRationaleActivity.class)));
         button(form, R.string.hc_clear).setOnClickListener(v -> {
             version++; bridge.cancelPending(); store.clear();
@@ -74,11 +80,19 @@ public final class HealthConnectActivity extends AppCompatActivity {
             render(); refresh(); status.setText(workoutsCleared?R.string.hc_cleared:R.string.hc_cache_error);
         });
     }
+    private TextView heading(LinearLayout form, int resource) {
+        TextView view = text(form, resource);
+        view.setTextSize(18);
+        view.setTypeface(null, android.graphics.Typeface.BOLD);
+        androidx.core.view.ViewCompat.setAccessibilityHeading(view, true);
+        view.setPadding(0, ProgressUi.dp(this, 20), 0, ProgressUi.dp(this, 4));
+        return view;
+    }
     private TextView text(LinearLayout form, int resource) {
-        TextView view = new TextView(this); view.setTextSize(16); view.setPadding(0,12,0,12);
+        TextView view = new TextView(this); view.setTextSize(16); view.setPadding(0, ProgressUi.dp(this, 6), 0, ProgressUi.dp(this, 6));
         if (resource != 0) view.setText(resource); form.addView(view); return view;
     }
-    private Button button(LinearLayout form, int resource) { Button b = new Button(this); b.setText(resource); form.addView(b); return b; }
+    private Button button(LinearLayout form, int resource) { Button b = new Button(this); b.setText(resource); b.setAllCaps(false); form.addView(b); return b; }
     private boolean current(int request) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         return request == version && !isFinishing() && !isDestroyed() && user != null && uid.equals(user.getUid());
