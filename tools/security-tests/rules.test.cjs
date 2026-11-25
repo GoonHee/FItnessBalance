@@ -275,3 +275,33 @@ test('verified account can resume protected catalogue access',async()=>{
  const d=env.authenticatedContext('alice',{email_verified:true,email:'alice@example.test'}).firestore();
  await assertSucceeds(getDoc(doc(d,'foods/rice')));
 });
+
+test('daily chest earns from two check-ins and stays claimable after the meal is removed', async () => {
+ const d = db(), chest = ref(d, `dailyChests/${DAY}`), meal = ref(d, `foodLogs/${DAY}`);
+ const reflection = {rest:false,reflection:true,earned:false,opened:false,accent:'purple'};
+ await assertSucceeds(setDoc(chest, {...reflection,updatedAt:serverTimestamp()}));
+ await assertSucceeds(setDoc(meal, {foodItems:[{name:'Rice'}]}));
+ await assertSucceeds(updateDoc(chest, {earned:true,updatedAt:serverTimestamp()}));
+ await assertSucceeds(deleteDoc(meal));
+ const open = () => runTransaction(d, async tx => {
+  const saved = await tx.get(chest);
+  if (saved.get('opened')) return false;
+  tx.update(chest, {opened:true,updatedAt:serverTimestamp()});
+  return true;
+ });
+ assert.deepEqual((await Promise.all([open(), open()])).sort(), [false, true]);
+ assert.equal(await open(), false);
+ assert.equal((await getDoc(chest)).get('accent'), 'purple');
+ assert.equal((await getDoc(chest)).get('opened'), true);
+ await assertFails(getDoc(ref(db('bob'), `dailyChests/${DAY}`)));
+});
+
+test('workout and reflection quests can earn the same dated chest', async () => {
+ const d = db();
+ await start(d);
+ await complete(d);
+ const chest = ref(d, `dailyChests/${DAY}`);
+ await assertSucceeds(setDoc(chest, {rest:false,reflection:false,earned:true,
+  opened:true,accent:'teal',updatedAt:serverTimestamp()}));
+ assert.equal((await getDoc(chest)).get('opened'), true);
+});

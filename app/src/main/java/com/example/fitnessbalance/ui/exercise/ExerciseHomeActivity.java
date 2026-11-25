@@ -18,6 +18,7 @@ import java.util.*;
 
 public final class ExerciseHomeActivity extends ExerciseBaseActivity {
   private WorkoutLesson recommended;
+  private DailyChestDialog dailyChest;
   private com.example.fitnessbalance.repository.BanditStore banditStore;
   private ContextualBanditService.Selection banditSelection;
   private RecommendationService.Preferences banditPreferences;
@@ -37,6 +38,9 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
     super.onCreate(b);
     screen(R.layout.activity_exercise_home);
     healthBridge = new HealthConnectBridge(this);
+    findViewById(R.id.exDailyChest).setOnClickListener(v -> {
+      if (dailyChest != null) dailyChest.show();
+    });
     togglePanel(R.id.exRecommendationSettings, R.id.exRecommendationSettingsPanel);
     togglePanel(R.id.exMoreOptions, R.id.exMoreOptionsPanel);
     ((CheckBox)findViewById(R.id.exUseBandit)).setOnCheckedChangeListener((button,checked)->{
@@ -121,6 +125,8 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
   @Override
   protected void load() {
     final int version = ++loadVersion;
+    if (dailyChest == null) dailyChest = new DailyChestDialog(this, uid);
+    dailyChest.refreshToday();
     loading();
     healthBridge.cancelPending();
     healthStore = new HealthRecommendationStore(this, uid);

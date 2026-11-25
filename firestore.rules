@@ -251,6 +251,11 @@ service cloud.firestore {
      && request.resource.data.entryCount is int && request.resource.data.entryCount > 0 && request.resource.data.entryCount <= 25
      && request.resource.data.createdAt == request.time;
    }
+   match /dailyChests/{day} {
+    allow read: if owner(uid);
+    allow create: if owner(uid) && validChest(uid, day, {});
+    allow update: if owner(uid) && validChest(uid, day, resource.data);
+   }
    match /foodLogs/{day} { allow read, write: if owner(uid); }
    match /wearableWorkoutRewards/{id} {
     allow read: if owner(uid);
@@ -328,6 +333,36 @@ service cloud.firestore {
       && freshWearableReward(uid,request.resource.data.recordId)
       && wearableAchievement(uid,id,request.resource.data.recordId)));
    }
+  }
+  function chestQuest(uid, day, quest) {
+   let ref = /databases/$(database)/documents/users/$(uid)/questProgress/$(day + '_' + quest);
+   return exists(ref) && get(ref).data.get('completed', false) == true;
+  }
+  function chestMeal(uid, day) {
+   let ref = /databases/$(database)/documents/users/$(uid)/foodLogs/$(day);
+   return exists(ref) && (get(ref).data.get('foodItems', []) is list
+    && get(ref).data.get('foodItems', []).size() > 0
+    || (!('foodItems' in get(ref).data) && get(ref).data.get('totalCalories', 0) is number
+      && get(ref).data.get('totalCalories', 0) > 0));
+  }
+  function chestGoals(uid, day, d) {
+   let movement = d.rest || chestQuest(uid, day, 'planned');
+   let reflection = d.reflection || chestQuest(uid, day, 'feedback');
+   let meal = chestMeal(uid, day);
+   return (movement && (meal || reflection)) || (meal && reflection);
+  }
+  function validChest(uid, day, prior) {
+   let d = request.resource.data;
+   return day.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+    && d.keys().hasOnly(['rest','reflection','earned','opened','accent','updatedAt'])
+    && d.rest is bool && d.reflection is bool && d.earned is bool && d.opened is bool
+    && d.accent in ['teal','purple','amber'] && d.accent == prior.get('accent', d.accent)
+    && d.updatedAt == request.time && !prior.get('opened', false)
+    && (!prior.get('rest', false) || d.rest)
+    && (!prior.get('reflection', false) || d.reflection)
+    && (!prior.get('earned', false) || d.earned)
+    && (!d.opened || d.earned)
+    && (!d.earned || prior.get('earned', false) || chestGoals(uid, day, d));
   }
   function validXpBreakdown(d) {
    let xp = d.xpBreakdown;

@@ -1,0 +1,23 @@
+<resources>
+    <color name="dc_amber">#8A5700</color>
+    <string name="dc_title">Daily chest</string>
+    <string name="dc_ready">Daily chest ready</string>
+    <string name="dc_pick_date">Choose a date</string>
+    <string name="dc_date">Date · %1$s</string>
+    <string name="dc_goals">Workout or planned rest · %1$s\nLog a meal · %2$s\nReflect on your day · %3$s</string>
+    <string name="dc_check_rest">Check in for planned rest</string>
+    <string name="dc_reflect">Take a moment to reflect</string>
+    <string name="dc_reflection_prompt">What helped you feel supported today? Think it over privately and tap Done when ready.</string>
+    <string name="dc_done">Done</string>
+    <string name="dc_reward">Reward preview: %1$s weekly ring</string>
+    <string name="dc_open">Open chest</string>
+    <string name="dc_apply">Use this accent</string>
+    <string name="dc_applied">Accent applied to your weekly ring.</string>
+    <string name="dc_opened">Accent unlocked</string>
+    <string name="dc_earned">Chest earned. Open it now or return to this date later.</string>
+    <string name="dc_locked">Complete any two goals to earn this chest.</string>
+    <string name="dc_error">Couldn’t load this chest. Choose the date again to retry.</string>
+    <string name="dc_teal">Teal</string>
+    <string name="dc_purple">Purple</string>
+    <string name="dc_amber">Amber</string>
+</resources>

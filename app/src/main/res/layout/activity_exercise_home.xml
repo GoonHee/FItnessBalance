@@ -77,6 +77,10 @@
                         style="@style/RewardBody"
                         android:text="@string/ex_recovery_note" />
                 </LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exDailyChest"
+                    style="@style/ExerciseButton"
+                    android:text="@string/dc_title" />
                 <LinearLayout style="@style/RewardPanel">
                     <TextView
                         android:id="@+id/exRecommended"

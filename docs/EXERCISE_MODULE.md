@@ -204,3 +204,9 @@ No Android device/emulator was attached during implementation. Automated checks 
 - [ ] App restart retains remote progress; two accounts remain isolated.
 - [ ] Missing profile/content/reference, offline and denied-permission cases show safe errors and retry.
 - [ ] Large text, TalkBack, light/dark mode, portrait/landscape and system insets are usable.
+
+## Daily chest
+
+Exercise Home previews one cosmetic weekly-ring accent per local date. Any two of workout or planned rest, a meal log, and reflection earn the chest. Workout and rest share one goal. A rest check-in is available on off-days when workout days are configured. A reflection can come from workout feedback or a private prompt, which stores only completion. Both standalone check-ins are available for today.
+
+The date picker can revisit past earned chests or evaluate records still present for a past date. A Firestore transaction stores earned state and the cosmetic unlock in the same `users/{uid}/dailyChests/{yyyy-MM-dd}` receipt. Once earned, the chest stays available if a meal is removed. The three accent colours repeat. Applying an unlocked colour is optional, account-specific on the current device, and has no effect on XP or targets. Publish the updated rules with the other exercise rules before distributing this build.
