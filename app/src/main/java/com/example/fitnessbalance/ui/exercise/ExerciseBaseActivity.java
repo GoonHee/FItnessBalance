@@ -160,7 +160,7 @@ public abstract class ExerciseBaseActivity extends AppCompatActivity {
     text(R.id.exXp, getString(R.string.ex_xp, xp, game.nextLevelXp(xp)));
     boolean animate=android.animation.ValueAnimator.areAnimatorsEnabled();
     ((LinearProgressIndicator) findViewById(R.id.exXpBar))
-        .setProgressCompat(Math.max(0, xp) % 100, animate);
+        .setProgressCompat(Math.max(0, xp) % GamificationService.XP_PER_LEVEL, animate);
     text(R.id.exMomentum, getString(R.string.ex_week_count, count, target));
     ((LinearProgressIndicator) findViewById(R.id.exMomentumBar))
         .setProgressCompat(momentum.percentage(count, target), false);

@@ -36,6 +36,7 @@ public final class RecommendationPreferences {
         if (Values.integer(d, -1) == DateUtils.isoDay(now, zone)) planned = true;
       p.recoveryDay = !planned;
     }
+    if (!recent.isEmpty()) p.tired = "tired".equals(recent.get(0).get("feelingFeedback"));
     for (Map<String, Object> r : recent) {
       if (p.lastDifficulties.size() < 2)
         p.lastDifficulties.add(Values.text(r.get("difficultyFeedback"), ""));

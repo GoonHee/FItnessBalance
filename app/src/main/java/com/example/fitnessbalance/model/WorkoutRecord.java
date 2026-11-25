@@ -148,6 +148,16 @@ public class WorkoutRecord {
     xpEarned = value;
   }
 
+  private Map<String, Integer> xpBreakdown = Collections.emptyMap();
+
+  public Map<String, Integer> getXpBreakdown() {
+    return xpBreakdown;
+  }
+
+  public void setXpBreakdown(Map<String, Integer> value) {
+    xpBreakdown = value == null ? Collections.emptyMap() : value;
+  }
+
   private int starsEarned = 0;
 
   public int getStarsEarned() {

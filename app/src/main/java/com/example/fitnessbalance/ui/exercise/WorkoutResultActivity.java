@@ -71,9 +71,7 @@ public final class WorkoutResultActivity extends ExerciseBaseActivity {
                       r.getPlannedExercises(),
                       r.getDurationSeconds(),
                       r.getActiveDurationSeconds(),
-                      r.getEstimatedCaloriesBurned(),
-                      r.getXpEarned(),
-                      r.getStarsEarned()));
+                      r.getEstimatedCaloriesBurned()));
               text(
                   R.id.exUnlocks,
                   r.getUnlocked().isEmpty()
@@ -81,6 +79,10 @@ public final class WorkoutResultActivity extends ExerciseBaseActivity {
                       : getString(R.string.ex_unlocks, unlockedNames(r.getUnlocked())));
               text(R.id.exRewardXp,getString(R.string.gm_xp_earned,r.getXpEarned()));
               text(R.id.exRewardStars,RewardCelebrationDialog.stars(r.getStarsEarned())+"  "+getString(R.string.gm_stars,r.getStarsEarned()));
+              findViewById(R.id.exRewardStars).setVisibility(
+                  r.getXpEarned() > 0 || r.getXpBreakdown().isEmpty() ? android.view.View.VISIBLE : android.view.View.GONE);
+              text(R.id.exRewardBreakdown, RewardCelebrationDialog.breakdown(this, r.getXpBreakdown()));
+              text(R.id.exRewardWeek, getString(R.string.gm_week_detail, r.getWeeklyCompleted(), r.getWeeklyTarget()));
               progress(profile.getResult(), week.getResult());
               loaded();
               if(saved.getResult().exists()&&!saved.getResult().getMetadata().hasPendingWrites()&&!saved.getResult().getMetadata().isFromCache()){

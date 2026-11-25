@@ -51,7 +51,9 @@
                     <TextView style="@style/RewardHeading" android:text="@string/gm_earned" />
                     <TextView android:id="@+id/exRewardXp" style="@style/RewardHeading" />
                     <TextView android:id="@+id/exRewardStars" style="@style/RewardBody" />
-                    <TextView style="@style/RewardBody" android:text="@string/gm_reward_note" />
+                    <TextView android:id="@+id/exRewardBreakdown" style="@style/RewardBody" />
+                    <TextView android:id="@+id/exRewardWeek" style="@style/RewardBody" />
+                    <TextView android:id="@+id/exUnlocks" style="@style/RewardBody" />
                 </LinearLayout>
                 <TextView
                     android:id="@+id/exResultTitle"
@@ -92,9 +94,6 @@
                         android:layout_marginVertical="12dp"
                         android:max="100" />
                 </LinearLayout>
-                <TextView
-                    android:id="@+id/exUnlocks"
-                    style="@style/RewardBody" />
                 <TextView
                     android:id="@+id/exApplicationProgress"
                     style="@style/RewardBody"

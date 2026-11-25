@@ -27,7 +27,7 @@ public final class AdaptiveRecommendationService {
         public Map<String,Object> audit(long now, boolean useUsual) {
             RecommendationService.Recommendation selected = useUsual ? usual : suggested;
             return Values.of("id", UUID.randomUUID().toString(), "createdAt", now, "ruleVersion", VERSION,
-                    "inputs", inputs, "healthReason", healthReason, "normalReason", usual.reason, "baseRuleVersion", "workout-rules-v1",
+                    "inputs", inputs, "healthReason", healthReason, "normalReason", usual.reason, "baseRuleVersion", "workout-rules-v2",
                     "normalLessonId", usual.lesson == null ? "" : usual.lesson.getId(),
                     "selectedLessonId", selected.lesson == null ? "" : selected.lesson.getId(),
                     "selectedMinutes", selected.lesson == null ? 0 : selected.lesson.getEstimatedMinutes(),
@@ -41,6 +41,7 @@ public final class AdaptiveRecommendationService {
         RecommendationService.Recommendation usual = base.recommend(p, lessons);
         Map<String,Object> inputs = Values.of("preferredMinutes", p.minutes, "equipment", new ArrayList<>(p.equipment),
                 "fitnessLevel", p.fitnessLevel, "goal", p.goal, "preferredCategories", new ArrayList<>(p.categories),
+                "tired", p.tired, "lastSequence", p.lastSequence,
                 "recentCategories", new ArrayList<>(p.recentCategories), "recentDifficultyFeedback", new ArrayList<>(p.lastDifficulties),
                 "inactiveDays", p.inactiveDays, "discomfort", p.discomfort, "scheduledRecoveryDay", p.recoveryDay,
                 "durationPreferenceKnown", p.durationPreferenceKnown, "healthOptIn", enabled,

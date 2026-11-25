@@ -49,6 +49,13 @@ public class GamificationServiceTest {
   }
 
   @Test
+  public void guidedEligibilityRequiresAnActiveMinuteAndNoCountedOverlap() {
+    assertFalse(g.eligibleGuidedWorkout(59, false));
+    assertTrue(g.eligibleGuidedWorkout(60, false));
+    assertFalse(g.eligibleGuidedWorkout(300, true));
+  }
+
+  @Test
   public void feedbackIsPerRecord() {
     assertEquals(2, g.feedbackXp(false));
     assertEquals(0, g.feedbackXp(true));

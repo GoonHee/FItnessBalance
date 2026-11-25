@@ -37,6 +37,8 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
     super.onCreate(b);
     screen(R.layout.activity_exercise_home);
     healthBridge = new HealthConnectBridge(this);
+    togglePanel(R.id.exRecommendationSettings, R.id.exRecommendationSettingsPanel);
+    togglePanel(R.id.exMoreOptions, R.id.exMoreOptionsPanel);
     ((CheckBox)findViewById(R.id.exUseBandit)).setOnCheckedChangeListener((button,checked)->{
       if(settingBandit || banditStore==null)return;
       try { banditStore.enable(checked); reload(); }
@@ -104,6 +106,18 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
                     .show());
   }
 
+  private void togglePanel(int buttonId, int panelId) {
+    View panel = findViewById(panelId);
+    View button = findViewById(buttonId);
+    androidx.core.view.ViewCompat.setStateDescription(button, getString(R.string.gm_collapsed));
+    button.setOnClickListener(v -> {
+      boolean expand = panel.getVisibility() != View.VISIBLE;
+      panel.setVisibility(expand ? View.VISIBLE : View.GONE);
+      androidx.core.view.ViewCompat.setStateDescription(
+          v, getString(expand ? R.string.gm_expanded : R.string.gm_collapsed));
+    });
+  }
+
   @Override
   protected void load() {
     final int version = ++loadVersion;
@@ -158,12 +172,13 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
                 text(R.id.alHomeSummary, getString(R.string.al_summary_error));
             });
 
+    String today = DateUtils.day(now, zone), weekStart = DateUtils.week(now, zone);
     Task<DocumentSnapshot> profile = repository.profile(),
         progress = repository.progress(path()),
-        week = repository.week(DateUtils.week(now, zone));
+        week = repository.week(weekStart);
     Task<List<WorkoutLesson>> lessons = repository.lessons(path());
     Task<QuerySnapshot> records = repository.recent(),
-        quests = repository.dailyQuests(DateUtils.day(now, zone));
+        quests = repository.questsThrough(weekStart, today);
     Tasks.whenAll(profile, progress, week, lessons, records, quests)
         .addOnSuccessListener(
             this,
@@ -207,9 +222,25 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
                               : user.getTimestamp("lastDiscomfortAt").toDate(),
                           now,
                           zone);
-              Set<String> done = new HashSet<>();
-              for (DocumentSnapshot q : quests.getResult())
-                if (Boolean.TRUE.equals(q.get("completed"))) done.add(q.getString("questId"));
+              Set<String> done = new HashSet<>(), activeDays = new HashSet<>();
+              for (DocumentSnapshot q : quests.getResult()) {
+                if (!Boolean.TRUE.equals(q.get("completed"))) continue;
+                String questDay = q.getString("day"), quest = q.getString("questId");
+                if (today.equals(questDay)) done.add(quest);
+                if ("planned".equals(quest)) activeDays.add(questDay);
+              }
+              text(R.id.exActiveDays, getResources().getQuantityString(
+                  R.plurals.gm_active_days, activeDays.size(), activeDays.size()));
+              if (!recent.isEmpty()) {
+                String lastLesson = Values.text(recent.get(0).get("lessonId"), "");
+                String lastPath = Values.text(recent.get(0).get("pathId"), "");
+                for (WorkoutLesson lesson : lessons.getResult()) {
+                  if (path().equals(lastPath) && lastLesson.equals(lesson.getId()) && !lesson.getStandalone()) {
+                    preferences.lastSequence = lesson.getSequence();
+                    break;
+                  }
+                }
+              }
               String[] ids = {"planned", "minutes", "feedback"};
               int[] labels = {
                 R.string.ex_quest_planned, R.string.ex_quest_minutes, R.string.ex_quest_feedback

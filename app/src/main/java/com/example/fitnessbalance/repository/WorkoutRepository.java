@@ -47,8 +47,11 @@ public final class WorkoutRepository {
     return user().collection(RECORDS).document(id).get();
   }
 
-  public Task<QuerySnapshot> dailyQuests(String day) {
-    return user().collection(QUEST_PROGRESS).whereEqualTo("day", day).get();
+  public Task<QuerySnapshot> questsThrough(String firstDay, String lastDay) {
+    return user().collection(QUEST_PROGRESS)
+        .whereGreaterThanOrEqualTo("day", firstDay)
+        .whereLessThanOrEqualTo("day", lastDay)
+        .get();
   }
 
   public Task<QuerySnapshot> achievements() {
