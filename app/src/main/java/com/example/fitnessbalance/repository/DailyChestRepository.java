@@ -42,11 +42,11 @@ public final class DailyChestRepository {
     boolean today = date.equals(currentDate);
     String day = date.toString();
     DocumentReference receipt = user.collection("dailyChests").document(day);
-    return db.runTransaction(tx -> {
+    Task<Chest> update = db.runTransaction(tx -> {
       DocumentSnapshot saved = tx.get(receipt);
       String storedAccent = saved.getString("accent");
       String accent = storedAccent == null ? accent(date) : storedAccent;
-      if (flag(saved, "opened")) return new Chest(false, false, false, false, true, true, accent);
+      if (flag(saved, "opened")) return opened(accent);
 
       DocumentSnapshot workout = tx.get(user.collection("questProgress").document(day + "_planned"));
       DocumentSnapshot feedback = tx.get(user.collection("questProgress").document(day + "_feedback"));
@@ -71,6 +71,22 @@ public final class DailyChestRepository {
       }
       return new Chest(moved, meal, reflection, plannedRest && !moved, earned, opened, accent);
     });
+    if (action != Action.OPEN) return update;
+    return update.continueWithTask(outcome -> {
+      if (outcome.isSuccessful()) return Tasks.forResult(outcome.getResult());
+      // A concurrent open can make a pending transaction fail the immutable receipt rule.
+      return receipt.get(Source.SERVER).continueWith(confirmed -> {
+        if (confirmed.isSuccessful() && flag(confirmed.getResult(), "opened")) {
+          return opened(confirmed.getResult().getString("accent"));
+        }
+        throw outcome.getException() == null
+            ? new IllegalStateException("Chest open failed") : outcome.getException();
+      });
+    });
+  }
+
+  private static Chest opened(String accent) {
+    return new Chest(false, false, false, false, true, true, accent);
   }
 
   public static boolean qualifies(boolean movement, boolean meal, boolean reflection) {

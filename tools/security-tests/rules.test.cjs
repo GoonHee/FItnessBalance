@@ -288,6 +288,10 @@ test('daily chest earns from two check-ins and stays claimable after the meal is
   if (saved.get('opened')) return false;
   tx.update(chest, {opened:true,updatedAt:serverTimestamp()});
   return true;
+ }).catch(async error => {
+  const confirmed = await getDocFromServer(chest);
+  if (confirmed.get('opened')) return false;
+  throw error;
  });
  assert.deepEqual((await Promise.all([open(), open()])).sort(), [false, true]);
  assert.equal(await open(), false);
