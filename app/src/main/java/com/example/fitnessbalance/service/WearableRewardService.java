@@ -7,6 +7,7 @@ import java.util.*;
 /** Versioned, calorie-independent application rewards; elapsed time is not active sensor time. */
 public final class WearableRewardService {
   public static final String VERSION="wearable-rewards-v1";
+  private static final int BASE_XP = 20;
   public static final long MINIMUM_MILLIS=300000L,WINDOW_MILLIS=7L*86400000;
   public boolean eligible(Map<String,Object> entry,long now){
     if(!"health_connect".equals(entry.get("source"))||!Boolean.TRUE.equals(entry.get("completed")))return false;
@@ -34,7 +35,7 @@ public final class WearableRewardService {
     GamificationService game=new GamificationService();int target=new MomentumService().target(Values.integer(profile.get("weeklyWorkoutTarget"),3));
     int oldCount=Values.integer(weekly.get("completed"),Values.integer(Values.map(profile.get("weeklyCounts")).get(week),0));
     if(oldCount<0||oldCount>1000000)throw new IllegalStateException("Invalid weekly progress");
-    int count=oldCount+(dayCredited?0:1),base=dayCredited?0:20,quest=(plannedQuest?0:5)+(minutesQuest?0:5);
+    int count=oldCount+(dayCredited?0:1),base=dayCredited?0:BASE_XP,quest=game.dailyBonus(true,plannedQuest,GamificationService.DAILY_QUEST_XP)+game.dailyBonus(true,minutesQuest,GamificationService.DAILY_QUEST_XP);
     List<String> goalWeeks=Values.strings(profile.get("metGoalWeeks"));boolean priorBonus=Boolean.TRUE.equals(weekly.get("bonusAwarded"))||goalWeeks.contains(week);
     int bonus=game.weeklyBonus(count,target,priorBonus);if(bonus>0&&!goalWeeks.contains(week))goalWeeks.add(week);
     String category=category(Values.text(entry.get("name"),""));List<String> categories=Values.strings(weekly.get("categories"));if(!categories.contains(category))categories.add(category);

@@ -17,7 +17,15 @@ public final class WearableRewardDialog {
       ProgressUi.text(activity,body,activity.getString(prior?R.string.wr_already:R.string.gm_xp_earned,Values.integer(award.get("xpEarned"),0)),24,true);
       ProgressUi.text(activity,body,activity.getString(R.string.gm_week_detail,Values.integer(award.get("weeklyCompleted"),0),Values.integer(award.get("weeklyTarget"),3)),17,true);
       if(!prior&&!Boolean.TRUE.equals(award.get("newDayCredit")))ProgressUi.text(activity,body,activity.getString(R.string.wr_day_cap),15,false);
-      if(Values.integer(award.get("weeklyBonusXp"),0)>0)ProgressUi.text(activity,body,activity.getString(R.string.wr_week_bonus),17,true);
+      String[] keys = {"baseXp", "questXp", "weeklyBonusXp"};
+      int[] labels = {R.string.gm_xp_wearable, R.string.gm_xp_quests, R.string.gm_xp_weekly};
+      for (int i = 0; i < keys.length; i++) {
+        int amount = Values.integer(award.get(keys[i]), 0);
+        if (amount > 0) ProgressUi.text(activity, body, activity.getString(labels[i], amount), 15, false);
+      }
+      ProgressUi.text(activity, body, activity.getString(R.string.gm_next_level,
+          new com.example.fitnessbalance.service.GamificationService().nextLevelXp(
+              Values.integer(award.get("totalXpAfter"), 0))), 16, false);
       for(String id:Values.strings(award.get("unlocked"))){int label="first_step".equals(id)?R.string.ex_first_step:"routine_builder".equals(id)?R.string.ex_routine_builder:"welcome_back".equals(id)?R.string.ex_welcome_back:R.string.ex_balanced_week;ProgressUi.text(activity,body,activity.getString(label),18,true);}
     }
     ProgressUi.text(activity,body,activity.getString(R.string.wr_policy),14,false);ScrollView scroll=new ScrollView(activity);scroll.addView(body);

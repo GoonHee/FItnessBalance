@@ -14,7 +14,7 @@ const db=(uid='alice')=>env.authenticatedContext(uid,{email_verified:true,email:
 const ref=(d,s)=>doc(d,`users/alice/${s}`);
 async function start(d,id='session1',lessonId='lesson_01') {return setDoc(ref(d,`workoutSessions/${id}`),{pathId:PATH,lessonId,plannedExercises:4,startedAt:serverTimestamp()})}
 // This exercises the same server-side atomic/idempotency contract, without claiming to run Android UI code.
-async function complete(d,id='session1',allAchievements=false){
+async function complete(d,id='session1',allAchievements=false,legacy=false){
  return runTransaction(d,async tx=>{
   const record=ref(d,`workoutRecords/${id}`),saved=await tx.get(record);if(saved.exists())return saved.data().xpEarned;
   const session=await tx.get(ref(d,`workoutSessions/${id}`)),user=await tx.get(doc(d,'users/alice')),progress=await tx.get(ref(d,`pathProgress/${PATH}`)),week=await tx.get(ref(d,`exerciseWeeks/${WEEK}`));
@@ -22,7 +22,10 @@ async function complete(d,id='session1',allAchievements=false){
   const qids=['planned','minutes','feedback'];const quests=[];for(const q of qids)quests.push(await tx.get(ref(d,`questProgress/${DAY}_${q}`)));
   const owned=[];for(const a of achievements)owned.push(await tx.get(ref(d,`unlockedAchievements/${a}`)));
   const u=user.data()||{},p=progress.data()||{},w=week.data()||{};const attempts=(p.completionCounts||{}).lesson_01||0,count=(w.completed||0)+1;
-  const bonus=count>=3&&!w.bonusAwarded?30:0;const questBonus=quests.slice(0,2).filter(q=>!q.exists()).length*5;const xp=Math.round(10*(attempts===0?1:attempts===1?.5:.25))+2+questBonus+bonus,total=(u.totalXp||0)+xp;
+  const bonus=count>=3&&!w.bonusAwarded?30:0;
+  const xpBreakdown={lesson:Math.round(10*(attempts===0?1:attempts===1?.5:.25)),feedback:2,
+    planned:quests[0].exists()?0:5,minutes:quests[1].exists()?0:5,weekly:bonus};
+  const xp=Object.values(xpBreakdown).reduce((sum,value)=>sum+value,0),total=(u.totalXp||0)+xp;
   const unlocks=allAchievements?achievements:!owned[0].exists()?['first_step']:[];
   const contributions={...(daily.data()?.structuredExerciseContributions||{})};contributions[id]={calories:25,activeSeconds:300};
   const manualItems=manualRows(manual.data(),daily.data());tx.set(ref(d,`dailyData/${DAY}`),dayTotals(manualItems,contributions),{merge:true});
@@ -31,7 +34,7 @@ async function complete(d,id='session1',allAchievements=false){
   tx.set(ref(d,`pathProgress/${PATH}`),{completionCounts:{lesson_01:attempts+1},bestPercent:{lesson_01:100},bestStars:{lesson_01:3},updatedAt:serverTimestamp()});
   tx.set(ref(d,`exerciseWeeks/${WEEK}`),{completed:count,categories:['mixed'],bonusAwarded:!!w.bonusAwarded||bonus>0,target:3,lastRecordId:id,updatedAt:serverTimestamp()});
   tx.set(doc(d,'users/alice'),{totalXp:total,level:Math.floor(total/100)+1,lastRecordId:id,feedbackCount:(u.feedbackCount||0)+1,achievementIds:[...new Set([...(u.achievementIds||[]),...unlocks])],metGoalWeeks:bonus?[WEEK]:u.metGoalWeeks||[],lastWorkoutAt:serverTimestamp()},{merge:true});
-  tx.set(record,{pathId:PATH,lessonId:'lesson_01',lessonName:'Basic Movement',startedAt:session.data().startedAt,completedAt:serverTimestamp(),plannedExercises:4,completedExercises:4,skippedExercises:0,completionPercentage:100,durationSeconds:380,activeDurationSeconds:300,estimatedCaloriesBurned:25,xpEarned:xp,starsEarned:3,difficultyFeedback:'suitable',feelingFeedback:'normal',discomfortReported:false,firstCompletion:attempts===0,totalXpAfter:total,weeklyCompleted:count,weeklyTarget:3,unlocked:unlocks,localDay:DAY,localWeek:WEEK,timeZone:'Asia/Kuala_Lumpur',category:'mixed'});
+  tx.set(record,{pathId:PATH,lessonId:'lesson_01',lessonName:'Basic Movement',startedAt:session.data().startedAt,completedAt:serverTimestamp(),plannedExercises:4,completedExercises:4,skippedExercises:0,completionPercentage:100,durationSeconds:380,activeDurationSeconds:300,estimatedCaloriesBurned:25,xpEarned:xp,starsEarned:3,difficultyFeedback:'suitable',feelingFeedback:'normal',discomfortReported:false,firstCompletion:attempts===0,totalXpAfter:total,weeklyCompleted:count,weeklyTarget:3,unlocked:unlocks,localDay:DAY,localWeek:WEEK,timeZone:'Asia/Kuala_Lumpur',category:'mixed',...(legacy?{}:{xpBreakdown})});
   return xp;
  }).catch(async error=>{const confirmed=await getDocFromServer(ref(d,`workoutRecords/${id}`));if(confirmed.exists())return confirmed.data().xpEarned;throw error;});
 }
@@ -51,7 +54,20 @@ test('recovery lesson is independently available',async()=>{await assertSucceeds
 test('session start must have server time and cannot be edited',async()=>{await assertFails(setDoc(ref(db(),'workoutSessions/bad'),{pathId:PATH,lessonId:'lesson_01',plannedExercises:4,startedAt:Timestamp.fromMillis(0)}));await start(db());await assertFails(updateDoc(ref(db(),'workoutSessions/session1'),{plannedExercises:99}))});
 test('atomic record and all aggregate writes succeed',async()=>{const d=db();await start(d);assert.equal(await assertSucceeds(complete(d)),22);assert.equal((await getDoc(doc(d,'users/alice'))).data().totalXp,22);assert.equal((await getDoc(ref(d,`exerciseWeeks/${WEEK}`))).data().completed,1);await assertSucceeds(start(d,'next','lesson_02'))});
 test('same session retried or concurrently submitted awards once',async()=>{const d=db();await start(d);await assertSucceeds(Promise.all([complete(d),complete(d)]));await assertSucceeds(complete(d));assert.equal((await getDoc(doc(d,'users/alice'))).data().totalXp,22);assert.equal((await getDoc(ref(d,`exerciseWeeks/${WEEK}`))).data().completed,1)});
-test('repeats reduce workout XP and daily/weekly bonuses occur once',async()=>{const d=db();const earned=[];for(let n=0;n<4;n++){await start(d,'repeat'+n);earned.push(await complete(d,'repeat'+n));}assert.deepEqual(earned,[22,7,35,5]);assert.equal((await getDoc(doc(d,'users/alice'))).data().totalXp,69)});
+test('new guided records retain the XP breakdown and older clients can still save',async()=>{
+ const d=db();await start(d);await assertSucceeds(complete(d));
+ const saved=(await getDoc(ref(d,'workoutRecords/session1'))).data();
+ assert.deepEqual(saved.xpBreakdown,{lesson:10,feedback:2,planned:5,minutes:5,weekly:0});
+ assert.equal(saved.xpEarned,22);
+ const weeklyQuests=await assertSucceeds(getDocs(query(collection(d,'users/alice/questProgress'),
+   where('day','>=',WEEK),where('day','<=',DAY))));
+ assert.equal(weeklyQuests.docs.filter(q=>q.data().questId==='planned'&&q.data().completed).length,1);
+ await start(d,'legacy');await assertSucceeds(complete(d,'legacy',false,true));
+ assert.equal((await getDoc(ref(d,'workoutRecords/legacy'))).data().xpBreakdown,undefined);
+});
+test('repeats reduce workout XP and daily/weekly bonuses occur once',async()=>{const d=db();const earned=[];for(let n=0;n<4;n++){await start(d,'repeat'+n);earned.push(await complete(d,'repeat'+n));}assert.deepEqual(earned,[22,7,35,5]);assert.equal((await getDoc(doc(d,'users/alice'))).data().totalXp,69);
+ assert.equal((await getDoc(ref(d,'workoutRecords/repeat2'))).data().xpBreakdown.weekly,30);
+ assert.equal((await getDoc(ref(d,'workoutRecords/repeat3'))).data().xpBreakdown.weekly,0)});
 test('immutable record, quests and achievements cannot be rewritten',async()=>{const d=db();await start(d);await complete(d);await assertFails(updateDoc(ref(d,'workoutRecords/session1'),{xpEarned:77}));await assertFails(deleteDoc(ref(d,'workoutRecords/session1')));await assertFails(updateDoc(ref(d,`questProgress/${DAY}_planned`),{xpEarned:5}));await assertFails(updateDoc(ref(d,'unlockedAchievements/first_step'),{recordId:'another'}))});
 test('another user cannot read saved workout or week progress',async()=>{const d=db();await start(d);await complete(d);await assertFails(getDoc(ref(db('bob'),'workoutRecords/session1')));await assertFails(getDoc(ref(db('bob'),`exerciseWeeks/${WEEK}`)))});
 test('missing profile can be recreated by first completion',async()=>{const d=db();await env.withSecurityRulesDisabled(c=>deleteDoc(doc(c.firestore(),'users/alice')));await start(d);await assertSucceeds(complete(d));assert.equal((await getDoc(doc(d,'users/alice'))).data().totalXp,22)});
@@ -258,4 +274,38 @@ test('unverified profile setup rejects forged email, invalid weight and extra fi
 test('verified account can resume protected catalogue access',async()=>{
  const d=env.authenticatedContext('alice',{email_verified:true,email:'alice@example.test'}).firestore();
  await assertSucceeds(getDoc(doc(d,'foods/rice')));
+});
+
+test('daily chest earns from two check-ins and stays claimable after the meal is removed', async () => {
+ const d = db(), chest = ref(d, `dailyChests/${DAY}`), meal = ref(d, `foodLogs/${DAY}`);
+ const reflection = {rest:false,reflection:true,earned:false,opened:false,accent:'purple'};
+ await assertSucceeds(setDoc(chest, {...reflection,updatedAt:serverTimestamp()}));
+ await assertSucceeds(setDoc(meal, {foodItems:[{name:'Rice'}]}));
+ await assertSucceeds(updateDoc(chest, {earned:true,updatedAt:serverTimestamp()}));
+ await assertSucceeds(deleteDoc(meal));
+ const open = () => runTransaction(d, async tx => {
+  const saved = await tx.get(chest);
+  if (saved.get('opened')) return false;
+  tx.update(chest, {opened:true,updatedAt:serverTimestamp()});
+  return true;
+ }).catch(async error => {
+  const confirmed = await getDocFromServer(chest);
+  if (confirmed.get('opened')) return false;
+  throw error;
+ });
+ assert.deepEqual((await Promise.all([open(), open()])).sort(), [false, true]);
+ assert.equal(await open(), false);
+ assert.equal((await getDoc(chest)).get('accent'), 'purple');
+ assert.equal((await getDoc(chest)).get('opened'), true);
+ await assertFails(getDoc(ref(db('bob'), `dailyChests/${DAY}`)));
+});
+
+test('workout and reflection quests can earn the same dated chest', async () => {
+ const d = db();
+ await start(d);
+ await complete(d);
+ const chest = ref(d, `dailyChests/${DAY}`);
+ await assertSucceeds(setDoc(chest, {rest:false,reflection:false,earned:true,
+  opened:true,accent:'teal',updatedAt:serverTimestamp()}));
+ assert.equal((await getDoc(chest)).get('opened'), true);
 });

@@ -30,7 +30,7 @@
     <string name="ex_weekly">Weekly Momentum</string>
     <string name="ex_week_count">%1$d of %2$d qualifying workouts this week</string>
     <string name="ex_band_begin">Begin Again</string>
-    <string name="ex_band_restart">Restart Opportunity</string>
+    <string name="ex_band_restart">Room to build</string>
     <string name="ex_band_building">Building Momentum</string>
     <string name="ex_band_strong">Strong Momentum</string>
     <string name="ex_recovery_note">Recovery days keep your earned XP and achievements.</string>
@@ -51,7 +51,7 @@
     <string name="ex_reason_discomfort">Recent discomfort: choose gentle recovery and avoid increasing difficulty.</string>
     <string name="ex_reason_recovery">Today is a planned recovery day. A comfortable mobility session is optional.</string>
     <string name="ex_reason_comeback">Welcome back. Begin with a comfortable comeback workout after your break.</string>
-    <string name="ex_reason_easier">Your last workout felt difficult. Try a shorter beginner session.</string>
+    <string name="ex_reason_easier">Try a shorter session after a tiring or difficult workout.</string>
     <string name="ex_reason_balance">Balance recent strength activity with mobility or recovery.</string>
     <string name="ex_reason_next">Your last two workouts felt easy. Try the next unlocked beginner lesson at a comfortable pace.</string>
     <string name="ex_reason_micro">A short workout fits your five-minute preference.</string>
@@ -89,7 +89,7 @@
     <string name="ex_save">Save Workout</string>
     <string name="ex_finished">Lesson completed</string>
     <string name="ex_attempted">Workout attempted</string>
-    <string name="ex_result_stats">%1$.0f%% complete · %2$d of %3$d exercises\n%4$d seconds · %5$d active seconds\nEstimated calories: %6$.0f kcal\n%7$d XP earned · %8$d stars</string>
+    <string name="ex_result_stats">%1$.0f%% complete · %2$d of %3$d exercises\n%4$d seconds · %5$d active seconds\nEstimated calories: %6$.0f kcal</string>
     <string name="ex_unlocks">New progress: %1$s</string>
     <string name="ex_no_unlocks">Every comfortable step counts. Your earned progress stays with you.</string>
     <string name="ex_recent">Recent Workouts</string>

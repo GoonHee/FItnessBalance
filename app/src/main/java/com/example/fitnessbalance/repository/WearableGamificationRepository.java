@@ -1,5 +1,6 @@
 package com.example.fitnessbalance.repository;
 
+import com.example.fitnessbalance.service.GamificationService;
 import com.example.fitnessbalance.service.WearableRewardService;
 import com.example.fitnessbalance.util.*;
 import com.google.android.gms.tasks.*;
@@ -22,11 +23,11 @@ public final class WearableGamificationRepository {
       String id=awardRef.getId(),day=(String)result.get("day"),week=(String)result.get("week");
       Map<String,Object> ledger=new HashMap<>(result);for(String key:Arrays.asList("eligible","metGoalWeeks","categories","bonusAwarded","lastWorkoutAtMillis"))ledger.remove(key);ledger.put("entryId",id);ledger.put("createdAt",FieldValue.serverTimestamp());tx.set(awardRef,ledger);
       if(Boolean.TRUE.equals(result.get("newDayCredit")))tx.set(dayRef,Values.of("day",day,"week",week,"awardId",id,"createdAt",FieldValue.serverTimestamp()));
-      for(int n=0;n<quests.size();n++)if(!quests.get(n).exists())tx.set(quests.get(n).getReference(),Values.of("day",day,"questId",n==0?"planned":"minutes","completed",true,"xpEarned",5,"recordId",id,"completedAt",FieldValue.serverTimestamp()));
+      for(int n=0;n<quests.size();n++)if(!quests.get(n).exists())tx.set(quests.get(n).getReference(),Values.of("day",day,"questId",n==0?"planned":"minutes","completed",true,"xpEarned",GamificationService.DAILY_QUEST_XP,"recordId",id,"completedAt",FieldValue.serverTimestamp()));
       List<String> unlocked=Values.strings(result.get("unlocked")),owned=Values.strings(profile.get("achievementIds"));
       for(DocumentSnapshot achievement:achievements)if(unlocked.contains(achievement.getId())){tx.set(achievement.getReference(),Values.of("recordId",id,"unlockedAt",FieldValue.serverTimestamp()));if(!owned.contains(achievement.getId()))owned.add(achievement.getId());}
       tx.set(weekRef,Values.of("completed",result.get("weeklyCompleted"),"categories",result.get("categories"),"bonusAwarded",result.get("bonusAwarded"),"target",result.get("weeklyTarget"),"lastRecordId",id,"updatedAt",FieldValue.serverTimestamp()));
-      tx.set(user,Values.of("lastRecordId",id,"totalXp",result.get("totalXpAfter"),"level",Values.integer(result.get("totalXpAfter"),0)/100+1,"metGoalWeeks",result.get("metGoalWeeks"),"achievementIds",owned,"lastWorkoutAt",new Timestamp(new Date(((Number)result.get("lastWorkoutAtMillis")).longValue()))),SetOptions.merge());
+      tx.set(user,Values.of("lastRecordId",id,"totalXp",result.get("totalXpAfter"),"level",new GamificationService().level(Values.integer(result.get("totalXpAfter"),0)),"metGoalWeeks",result.get("metGoalWeeks"),"achievementIds",owned,"lastWorkoutAt",new Timestamp(new Date(((Number)result.get("lastWorkoutAtMillis")).longValue()))),SetOptions.merge());
     }
   }
   public static Award prepare(Transaction tx,DocumentReference user,String id,Map<String,Object> entry,long now) throws FirebaseFirestoreException {

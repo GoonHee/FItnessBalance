@@ -6,8 +6,8 @@ import java.util.*;
 /** Rule-based recommendations, with safety taking precedence over progression. */
 public final class RecommendationService {
   public static final class Preferences {
-    public int inactiveDays, minutes = 10;
-    public boolean discomfort, recoveryDay, durationPreferenceKnown;
+    public int inactiveDays, minutes = 10, lastSequence = -1;
+    public boolean discomfort, recoveryDay, durationPreferenceKnown, tired;
     public String fitnessLevel = "beginner", goal = "";
     public List<String> equipment = new ArrayList<>(),
         categories = new ArrayList<>(),
@@ -35,7 +35,7 @@ public final class RecommendationService {
     for (WorkoutLesson l : choices) if (!l.getStandalone()) normal.add(l);
     if (normal.isEmpty()) return alternative(choices, "recovery", "equipment");
     String previous = p.lastDifficulties.isEmpty() ? "" : p.lastDifficulties.get(0);
-    if ("too_difficult".equals(previous) || "tired".equals(previous)) {
+    if ("too_difficult".equals(previous) || p.tired) {
       Collections.sort(
           normal, (a, b) -> Integer.compare(a.getEstimatedMinutes(), b.getEstimatedMinutes()));
       return new Recommendation(normal.get(0), "easier");
@@ -45,11 +45,14 @@ public final class RecommendationService {
         if ("mobility".equals(l.getCategory())) return new Recommendation(l, "balance");
       return alternative(choices, "recovery", "balance");
     }
-    if (p.lastDifficulties.size() >= 2
+    if (p.lastSequence >= 0 && p.lastDifficulties.size() >= 2
         && "too_easy".equals(previous)
         && "too_easy".equals(p.lastDifficulties.get(1))) {
-      Collections.sort(normal, (a, b) -> Integer.compare(a.getSequence(), b.getSequence()));
-      return new Recommendation(normal.get(normal.size() - 1), "next");
+      WorkoutLesson next = null;
+      for (WorkoutLesson lesson : normal)
+        if (lesson.getSequence() > p.lastSequence
+            && (next == null || lesson.getSequence() < next.getSequence())) next = lesson;
+      if (next != null) return new Recommendation(next, "next");
     }
     if (p.lastDifficulties.isEmpty() && !p.durationPreferenceKnown && p.minutes == 10) {
       Collections.sort(normal, (a, b) -> Integer.compare(a.getSequence(), b.getSequence()));

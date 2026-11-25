@@ -84,17 +84,36 @@ public final class GamificationRepository {
                   || calories > 100000)
                 throw new IllegalArgumentException("Invalid session totals");
               double percentage = game.completion(completed, planned);
-              boolean countedWearable=new WearableRewardService().countedOverlap(new ExerciseLogService().entries(day,manualLog.getData()==null?Collections.emptyMap():manualLog.getData()),start.getTimestamp("startedAt").toDate().getTime(),now.getTime());
-              boolean qualifying = percentage >= 50 && !countedWearable;
+              long startedAt = start.getTimestamp("startedAt").toDate().getTime();
+              WearableRewardService wearable = new WearableRewardService();
+              ExerciseLogService logs = new ExerciseLogService();
+              Set<String> workoutDays = com.example.fitnessbalance.health.WearableWorkoutService.days(
+                  startedAt, now.getTime(), zone.toZoneId());
+              workoutDays.add(day);
+              boolean countedWearable = false;
+              for (String workoutDay : workoutDays) {
+                DocumentSnapshot log = day.equals(workoutDay) ? manualLog
+                    : tx.get(user.collection(MANUAL_LOGS).document(workoutDay));
+                Map<String, Object> data = log.getData();
+                if (wearable.countedOverlap(logs.entries(workoutDay,
+                    data == null ? Collections.emptyMap() : data), startedAt, now.getTime())) {
+                  countedWearable = true;
+                  break;
+                }
+              }
+              boolean eligibleWorkout = game.eligibleGuidedWorkout(activeDuration, countedWearable);
+              boolean qualifying = percentage >= 50 && eligibleWorkout;
               int stars = game.stars(percentage, difficulty);
               Map<String, Object> attempts = Values.map(progress.get("completionCounts")),
                   best = Values.map(progress.get("bestPercent")),
                   bestStars = Values.map(progress.get("bestStars"));
               int previousAttempts = Values.integer(attempts.get(lessonId), 0);
               double previousBest = Values.decimal(best.get(lessonId), 0);
-              attempts.put(lessonId, previousAttempts + 1);
-              best.put(lessonId, Math.max(previousBest, percentage));
-              bestStars.put(lessonId, Math.max(Values.integer(bestStars.get(lessonId), 0), stars));
+              if (eligibleWorkout) {
+                attempts.put(lessonId, previousAttempts + 1);
+                best.put(lessonId, Math.max(previousBest, percentage));
+                bestStars.put(lessonId, Math.max(Values.integer(bestStars.get(lessonId), 0), stars));
+              }
               int target =
                   new MomentumService()
                       .target(Values.integer(profile.get("weeklyWorkoutTarget"), 3));
@@ -106,26 +125,25 @@ public final class GamificationRepository {
               List<String> goalWeeks = Values.strings(profile.get("metGoalWeeks"));
               boolean priorWeeklyBonus =
                   Boolean.TRUE.equals(weekly.get("bonusAwarded")) || goalWeeks.contains(week);
-              int weeklyBonus = game.weeklyBonus(count, target, priorWeeklyBonus);
+              int weeklyBonus = qualifying ? game.weeklyBonus(count, target, priorWeeklyBonus) : 0;
               if (weeklyBonus > 0) goalWeeks.add(week);
               List<String> categories = Values.strings(weekly.get("categories"));
               if (qualifying && !categories.contains(lesson.getCategory()))
                 categories.add(lesson.getCategory());
-              boolean[] eligible = {qualifying, activeDuration >= 300 && !countedWearable, true};
-              int[] questXp = {5, 5, 0};
-              int questBonus = 0;
-              for (int n = 0; n < 3; n++)
-                questBonus += game.dailyBonus(eligible[n], quests.get(n).exists(), questXp[n]);
-              int earned =
-                  (countedWearable?0:game.workoutXp(lesson.getBaseXp(), percentage, previousAttempts))
-                      + game.feedbackXp(false)
-                      + questBonus
-                      + weeklyBonus;
+              boolean[] eligible = {
+                qualifying, eligibleWorkout && activeDuration >= GamificationService.ACTIVE_MINUTES_QUEST_SECONDS, eligibleWorkout
+              };
+              int[] questXp = {GamificationService.DAILY_QUEST_XP, GamificationService.DAILY_QUEST_XP, 0};
+              int lessonXp = eligibleWorkout ? game.workoutXp(lesson.getBaseXp(), percentage, previousAttempts) : 0;
+              int feedbackXp = eligibleWorkout ? game.feedbackXp(false) : 0;
+              int plannedXp = game.dailyBonus(eligible[0], quests.get(0).exists(), questXp[0]);
+              int minutesXp = game.dailyBonus(eligible[1], quests.get(1).exists(), questXp[1]);
+              int earned = lessonXp + feedbackXp + plannedXp + minutesXp + weeklyBonus;
               int oldXp = Values.integer(profile.get("totalXp"), 0);
               if (oldXp < 0 || oldXp > 1000000000 - earned)
                 throw new IllegalStateException("Invalid XP total");
               int totalXp = oldXp + earned,
-                  feedbackCount = Values.integer(profile.get("feedbackCount"), 0) + 1;
+                  feedbackCount = Values.integer(profile.get("feedbackCount"), 0) + (eligibleWorkout ? 1 : 0);
               boolean pathComplete = true;
               for (int n = 1; n <= 7; n++)
                 if (Values.decimal(best.get(String.format(Locale.ROOT, "lesson_%02d", n)), 0) < 50)
@@ -136,11 +154,11 @@ public final class GamificationRepository {
                       && DateUtils.daysBetween(lastWorkout.toDate(), now, zone) >= 7;
               boolean[] eligibleAchievements = {
                 qualifying,
-                goalWeeks.size() >= 2,
-                pathComplete,
+                qualifying && goalWeeks.size() >= 2,
+                qualifying && pathComplete,
                 qualifying && comeback,
-                feedbackCount >= 5,
-                categories.containsAll(Arrays.asList("strength", "mobility", "recovery"))
+                eligibleWorkout && feedbackCount >= 5,
+                qualifying && categories.containsAll(Arrays.asList("strength", "mobility", "recovery"))
               };
               List<String> achievementList = Values.strings(profile.get("achievementIds")),
                   newUnlocks = new ArrayList<>();
@@ -182,7 +200,7 @@ public final class GamificationRepository {
                       Values.of("recordId", session, "unlockedAt", FieldValue.serverTimestamp()));
                 }
               if (!lesson.getStandalone()
-                  && percentage >= 50
+                  && qualifying
                   && previousBest < 50
                   && lesson.getSequence() < 7)
                 newUnlocks.add(String.format(Locale.ROOT, "lesson_%02d", lesson.getSequence() + 1));
@@ -268,6 +286,9 @@ public final class GamificationRepository {
                       Math.round(calories),
                       "xpEarned",
                       earned,
+                      "xpBreakdown",
+                      Values.of("lesson", lessonXp, "feedback", feedbackXp, "planned", plannedXp,
+                          "minutes", minutesXp, "weekly", weeklyBonus),
                       "starsEarned",
                       stars,
                       "difficultyFeedback",
@@ -277,7 +298,7 @@ public final class GamificationRepository {
                       "discomfortReported",
                       "discomfort".equals(feeling),
                       "firstCompletion",
-                      previousAttempts == 0,
+                      eligibleWorkout && previousAttempts == 0,
                       "totalXpAfter",
                       totalXp,
                       "weeklyCompleted",

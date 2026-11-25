@@ -9,6 +9,22 @@ import com.google.firebase.firestore.*;
 import java.util.*;
 
 public final class AchievementsActivity extends ExerciseBaseActivity {
+  private static final int[] CATEGORIES = {
+    R.string.gm_milestone, R.string.gm_consistency, R.string.gm_exploration,
+    R.string.gm_reflection, R.string.gm_balance, R.string.gm_comeback, R.string.gm_other_badges
+  };
+
+  private static int category(String id) {
+    switch (id) {
+      case "first_step": return 0;
+      case "routine_builder": return 1;
+      case "path_explorer": return 2;
+      case "honest_reflection": return 3;
+      case "balanced_week": return 4;
+      case "welcome_back": return 5;
+      default: return 6;
+    }
+  }
   @Override
   protected void onCreate(Bundle b) {
     super.onCreate(b);
@@ -27,13 +43,18 @@ public final class AchievementsActivity extends ExerciseBaseActivity {
               Set<String> ids = new HashSet<>();
               for (DocumentSnapshot a : unlocked.getResult()) ids.add(a.getId());
               List<ExerciseRowsAdapter.Row> rows = new ArrayList<>();
-              for (DocumentSnapshot a : definitions.getResult())
+              List<DocumentSnapshot> badges = definitions.getResult().getDocuments();
+              badges = new ArrayList<>(badges);
+              badges.sort(Comparator.comparingInt(a -> category(a.getId())));
+              for (DocumentSnapshot a : badges)
                 rows.add(
                     new ExerciseRowsAdapter.Row(
                         Values.text(a.get("name"), ""),
                         Values.text(a.get("description"), ""),
                         getString(
-                            ids.contains(a.getId()) ? R.string.ex_earned : R.string.ex_not_earned),
+                            R.string.gm_badge_state,
+                            getString(CATEGORIES[category(a.getId())]),
+                            getString(ids.contains(a.getId()) ? R.string.ex_earned : R.string.ex_not_earned)),
                         null));
               list(R.id.exAchievementsList, new AchievementAdapter(rows));
               loaded();

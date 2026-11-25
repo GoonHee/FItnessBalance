@@ -251,6 +251,11 @@ service cloud.firestore {
      && request.resource.data.entryCount is int && request.resource.data.entryCount > 0 && request.resource.data.entryCount <= 25
      && request.resource.data.createdAt == request.time;
    }
+   match /dailyChests/{day} {
+    allow read: if owner(uid);
+    allow create: if owner(uid) && validChest(uid, day, {});
+    allow update: if owner(uid) && validChest(uid, day, resource.data);
+   }
    match /foodLogs/{day} { allow read, write: if owner(uid); }
    match /wearableWorkoutRewards/{id} {
     allow read: if owner(uid);
@@ -329,11 +334,54 @@ service cloud.firestore {
       && wearableAchievement(uid,id,request.resource.data.recordId)));
    }
   }
+  function chestQuest(uid, day, quest) {
+   let ref = /databases/$(database)/documents/users/$(uid)/questProgress/$(day + '_' + quest);
+   return exists(ref) && get(ref).data.get('completed', false) == true;
+  }
+  function chestMeal(uid, day) {
+   let ref = /databases/$(database)/documents/users/$(uid)/foodLogs/$(day);
+   return exists(ref) && (get(ref).data.get('foodItems', []) is list
+    && get(ref).data.get('foodItems', []).size() > 0
+    || (!('foodItems' in get(ref).data) && get(ref).data.get('totalCalories', 0) is number
+      && get(ref).data.get('totalCalories', 0) > 0));
+  }
+  function chestGoals(uid, day, d) {
+   let movement = d.rest || chestQuest(uid, day, 'planned');
+   let reflection = d.reflection || chestQuest(uid, day, 'feedback');
+   let meal = chestMeal(uid, day);
+   return (movement && (meal || reflection)) || (meal && reflection);
+  }
+  function validChest(uid, day, prior) {
+   let d = request.resource.data;
+   return day.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+    && d.keys().hasOnly(['rest','reflection','earned','opened','accent','updatedAt'])
+    && d.rest is bool && d.reflection is bool && d.earned is bool && d.opened is bool
+    && d.accent in ['teal','purple','amber'] && d.accent == prior.get('accent', d.accent)
+    && d.updatedAt == request.time && !prior.get('opened', false)
+    && (!prior.get('rest', false) || d.rest)
+    && (!prior.get('reflection', false) || d.reflection)
+    && (!prior.get('earned', false) || d.earned)
+    && (!d.opened || d.earned)
+    && (!d.earned || prior.get('earned', false) || chestGoals(uid, day, d));
+  }
+  function validXpBreakdown(d) {
+   let xp = d.xpBreakdown;
+   return xp is map && xp.keys().hasOnly(['lesson','feedback','planned','minutes','weekly'])
+    && xp.lesson is int && xp.lesson >= 0 && xp.lesson <= 35
+    && xp.feedback is int && xp.feedback in [0,2]
+    && xp.planned is int && xp.planned in [0,5] && xp.minutes is int && xp.minutes in [0,5]
+    && xp.weekly is int && xp.weekly in [0,30]
+    && (d.activeDurationSeconds >= 60 || (xp.lesson == 0 && xp.feedback == 0 && xp.planned == 0 && xp.weekly == 0))
+    && (d.activeDurationSeconds >= 300 || xp.minutes == 0)
+    && (d.completionPercentage >= 50 || (xp.planned == 0 && xp.weekly == 0))
+    && (xp.weekly == 0 || d.weeklyCompleted >= d.weeklyTarget)
+    && d.xpEarned == xp.lesson + xp.feedback + xp.planned + xp.minutes + xp.weekly;
+  }
   function validRecord(uid,id) {
    let d = request.resource.data;
    let s = get(/databases/$(database)/documents/users/$(uid)/workoutSessions/$(id)).data;
    let user = getAfter(/databases/$(database)/documents/users/$(uid)).data;
-   return d.keys().hasOnly(['pathId','lessonId','lessonName','startedAt','completedAt','plannedExercises','completedExercises','skippedExercises','completionPercentage','durationSeconds','activeDurationSeconds','estimatedCaloriesBurned','xpEarned','starsEarned','difficultyFeedback','feelingFeedback','discomfortReported','firstCompletion','totalXpAfter','weeklyCompleted','weeklyTarget','unlocked','localDay','localWeek','timeZone','category'])
+   return d.keys().hasOnly(['pathId','lessonId','lessonName','startedAt','completedAt','plannedExercises','completedExercises','skippedExercises','completionPercentage','durationSeconds','activeDurationSeconds','estimatedCaloriesBurned','xpEarned','starsEarned','difficultyFeedback','feelingFeedback','discomfortReported','firstCompletion','totalXpAfter','weeklyCompleted','weeklyTarget','unlocked','localDay','localWeek','timeZone','category','xpBreakdown'])
     && d.pathId == s.pathId && d.lessonId == s.lessonId
     && d.lessonName is string && d.startedAt == s.startedAt && d.completedAt == request.time && d.startedAt <= d.completedAt
     && d.plannedExercises == s.plannedExercises
@@ -346,6 +394,7 @@ service cloud.firestore {
     && d.activeDurationSeconds is int && d.activeDurationSeconds >= 0 && d.activeDurationSeconds <= d.durationSeconds
     && d.estimatedCaloriesBurned is number && d.estimatedCaloriesBurned >= 0 && d.estimatedCaloriesBurned <= 100000
     && d.xpEarned is int && d.xpEarned >= 0 && d.xpEarned <= 77
+    && (!('xpBreakdown' in d) || validXpBreakdown(d))
     && d.difficultyFeedback in ['too_easy','suitable','too_difficult']
     && d.feelingFeedback in ['energized','normal','tired','discomfort']
     && d.discomfortReported == (d.feelingFeedback == 'discomfort')

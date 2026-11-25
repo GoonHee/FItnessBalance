@@ -73,10 +73,26 @@ public class RecommendationServiceTest {
   }
 
   @Test
-  public void easyChoosesLaterAvailable() {
+  public void repeatedEasyFeedbackChoosesNearestLaterUnlockedLesson() {
     RecommendationService.Preferences p = new RecommendationService.Preferences();
     p.lastDifficulties = Arrays.asList("too_easy", "too_easy");
-    assertEquals("lesson_02", selected(p));
+    p.lastSequence = 5;
+    List<WorkoutLesson> available = new ArrayList<>(all());
+    available.add(lesson("later", 15, false));
+    assertEquals("lesson_02", new RecommendationService().recommend(p, available).lesson.getId());
+  }
+
+  @Test
+  public void tiredFeelingOverridesRepeatedEasyRatings() {
+    Map<String, Object> latest = new HashMap<>();
+    latest.put("feelingFeedback", "tired");
+    latest.put("difficultyFeedback", "too_easy");
+    Map<String, Object> previous = Collections.singletonMap("difficultyFeedback", "too_easy");
+    RecommendationService.Preferences p = new RecommendationPreferences().from(
+        Collections.emptyMap(), Arrays.asList(latest, previous), null, null, new Date(),
+        TimeZone.getTimeZone("UTC"));
+    p.lastSequence = 5;
+    assertEquals("lesson_01", selected(p));
   }
 
   @Test

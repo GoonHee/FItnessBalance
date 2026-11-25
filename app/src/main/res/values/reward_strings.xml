@@ -10,4 +10,30 @@
 <string name="gm_reward_note">XP includes the workout and any feedback, quest or weekly bonuses awarded. Repeated workouts may earn less XP.</string>
 <string name="gm_continue">Continue</string><string name="gm_discomfort">Thank you for your feedback. Rest and follow the recovery guidance if you reported discomfort.</string>
 <string name="gm_star_visual">★</string>
+<string name="gm_no_reward">XP requires at least 1 active minute and a workout that hasn’t already been counted.</string>
+<string name="gm_legacy_reward">XP details were not saved for this workout.</string>
+<string name="gm_xp_lesson">+%1$d XP · Lesson</string>
+<string name="gm_xp_feedback">+%1$d XP · Reflection</string>
+<string name="gm_xp_planned">+%1$d XP · Workout quest</string>
+<string name="gm_xp_minutes">+%1$d XP · Active minutes quest</string>
+<string name="gm_xp_quests">+%1$d XP · Daily quests</string>
+<string name="gm_xp_weekly">+%1$d XP · Weekly target</string>
+<string name="gm_xp_wearable">+%1$d XP · Wearable workout</string>
+<string name="gm_next_level">%1$d XP to the next level</string>
+<string name="gm_settings">Recommendation settings</string>
+<string name="gm_expanded">Expanded</string>
+<string name="gm_collapsed">Collapsed</string>
+<string name="gm_more">More exercise options</string>
+<string name="gm_badge_state">%1$s · %2$s</string>
+<string name="gm_milestone">Milestone</string>
+<string name="gm_consistency">Consistency</string>
+<string name="gm_exploration">Exploration</string>
+<string name="gm_reflection">Reflection</string>
+<string name="gm_balance">Balance</string>
+<string name="gm_comeback">Comeback</string>
+<string name="gm_other_badges">Other achievements</string>
+<plurals name="gm_active_days">
+    <item quantity="one">%d active day this week</item>
+    <item quantity="other">%d active days this week</item>
+</plurals>
 </resources>
