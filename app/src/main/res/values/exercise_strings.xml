@@ -114,4 +114,7 @@
     <string name="ex_honest_reflection">Honest Reflection</string>
     <string name="ex_balanced_week">Balanced Week</string>
     <string name="ex_reason_beginner">Start with the next unlocked beginner lesson and build at your own pace.</string>
+    <string name="ex_demo_description">Movement demonstration for %1$s</string>
+    <string name="ex_demo_pause">Pause demo</string>
+    <string name="ex_demo_play">Play demo</string>
 </resources>
