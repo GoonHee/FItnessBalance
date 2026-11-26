@@ -9,6 +9,8 @@ import com.google.firebase.firestore.*;
 import java.util.*;
 
 public final class AchievementsActivity extends ExerciseBaseActivity {
+  private DailyChestDialog chests;
+
   private static final int[] CATEGORIES = {
     R.string.gm_milestone, R.string.gm_consistency, R.string.gm_exploration,
     R.string.gm_reflection, R.string.gm_balance, R.string.gm_comeback, R.string.gm_other_badges
@@ -32,8 +34,15 @@ public final class AchievementsActivity extends ExerciseBaseActivity {
   }
 
   @Override
+  protected void onStop() {
+    if (chests != null) chests.onHostStop();
+    super.onStop();
+  }
+
+  @Override
   protected void load() {
     loading();
+    if (chests == null) chests = new DailyChestDialog(this, uid);
     Task<QuerySnapshot> definitions = repository.achievements(),
         unlocked = repository.unlockedAchievements();
     Tasks.whenAll(definitions, unlocked)
@@ -46,16 +55,15 @@ public final class AchievementsActivity extends ExerciseBaseActivity {
               List<DocumentSnapshot> badges = definitions.getResult().getDocuments();
               badges = new ArrayList<>(badges);
               badges.sort(Comparator.comparingInt(a -> category(a.getId())));
-              for (DocumentSnapshot a : badges)
-                rows.add(
-                    new ExerciseRowsAdapter.Row(
-                        Values.text(a.get("name"), ""),
-                        Values.text(a.get("description"), ""),
-                        getString(
-                            R.string.gm_badge_state,
-                            getString(CATEGORIES[category(a.getId())]),
-                            getString(ids.contains(a.getId()) ? R.string.ex_earned : R.string.ex_not_earned)),
-                        null));
+              for (DocumentSnapshot badge : badges) {
+                String id = badge.getId(), name = Values.text(badge.get("name"), "");
+                boolean earned = ids.contains(id);
+                String state = getString(earned ? R.string.ex_earned : R.string.ex_not_earned);
+                if (earned) state = getString(R.string.dc_chest_row, state);
+                rows.add(new ExerciseRowsAdapter.Row(name, Values.text(badge.get("description"), ""),
+                    getString(R.string.gm_badge_state, getString(CATEGORIES[category(id)]), state),
+                    earned ? () -> chests.showAchievement(id, name) : null));
+              }
               list(R.id.exAchievementsList, new AchievementAdapter(rows));
               loaded();
               if (rows.isEmpty()) status(R.string.ex_no_achievements);

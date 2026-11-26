@@ -11,7 +11,13 @@
     <string name="dc_done">Done</string>
     <string name="dc_reward">Reward preview: %1$s weekly ring</string>
     <string name="dc_reward_unlocked">%1$s weekly ring</string>
-    <string name="dc_sound">Play chest sounds</string>
+    <string name="dc_quest_chests">Quest chests for this date</string>
+    <string name="dc_quest_title">Quest chest</string>
+    <string name="dc_achievement_title">Achievement chest</string>
+    <string name="dc_chest_row">%1$s · View chest</string>
+    <string name="dc_milestone_ready">Chest earned. Open it to unlock this accent.</string>
+    <string name="dc_milestone_locked">Complete this goal to earn its chest.</string>
+    <string name="dc_milestone_error">Couldn’t load this chest. Close it and try again.</string>
     <string name="dc_open">Open chest</string>
     <string name="dc_apply">Use this accent</string>
     <string name="dc_applied">Accent applied to your weekly ring.</string>
