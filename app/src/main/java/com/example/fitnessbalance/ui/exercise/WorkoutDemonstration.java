@@ -13,13 +13,42 @@ import android.widget.ImageView;
 import androidx.annotation.RequiresApi;
 import com.example.fitnessbalance.R;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Owns preview playback independently of the exercise timer. */
 final class WorkoutDemonstration {
   private enum Clip {
-    MARCH(R.raw.demo_march, R.drawable.demo_march_still),
-    SQUAT(R.raw.demo_chair_squat, R.drawable.demo_chair_squat_still),
-    PUSH_UP(R.raw.demo_wall_pushup, R.drawable.demo_wall_pushup_still);
+    EX001(R.raw.demo_march, R.drawable.demo_march_still),
+    EX002(R.raw.demo_chair_squat, R.drawable.demo_chair_squat_still),
+    EX003(R.raw.demo_wall_pushup, R.drawable.demo_wall_pushup_still),
+    EX004(R.raw.demo_ex004, R.drawable.demo_ex004_still),
+    EX005(R.raw.demo_ex005, R.drawable.demo_ex005_still),
+    EX006(R.raw.demo_ex006, R.drawable.demo_ex006_still),
+    EX007(R.raw.demo_ex007, R.drawable.demo_ex007_still),
+    EX008(R.raw.demo_ex008, R.drawable.demo_ex008_still),
+    EX009(R.raw.demo_ex009, R.drawable.demo_ex009_still),
+    EX010(R.raw.demo_ex010, R.drawable.demo_ex010_still),
+    EX011(R.raw.demo_ex011, R.drawable.demo_ex011_still),
+    EX012(R.raw.demo_ex012, R.drawable.demo_ex012_still),
+    EX013(R.raw.demo_ex013, R.drawable.demo_ex013_still),
+    EX014(R.raw.demo_ex014, R.drawable.demo_ex014_still),
+    EX015(R.raw.demo_ex015, R.drawable.demo_ex015_still),
+    EX016(R.raw.demo_ex016, R.drawable.demo_ex016_still),
+    EX017(R.raw.demo_ex017, R.drawable.demo_ex017_still),
+    EX018(R.raw.demo_ex018, R.drawable.demo_ex018_still),
+    EX019(R.raw.demo_ex019, R.drawable.demo_ex019_still),
+    EX020(R.raw.demo_ex020, R.drawable.demo_ex020_still),
+    EX021(R.raw.demo_ex021, R.drawable.demo_ex021_still),
+    EX022(R.raw.demo_ex022, R.drawable.demo_ex022_still),
+    EX023(R.raw.demo_ex023, R.drawable.demo_ex023_still),
+    EX024(R.raw.demo_ex024, R.drawable.demo_ex024_still),
+    EX025(R.raw.demo_ex025, R.drawable.demo_ex025_still),
+    EX026(R.raw.demo_ex026, R.drawable.demo_ex026_still),
+    EX027(R.raw.demo_ex027, R.drawable.demo_ex027_still),
+    EX028(R.raw.demo_ex028, R.drawable.demo_ex028_still),
+    EX029(R.raw.demo_ex029, R.drawable.demo_ex029_still),
+    EX030(R.raw.demo_ex030, R.drawable.demo_ex030_still);
 
     final int animation, still;
 
@@ -28,13 +57,14 @@ final class WorkoutDemonstration {
       this.still = still;
     }
 
+    private static final Map<String, Clip> BY_EXERCISE = new HashMap<>();
+
+    static {
+      for (Clip clip : values()) BY_EXERCISE.put(clip.name(), clip);
+    }
+
     static Clip forExercise(String exerciseId) {
-      switch (exerciseId) {
-        case "EX001": return MARCH;
-        case "EX002": return SQUAT;
-        case "EX003": return PUSH_UP;
-        default: return null;
-      }
+      return BY_EXERCISE.get(exerciseId);
     }
   }
 
