@@ -59,6 +59,22 @@
                     <TextView
                         android:id="@+id/exExerciseName"
                         style="@style/ExerciseHeading" />
+                    <LinearLayout
+                        android:id="@+id/exDemoPanel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+                        <ImageView
+                            android:id="@+id/exDemoImage"
+                            android:layout_width="match_parent"
+                            android:layout_height="154dp"
+                            android:scaleType="fitCenter" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/exDemoPlayback"
+                            style="@style/ExerciseButton"
+                            android:text="@string/ex_demo_pause" />
+                    </LinearLayout>
                     <TextView
                         android:id="@+id/exInstructions"
                         style="@style/ExerciseBody" />

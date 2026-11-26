@@ -10,7 +10,9 @@ import com.example.fitnessbalance.util.IntentKeys;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 public final class ActiveWorkoutActivity extends ExerciseBaseActivity {
+  private static final String DEMO_PAUSED_ITEM = "demoPausedItem";
   private WorkoutDraft draft;
+  private WorkoutDemonstration demonstration;
   private final Handler timer = new Handler(Looper.getMainLooper());
   private long lastTick, lastAction, lastSave;
   private boolean foreground, firstLoad = true, autoStart, confirmed;
@@ -50,6 +52,8 @@ public final class ActiveWorkoutActivity extends ExerciseBaseActivity {
   protected void onCreate(Bundle b) {
     super.onCreate(b);
     screen(R.layout.activity_active_workout);
+    demonstration = new WorkoutDemonstration(findViewById(R.id.exDemoPanel),
+        b == null ? -1 : b.getInt(DEMO_PAUSED_ITEM, -1));
     autoStart = b == null && getIntent().getBooleanExtra(IntentKeys.START_NEW, false);
     findViewById(R.id.exComplete).setOnClickListener(v -> complete(false));
     findViewById(R.id.exSkip).setOnClickListener(v -> complete(true));
@@ -122,6 +126,11 @@ public final class ActiveWorkoutActivity extends ExerciseBaseActivity {
     Exercise e = draft.plan.exercises.get(s.index);
     text(R.id.exPosition, getString(R.string.ex_position, s.index + 1, draft.plan.items.size()));
     text(R.id.exExerciseName, e.getName());
+    if (SessionState.EXERCISE.equals(s.phase)) {
+      demonstration.show(s.index, item.getExerciseId(), e.getName(), foreground);
+    } else {
+      demonstration.hide();
+    }
     text(R.id.exInstructions, e.getDescription() + "\n\n" + String.join("\n", e.getInstructions()));
     text(R.id.exSessionCounts, getString(R.string.ex_session_counts, s.completed, s.skipped));
     ((LinearProgressIndicator) findViewById(R.id.exSessionBar))
@@ -172,6 +181,7 @@ public final class ActiveWorkoutActivity extends ExerciseBaseActivity {
   }
 
   private void feedback() {
+    demonstration.hide();
     openSession(WorkoutFeedbackActivity.class, draft.sessionId);
     finish();
   }
@@ -180,6 +190,7 @@ public final class ActiveWorkoutActivity extends ExerciseBaseActivity {
   protected void onResume() {
     super.onResume();
     foreground = true;
+    if (confirmed) render();
     lastTick = SystemClock.elapsedRealtime();
     timer.removeCallbacks(tick);
     timer.post(tick);
@@ -188,6 +199,7 @@ public final class ActiveWorkoutActivity extends ExerciseBaseActivity {
   @Override
   protected void onPause() {
     foreground = false;
+    demonstration.stopPlayback();
     timer.removeCallbacks(tick);
     if (draft != null) {
       draft.state.paused = true;
@@ -198,6 +210,7 @@ public final class ActiveWorkoutActivity extends ExerciseBaseActivity {
 
   @Override
   protected void onSaveInstanceState(Bundle state) {
+    state.putInt(DEMO_PAUSED_ITEM, demonstration.pausedItem());
     if (draft != null) drafts.save(draft);
     super.onSaveInstanceState(state);
   }
