@@ -31,8 +31,19 @@ public class FoodEntryEditorTest {
         Map<String, Object> original = entry(); original.put("calculationMode", "manual");
         Map<String, Object> updated = FoodEntryEditor.resize(original, 50, 3, "Dinner", 80);
         assertEquals(240.0, (Double) updated.get("calories"), 0);
-        assertEquals(1, ((Map<?, ?>) updated.get("nutrients")).size());
+        Map<?, ?> nutrients = (Map<?, ?>) updated.get("nutrients");
+        assertEquals(15.0, (Double) nutrients.get("protein_g"), 0);
+        assertEquals(0.0, (Double) nutrients.get("sodium_mg"), 0);
+        assertFalse(nutrients.containsKey("fat_g"));
     }
+    @Test public void olderManualCalorieEntriesStayEditable() {
+        Map<String, Object> original = entry();
+        original.put("calculationMode", "manual");
+        original.put("nutrients", Collections.singletonMap("energy_kcal", 200.0));
+        Map<String, Object> updated = FoodEntryEditor.resize(original, 50, 3, "Dinner", 80);
+        assertEquals(Collections.singletonMap("energy_kcal", 240.0), updated.get("nutrients"));
+    }
+
     @Test public void replacesOnlyTargetAndRecalculatesTotals() {
         Map<String, Object> original = entry();
         Map<String, Object> other = entry(); other.put("entryId", "two");

@@ -720,6 +720,10 @@ public class FoodDetailsActivity extends AppCompatActivity {
         String confirmedUnit =
                 barcodeReferenceUnit.getSelectedItem().toString();
 
+        if (barcodeConfirmed.isChecked() && restoredUnit == null
+                && !confirmedUnit.equals(FoodNutrition.portionUnit(basis))) {
+            restoredUnit = confirmedUnit;
+        }
         basis = barcodeConfirmed.isChecked()
                 ? "per_100" + confirmedUnit
                 : "unknown";
@@ -801,16 +805,9 @@ public class FoodDetailsActivity extends AppCompatActivity {
     }
 
     private Map<String, Object> calculated() {
-        FoodNutrition.totalAmount(
-                value(portion),
-                value(servings)
-        );
-
         if (manual.isChecked()) {
-            return FoodNutrition.manualNutrition(
-                    value(manualCalories),
-                    value(servings)
-            );
+            return FoodNutrition.manualServingNutrition(nutrition, basis, selectedUnit(),
+                    value(portion), value(servings), value(manualCalories));
         }
 
         return FoodNutrition.servingNutrition(
@@ -873,7 +870,8 @@ public class FoodDetailsActivity extends AppCompatActivity {
             logButton.setEnabled(true);
 
             if (manual.isChecked()) {
-                status.setText(R.string.fc_manual_ready);
+                status.setText(scaled.size() > 1
+                        ? R.string.fc_manual_with_nutrients : R.string.fc_manual_ready);
             } else if (FoodNutrition.usesEstimatedEnergy(nutrition)) {
                 status.setText(R.string.fc_estimate);
             }
@@ -1046,7 +1044,7 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
         entry.put(
                 "basisConfirmationSource",
-                manual.isChecked()
+                manual.isChecked() && scaled.size() == 1
                         ? "manual_entry"
                         : "user_entered".equals(
                         food.get("nutrition_verification")
@@ -1068,7 +1066,7 @@ public class FoodDetailsActivity extends AppCompatActivity {
 
         entry.put(
                 "nutritionVerification",
-                manual.isChecked()
+                (manual.isChecked() && scaled.size() == 1)
                         || "user_entered".equals(
                         food.get("nutrition_verification")
                 )

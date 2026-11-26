@@ -18,19 +18,20 @@ final class FoodEntryEditor {
         }
         Map<String, Object> result = new HashMap<>(original);
         Map<String, Object> nutrients = new HashMap<>();
-        if ("manual".equals(original.get("calculationMode"))) {
+        boolean manual = "manual".equals(original.get("calculationMode"));
+        Map<?, ?> saved = (Map<?, ?>) original.get("nutrients");
+        for (Map.Entry<?, ?> item : saved.entrySet()) {
+            if (manual && "energy_kcal".equals(item.getKey())) continue;
+            Double value = FoodNutrition.number(item.getValue());
+            if (item.getKey() instanceof String && value != null) {
+                double scaled = value * (total / oldTotal);
+                if (!Double.isFinite(scaled)) throw new IllegalArgumentException("Invalid nutrition total");
+                nutrients.put((String) item.getKey(), scaled);
+            }
+        }
+        if (manual) {
             nutrients.putAll(FoodNutrition.manualNutrition(manualCalories, servings));
             result.put("manualCaloriesPerServing", manualCalories);
-        } else {
-            Map<?, ?> saved = (Map<?, ?>) original.get("nutrients");
-            for (Map.Entry<?, ?> item : saved.entrySet()) {
-                Double value = FoodNutrition.number(item.getValue());
-                if (item.getKey() instanceof String && value != null) {
-                    double scaled = value * (total / oldTotal);
-                    if (!Double.isFinite(scaled)) throw new IllegalArgumentException("Invalid nutrition total");
-                    nutrients.put((String) item.getKey(), scaled);
-                }
-            }
         }
         if (FoodNutrition.number(nutrients.get("energy_kcal")) == null && !"unknown".equals(original.get("calculationMode"))) {
             throw new IllegalArgumentException("Saved calories are unavailable.");
