@@ -21,6 +21,13 @@ public class DailyChestRepositoryTest {
     assertTrue(DailyChestRepository.plannedRest(Arrays.asList(1L, 5L), monday.plusDays(1)));
   }
 
+  @Test public void previouslyOpenedReceiptDoesNotTriggerCelebration() {
+    DailyChestRepository.Chest saved = DailyChestRepository.restoredOpen("purple");
+    assertTrue(saved.opened);
+    assertFalse(saved.newlyOpened);
+    assertEquals("purple", saved.accent);
+  }
+
   @Test public void rewardChangesAtTheLocalDateBoundary() {
     LocalDate today = LocalDate.of(2026, 12, 31);
     assertNotEquals(DailyChestRepository.accent(today), DailyChestRepository.accent(today.plusDays(1)));

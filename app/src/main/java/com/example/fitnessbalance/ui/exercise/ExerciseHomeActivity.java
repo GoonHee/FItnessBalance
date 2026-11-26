@@ -379,6 +379,7 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
   }
 
   @Override protected void onStop() {
+    if (dailyChest != null) dailyChest.onHostStop();
     loadVersion++; if (healthBridge != null) healthBridge.cancelPending(); super.onStop();
   }
   @Override protected void onDestroy() { if (healthBridge != null) healthBridge.close(); super.onDestroy(); }
