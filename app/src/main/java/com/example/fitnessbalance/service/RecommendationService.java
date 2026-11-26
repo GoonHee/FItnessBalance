@@ -59,10 +59,15 @@ public final class RecommendationService {
       Collections.sort(normal, (a, b) -> Integer.compare(a.getSequence(), b.getSequence()));
       return new Recommendation(normal.get(0), "beginner");
     }
-    normal.sort(Comparator.comparingInt((WorkoutLesson l) -> l.getId().equals(p.lastLesson) ? 1 : 0)
-        .thenComparingInt(l -> Collections.frequency(p.rotationCategories, l.getCategory()) >= 2 ? 1 : 0)
+    normal.sort(Comparator.comparingInt((WorkoutLesson l) -> rotationRank(p, l))
         .thenComparingInt(l -> score(p, l)));
     return new Recommendation(normal.get(0), p.minutes <= 5 ? "micro" : "preference");
+  }
+
+  static int rotationRank(Preferences p, WorkoutLesson lesson) {
+    int recentLesson = lesson.getId().equals(p.lastLesson) ? 2 : 0;
+    int repeatedCategory = Collections.frequency(p.rotationCategories, lesson.getCategory()) >= 2 ? 1 : 0;
+    return recentLesson + repeatedCategory;
   }
 
   boolean equipmentFits(Preferences p, WorkoutLesson l) {

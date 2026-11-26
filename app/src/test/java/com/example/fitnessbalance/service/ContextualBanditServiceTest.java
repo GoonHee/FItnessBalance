@@ -22,23 +22,58 @@ public class ContextualBanditServiceTest {
   @Test public void contextChangesWithPreferencesAndHistory(){RecommendationService.Preferences p=prefs();double[] first=ContextualBanditService.context(p);p.minutes=5;p.inactiveDays=3;p.lastDifficulties=Arrays.asList("too_easy");p.recentCategories=Arrays.asList("strength");assertFalse(Arrays.equals(first,ContextualBanditService.context(p)));}
   @Test public void corruptTrainingIgnored(){List<Map<String,Object>> data=Arrays.asList(observation("b",Double.NaN,context()),observation("b",1,Arrays.asList(1.0)));assertEquals("a",select(data).lesson.getId());}
   @Test public void unknownVersionIgnored(){Map<String,Object> row=observation("b",1,context());row.put("version","old");assertEquals("a",select(Arrays.asList(row)).lesson.getId());}
-  @Test public void rewardBoundedAndDiscomfortZero(){Map<String,Object> r=Values.of("completionPercentage",100,"difficultyFeedback","suitable","feelingFeedback","energized");assertEquals(1,ContextualBanditService.reward(r),1e-9);r.put("feelingFeedback","discomfort");assertEquals(0,ContextualBanditService.reward(r),0);}
+  @Test public void rewardBoundedAndDiscomfortZero(){Map<String,Object> r=Values.of("completionPercentage",100,"activeDurationSeconds",120,"xpEarned",10,"difficultyFeedback","suitable","feelingFeedback","energized");assertEquals(1,ContextualBanditService.reward(r),1e-9);r.put("feelingFeedback","discomfort");assertEquals(0,ContextualBanditService.reward(r),0);}
   @Test public void invalidFeedbackNotNegativeReward(){assertNull(ContextualBanditService.reward(Values.of("completionPercentage",100)));assertNull(ContextualBanditService.reward(Values.of("completionPercentage",101,"difficultyFeedback","suitable","feelingFeedback","normal")));}
   @Test public void auditIncludesExactFeaturesAndCandidateScores(){Map<String,Object> audit=select(Collections.emptyList()).audit;assertEquals(context(),audit.get("context"));assertEquals(2,((List<?>)audit.get("candidates")).size());assertEquals(ContextualBanditService.VERSION,audit.get("version"));}
   @Test public void savedSessionOnlyCreditedOnce(){
     Map<String,Object> d=select(Collections.emptyList()).audit;
-    Map<String,Object> r=Values.of("recordId","session","lessonId",d.get("lessonId"),"completionPercentage",100,"difficultyFeedback","suitable","feelingFeedback","normal");
+    Map<String,Object> r=Values.of("recordId","session","lessonId",d.get("lessonId"),"completionPercentage",100,"activeDurationSeconds",120,"xpEarned",10,"difficultyFeedback","suitable","feelingFeedback","normal");
     List<Map<String,Object>> rows=new ArrayList<>();
     assertTrue(ContextualBanditService.credit("session",d,r,rows));assertTrue(ContextualBanditService.credit("session",d,r,rows));assertEquals(1,rows.size());
     assertEquals(.925,((Number)rows.get(0).get("reward")).doubleValue(),1e-9);
   }
   @Test public void unrelatedSessionOrLessonNeverTrains(){
     Map<String,Object> d=select(Collections.emptyList()).audit;
-    Map<String,Object> r=Values.of("recordId","other","lessonId",d.get("lessonId"),"completionPercentage",100,"difficultyFeedback","suitable","feelingFeedback","normal");
+    Map<String,Object> r=Values.of("recordId","other","lessonId",d.get("lessonId"),"completionPercentage",100,"activeDurationSeconds",120,"xpEarned",10,"difficultyFeedback","suitable","feelingFeedback","normal");
     List<Map<String,Object>> rows=new ArrayList<>();
     assertFalse(ContextualBanditService.credit("session",d,r,rows));r.put("recordId","session");r.put("lessonId","other");
     assertFalse(ContextualBanditService.credit("session",d,r,rows));assertTrue(rows.isEmpty());
   }
+  @Test public void filtersRecentLessonAndRepeatedCategoryBeforeLearningRanks() {
+    List<WorkoutLesson> choices = choices();
+    WorkoutLesson recent = choices.get(1);
+    recent.setCategory("strength");
+    RecommendationService.Preferences p = prefs();
+    RecommendationService.Recommendation base = new RecommendationService.Recommendation(choices.get(0), "preference");
+    p.lastLesson = recent.getId();
+    List<Map<String, Object>> data = Collections.singletonList(observation(recent.getId(), 1, context()));
+    assertNull(service.select(p, choices, base, data));
+    p.lastLesson = "";
+    p.rotationCategories.addAll(Arrays.asList("strength", "strength"));
+    assertNull(service.select(p, choices, base, data));
+  }
+
+  @Test public void difficultyAndTirednessLowerTheLearningReward() {
+    Map<String, Object> record = Values.of("activeDurationSeconds", 120, "xpEarned", 10,
+        "completionPercentage", 100, "difficultyFeedback", "too_difficult", "feelingFeedback", "tired");
+    double poorFit = ContextualBanditService.reward(record);
+    record.put("completionPercentage", 50);
+    record.put("difficultyFeedback", "suitable");
+    record.put("feelingFeedback", "normal");
+    assertTrue(ContextualBanditService.reward(record) > poorFit);
+  }
+
+  @Test public void noWorkoutXpConsumesBindingWithoutTraining() {
+    Map<String, Object> decision = select(Collections.emptyList()).audit;
+    Map<String, Object> record = Values.of("recordId", "session", "lessonId", decision.get("lessonId"),
+        "activeDurationSeconds", 120, "xpEarned", 0, "completionPercentage", 100,
+        "difficultyFeedback", "suitable", "feelingFeedback", "normal");
+    List<Map<String, Object>> observations = new ArrayList<>();
+    assertTrue(ContextualBanditService.credit("session", decision, record, observations));
+    assertTrue(observations.isEmpty());
+    assertNull(ContextualBanditService.reward(record));
+  }
+
   @Test public void learnedRankingDependsOnContext(){
     RecommendationService.Preferences shortP=prefs();shortP.minutes=1;
     List<Double> shortX=new ArrayList<>();for(double x:ContextualBanditService.context(shortP))shortX.add(x);

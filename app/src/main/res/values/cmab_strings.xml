@@ -1,6 +1,16 @@
 <resources>
-<string name="cmab_enable">Learn workout suggestions from my feedback</string>
-<string name="cmab_note">Experimental learning on this device. Eligible workouts may be tried to learn what fits you. Turning this off clears its learning history. Recovery and sleep rules take priority.</string>
-<string name="cmab_reason">Learning suggestion based on your preferred duration, recent activity and feedback. It may try an eligible alternative; you choose whether to start.</string>
-<string name="cmab_error">Workout learning could not be saved. The usual recommendation remains available.</string>
+    <string name="cmab_enable">Personalise workouts with my feedback</string>
+    <string name="cmab_note">Learning stays on this device. Turning it off clears learning history. Recovery and sleep rules take priority.</string>
+    <string name="cmab_reason">Personalisation selected an eligible alternative.</string>
+    <string name="cmab_kept">Learning ranked the options and kept your usual workout.</string>
+    <string name="cmab_learning">Using your usual workout while learning from your feedback.</string>
+    <string name="cmab_fallback">Using your usual recommendation. Learning needs at least two suitable workouts to rank.</string>
+    <string name="cmab_priority">Using workout rules for this suggestion.</string>
+    <string name="cmab_usual">You selected your usual recommendation.</string>
+    <string name="cmab_disabled">Personalisation is off. Using your usual recommendation.</string>
+    <string name="cmab_checking_sleep">Checking sleep access…</string>
+    <string name="cmab_counts">Eligible workouts: %1$d · Saved feedback examples considered: %2$d</string>
+    <string name="cmab_reset">Reset workout learning</string>
+    <string name="cmab_reset_confirm">Clear the workout learning history stored on this device?</string>
+    <string name="cmab_error">Workout learning could not be saved. The usual recommendation remains available.</string>
 </resources>
