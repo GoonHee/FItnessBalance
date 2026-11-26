@@ -130,8 +130,12 @@
                             android:text="@string/ar_use_health" android:textColor="@color/gm_ink" />
                         <CheckBox android:id="@+id/exUseBandit"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:minHeight="48dp" android:text="@string/cmab_enable" android:textColor="@color/gm_ink" />
+                            android:saveEnabled="false" android:minHeight="48dp" android:text="@string/cmab_enable" android:textColor="@color/gm_ink" />
                         <TextView style="@style/RewardBody" android:text="@string/cmab_note" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/exResetBandit"
+                            style="@style/ExerciseButton"
+                            android:text="@string/cmab_reset" />
                     </LinearLayout>
                 </LinearLayout>
                 <LinearLayout style="@style/RewardPanel">

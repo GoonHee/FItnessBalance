@@ -6,13 +6,23 @@ import java.util.*;
 
 /** Disjoint LinUCB: ridge=1, alpha=0.35; context fixed before the action. */
 public final class ContextualBanditService {
-  public static final String VERSION = "workout-linucb-v1";
+  public static final String VERSION = "workout-linucb-v2";
   public static final int DIM = 6;
   public static final double ALPHA = .35;
   public static final class Selection {
     public final WorkoutLesson lesson;
     public final Map<String,Object> audit;
-    Selection(WorkoutLesson lesson, Map<String,Object> audit) { this.lesson=lesson; this.audit=audit; }
+    public final int candidateCount, observationCount;
+    public final boolean changedBaseline;
+
+    Selection(WorkoutLesson lesson, Map<String,Object> audit, int candidateCount,
+        int observationCount, boolean changedBaseline) {
+      this.lesson = lesson;
+      this.audit = audit;
+      this.candidateCount = candidateCount;
+      this.observationCount = observationCount;
+      this.changedBaseline = changedBaseline;
+    }
   }
   public static double[] context(RecommendationService.Preferences p) {
     return new double[]{1, Math.min(180,Math.max(1,p.minutes))/180.0,
@@ -21,16 +31,23 @@ public final class ContextualBanditService {
       p.lastDifficulties.contains("too_easy")?1:0,
       p.recentCategories.contains("strength")?1:0};
   }
+  public static boolean canRank(RecommendationService.Recommendation base) {
+    return base.lesson != null && Arrays.asList("beginner", "preference", "micro", "next").contains(base.reason);
+  }
+
   public Selection select(RecommendationService.Preferences p, List<WorkoutLesson> available,
       RecommendationService.Recommendation base, List<Map<String,Object>> observations) {
-    if (base.lesson==null || !Arrays.asList("beginner","preference","micro","next").contains(base.reason)) return null;
+    if (!canRank(base)) return null;
     List<WorkoutLesson> choices=new ArrayList<>();
     RecommendationService rules=new RecommendationService();
     for (WorkoutLesson l:available) if (!l.getStandalone() && rules.equipmentFits(p,l)
         && l.getEstimatedMinutes()>0 && l.getEstimatedMinutes()<=base.lesson.getEstimatedMinutes()
-        && l.getDifficulty().equalsIgnoreCase(base.lesson.getDifficulty())) choices.add(l);
+        && l.getDifficulty().equalsIgnoreCase(base.lesson.getDifficulty())
+        && (!"next".equals(base.reason) || l.getSequence() > p.lastSequence)
+        && RecommendationService.rotationRank(p, l) <= RecommendationService.rotationRank(p, base.lesson)) choices.add(l);
     choices.sort(Comparator.comparing(WorkoutLesson::getId));
-    if (choices.size()<2) return null;
+    if (choices.size() < 2 || choices.stream().noneMatch(l -> l.getId().equals(base.lesson.getId()))) return null;
+    int observationCount = 0;
     double[] x=context(p); WorkoutLesson chosen=base.lesson; double best=-Double.MAX_VALUE;
     List<Map<String,Object>> scores=new ArrayList<>();
     // Prefer normal rule on exact ties, then stable lesson ID order.
@@ -43,6 +60,7 @@ public final class ContextualBanditService {
         double[] z=vector(row.get("context")); double reward=Values.decimal(row.get("reward"),-1);
         if(z==null || !Double.isFinite(reward) || reward<0 || reward>1) continue;
         n++;
+        observationCount++;
         for(int i=0;i<DIM;i++){b[i]+=reward*z[i];for(int j=0;j<DIM;j++)a[i][j]+=z[i]*z[j];}
       }
       double[] theta=solve(a,b), uncertainty=solve(a,x);
@@ -53,7 +71,8 @@ public final class ContextualBanditService {
     }
     return new Selection(chosen,Values.of("version",VERSION,"lessonId",chosen.getId(),"context",list(x),
       "createdAt",System.currentTimeMillis(),"baselineLessonId",base.lesson.getId(),"baselineReason",base.reason,
-      "candidates",scores,"alpha",ALPHA,"ridge",1,"rewardVersion","completion-fit-v1"));
+      "candidates",scores,"alpha",ALPHA,"ridge",1,"rewardVersion","completion-fit-v2"),
+      choices.size(), observationCount, !chosen.getId().equals(base.lesson.getId()));
   }
   /** Credit only a bound session/lesson, once. Returns true when binding can be consumed. */
   public static boolean credit(String boundSession, Map<String,Object> decision,
@@ -61,6 +80,8 @@ public final class ContextualBanditService {
     if(!boundSession.equals(record.get("recordId")) || !VERSION.equals(decision.get("version"))
         || !Objects.equals(decision.get("lessonId"),record.get("lessonId"))
         || vector(decision.get("context"))==null)return false;
+    // A saved ineligible session consumes its binding without affecting the model.
+    if (!rewardEligible(record)) return true;
     Double value=reward(record);if(value==null)return false;
     for(Map<String,Object> o:observations)if(boundSession.equals(o.get("sessionId")))return true;
     Map<String,Object> row=new HashMap<>(decision);row.remove("candidates");
@@ -70,14 +91,22 @@ public final class ContextualBanditService {
   public static Double reward(Map<String,Object> record) {
     double completion=Values.decimal(record.get("completionPercentage"),-1);
     String difficulty=Values.text(record.get("difficultyFeedback"),""), feeling=Values.text(record.get("feelingFeedback"),"");
-    if(!Double.isFinite(completion)||completion<0||completion>100
+    if(!rewardEligible(record) || !Double.isFinite(completion)||completion<0||completion>100
         || !Arrays.asList("too_easy","suitable","too_difficult").contains(difficulty)
         || !Arrays.asList("energized","normal","tired","discomfort").contains(feeling))return null;
     if("discomfort".equals(feeling))return 0.0;
     double fit="suitable".equals(difficulty)?1:"too_easy".equals(difficulty)?.5:0;
     double feelingFit="energized".equals(feeling)?1:"normal".equals(feeling)?.5:0;
-    return .6*completion/100+.25*fit+.15*feelingFit;
+    double score = .45 * completion / 100 + .40 * fit + .15 * feelingFit;
+    if ("too_difficult".equals(difficulty)) score *= .45;
+    if ("tired".equals(feeling)) score *= .60;
+    return score;
   }
+  private static boolean rewardEligible(Map<String,Object> record) {
+    return Values.integer(record.get("activeDurationSeconds"), 0) >= GamificationService.MIN_GUIDED_ACTIVE_SECONDS
+        && Values.integer(record.get("xpEarned"), 0) > 0;
+  }
+
   public static double[] vector(Object value){
     if(!(value instanceof List)||((List<?>)value).size()!=DIM)return null;
     double[] x=new double[DIM];

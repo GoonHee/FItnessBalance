@@ -17,6 +17,7 @@ import com.google.firebase.firestore.*;
 import java.util.*;
 
 public final class ExerciseHomeActivity extends ExerciseBaseActivity {
+  private static final long SLEEP_CHECK_TIMEOUT_MS = 5000;
   private WorkoutLesson recommended;
   private DailyChestDialog dailyChest;
   private com.example.fitnessbalance.repository.BanditStore banditStore;
@@ -29,7 +30,7 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
   private HealthRecommendationStore healthStore;
   private AdaptiveRecommendationService.Decision decision;
   private String decisionId;
-  private boolean settingHealth;
+  private boolean settingHealth, checkingSleep;
   private boolean usingUsual;
 
 
@@ -48,6 +49,20 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
       try { banditStore.enable(checked); reload(); }
       catch(java.io.IOException error){ settingBandit=true;button.setChecked(banditStore.enabled());settingBandit=false;status(R.string.cmab_error); }
     });
+    findViewById(R.id.exResetBandit).setOnClickListener(v -> {
+      if (banditStore == null) return;
+      new AlertDialog.Builder(this).setTitle(R.string.cmab_reset)
+          .setMessage(R.string.cmab_reset_confirm)
+          .setNegativeButton(R.string.cancel, null)
+          .setPositiveButton(R.string.cmab_reset, (dialog, which) -> {
+            try {
+              banditStore.reset();
+              reload();
+            } catch (java.io.IOException error) {
+              status(R.string.cmab_error);
+            }
+          }).show();
+    });
     ((CheckBox)findViewById(R.id.exUseHealth)).setOnCheckedChangeListener((button, checked) -> {
       if (settingHealth || healthStore == null) return;
       if (checked) {
@@ -63,15 +78,16 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
     });
     findViewById(R.id.exExplain).setOnClickListener(v -> {
       if (decision == null) return;
-      if(banditSelection!=null){
-        new AlertDialog.Builder(this).setTitle(R.string.ar_explain)
-            .setMessage(getString(R.string.cmab_reason)+"\n\n"+ContextualBanditService.VERSION)
-            .setPositiveButton(android.R.string.ok,null).show();return;
+      String ruleDetails = getString(R.string.ar_details, AdaptiveRecommendationService.VERSION,
+          getString(reasonResource(decision.usual.reason)), healthExplanation(decision),
+          Values.integer(decision.inputs.get("preferredMinutes"), 10), decision.baselineDays);
+      String explanation = getString(banditReason());
+      if (banditSelection != null) {
+        explanation += "\n" + getString(R.string.cmab_counts, banditSelection.candidateCount,
+            banditSelection.observationCount);
       }
       new AlertDialog.Builder(this).setTitle(R.string.ar_explain)
-          .setMessage(getString(R.string.ar_details, AdaptiveRecommendationService.VERSION,
-              getString(reasonResource(decision.usual.reason)), healthExplanation(decision),
-              Values.integer(decision.inputs.get("preferredMinutes"),10), decision.baselineDays))
+          .setMessage(explanation + "\n\n" + ruleDetails)
           .setPositiveButton(android.R.string.ok, null).show();
     });
     findViewById(R.id.exWearableWorkouts).setOnClickListener(v->startActivity(new android.content.Intent(this,com.example.fitnessbalance.WearableWorkoutsActivity.class)));
@@ -135,7 +151,8 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
     settingHealth = true;
     ((CheckBox)findViewById(R.id.exUseHealth)).setChecked(healthStore.enabled());
     settingHealth = false;
-    decision = null; decisionId = null;
+    decision = null; decisionId = null; checkingSleep = false;
+    enabled(R.id.exResetBandit, banditStore.enabled());
     findViewById(R.id.exUsual).setVisibility(View.GONE);
     text(R.id.exHealthReason, "");
     text(R.id.alHomeSummary, getString(R.string.fl_loading));
@@ -320,15 +337,26 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
       List<WorkoutLesson> available, int version) {
     boolean optIn = healthStore.enabled();
     AdaptiveRecommendationService service = new AdaptiveRecommendationService();
-    displayDecision(service.recommend(preferences,available,Collections.emptyMap(),Collections.emptyList(),
-        optIn,false,System.currentTimeMillis(),java.time.ZoneId.systemDefault()),false);
-    if (!optIn) return;
+    AdaptiveRecommendationService.Decision fallback = service.recommend(preferences, available,
+        Collections.emptyMap(), Collections.emptyList(), optIn, false, System.currentTimeMillis(),
+        java.time.ZoneId.systemDefault());
     try {
-      if (HealthConnectBridge.availability(this) != HealthConnectClient.SDK_AVAILABLE) return;
-    } catch (RuntimeException unavailable) { return; }
+      checkingSleep = optIn && HealthConnectBridge.availability(this) == HealthConnectClient.SDK_AVAILABLE;
+    } catch (RuntimeException unavailable) {
+      checkingSleep = false;
+    }
+    displayDecision(fallback, false);
+    if (!checkingSleep) return;
+    Runnable useFallback = () -> {
+      if (!currentRecommendation(version) || !checkingSleep) return;
+      checkingSleep = false;
+      displayDecision(fallback, false);
+    };
+    findViewById(R.id.exStart).postDelayed(useFallback, SLEEP_CHECK_TIMEOUT_MS);
     healthBridge.check(new HealthConnectBridge.Callback() {
       @Override public void onResult(Map<String,? extends Object> ignored, Set<String> granted) {
-        if (!currentRecommendation(version)) return;
+        if (!currentRecommendation(version) || !checkingSleep) return;
+        checkingSleep = false;
         boolean permitted = granted.contains(HealthConnectBridge.SLEEP);
         HealthSummaryStore cache = new HealthSummaryStore(ExerciseHomeActivity.this,uid);
         Set<String> allowed = new HashSet<>();
@@ -344,9 +372,7 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
         displayDecision(service.recommend(preferences,available,health,healthStore.history(),
             true,permitted,System.currentTimeMillis(),java.time.ZoneId.systemDefault()),false);
       }
-      @Override public void onError() {
-        if (currentRecommendation(version)) text(R.id.exHealthReason, getString(R.string.ar_permission_fallback));
-      }
+      @Override public void onError() { useFallback.run(); }
     });
   }
 
@@ -354,22 +380,40 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
     decision = result; usingUsual = usual;
     RecommendationService.Recommendation selected = usual ? result.usual : result.suggested;
     banditSelection=null;
-    if(!usual && !result.adjusted() && banditPreferences!=null && banditStore.enabled())
+    if (!checkingSleep && !usual && permitsBandit(result) && banditPreferences != null && banditStore.enabled())
       banditSelection=new ContextualBanditService().select(banditPreferences,banditAvailable,selected,banditStore.observations());
     recommended = banditSelection==null?selected.lesson:banditSelection.lesson;
     text(R.id.exRecommendationTitle, recommended == null ? getString(R.string.ex_no_recommendation) : recommended.getName());
     text(R.id.exRecommendationMeta, recommended == null ? "" : getString(R.string.ex_recommendation_meta,
         recommended.getEstimatedMinutes(),recommended.getBaseXp()));
-    text(R.id.exRecommendationReason, banditSelection==null?getString(reasonResource(selected.reason)):getString(R.string.cmab_reason));
-    text(R.id.exHealthReason, usual ? getString(R.string.ar_chose_usual) : healthExplanation(result));
-    findViewById(R.id.exUsual).setVisibility((result.adjusted() || banditSelection!=null) && !usual ? View.VISIBLE : View.GONE);
-    enabled(R.id.exStart, drafts.read(uid) != null || recommended != null);
+    text(R.id.exRecommendationReason, banditSelection == null ? getString(reasonResource(selected.reason)) : getString(banditReason()));
+    text(R.id.exHealthReason, checkingSleep ? getString(R.string.cmab_checking_sleep)
+        : usual ? getString(R.string.ar_chose_usual) : healthExplanation(result));
+    findViewById(R.id.exUsual).setVisibility((result.adjusted() || (banditSelection != null && banditSelection.changedBaseline)) && !usual ? View.VISIBLE : View.GONE);
+    enabled(R.id.exStart, drafts.read(uid) != null || (!checkingSleep && recommended != null));
+    if (checkingSleep) return;
     try { Map<String,Object> auditData=result.audit(System.currentTimeMillis(),usual);
       auditData.put("selectedLessonId",recommended==null?"":recommended.getId());
       auditData.put("selectedMinutes",recommended==null?0:recommended.getEstimatedMinutes());
       auditData.put("selectionLayer",banditSelection==null?"rules":ContextualBanditService.VERSION);
       decisionId = healthStore.record(auditData); }
     catch (java.io.IOException error) { decisionId = null; status(R.string.ar_audit_error); }
+  }
+
+  private boolean permitsBandit(AdaptiveRecommendationService.Decision decision) {
+    return !decision.adjusted() && !"no_shorter".equals(decision.healthReason)
+        && ContextualBanditService.canRank(decision.suggested);
+  }
+
+  private int banditReason() {
+    if (checkingSleep) return R.string.cmab_checking_sleep;
+    if (usingUsual) return R.string.cmab_usual;
+    if (!permitsBandit(decision))
+      return R.string.cmab_priority;
+    if (!banditStore.enabled()) return R.string.cmab_disabled;
+    if (banditSelection == null) return R.string.cmab_fallback;
+    if (banditSelection.observationCount == 0) return R.string.cmab_learning;
+    return banditSelection.changedBaseline ? R.string.cmab_reason : R.string.cmab_kept;
   }
 
   private String healthExplanation(AdaptiveRecommendationService.Decision result) {
@@ -393,7 +437,7 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
     final int version = loadVersion;
     new AlertDialog.Builder(this).setTitle(R.string.ar_confirm_title)
         .setMessage(getString(R.string.ar_confirm, selected.getName(), selected.getEstimatedMinutes(),
-            learning!=null ? getString(R.string.cmab_reason) : usingUsual ? getString(R.string.ar_chose_usual) : decision == null ? "" : healthExplanation(decision)))
+            learning!=null ? getString(banditReason()) : usingUsual ? getString(R.string.ar_chose_usual) : decision == null ? "" : healthExplanation(decision)))
         .setNegativeButton(R.string.cancel,null)
         .setPositiveButton(R.string.ar_review,(dialog,which) -> {
           if (!currentRecommendation(version)) return;
