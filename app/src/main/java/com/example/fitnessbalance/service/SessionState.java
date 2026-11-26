@@ -7,6 +7,7 @@ import java.util.*;
 public final class SessionState {
   public static final String EXERCISE = "exercise", REST = "rest", FEEDBACK = "feedback";
   public int index, completed, skipped;
+  public final Set<String> completedExercises = new LinkedHashSet<>();
   public long remainingMs, elapsedMs, activeMs;
   public boolean paused = true;
   public String phase = EXERCISE;
@@ -27,7 +28,10 @@ public final class SessionState {
   public boolean complete(boolean skip, List<WorkoutExercise> plan) {
     if (paused || !EXERCISE.equals(phase)) return false;
     if (skip) skipped++;
-    else completed++;
+    else {
+      completed++;
+      completedExercises.add(plan.get(index).getExerciseId());
+    }
     if (index == plan.size() - 1) {
       end();
       return true;

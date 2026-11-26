@@ -396,7 +396,7 @@ service cloud.firestore {
    let d = request.resource.data;
    let s = get(/databases/$(database)/documents/users/$(uid)/workoutSessions/$(id)).data;
    let user = getAfter(/databases/$(database)/documents/users/$(uid)).data;
-   return d.keys().hasOnly(['pathId','lessonId','lessonName','startedAt','completedAt','plannedExercises','completedExercises','skippedExercises','completionPercentage','durationSeconds','activeDurationSeconds','estimatedCaloriesBurned','xpEarned','starsEarned','difficultyFeedback','feelingFeedback','discomfortReported','firstCompletion','totalXpAfter','weeklyCompleted','weeklyTarget','unlocked','localDay','localWeek','timeZone','category','xpBreakdown'])
+   return d.keys().hasOnly(['pathId','lessonId','lessonName','startedAt','completedAt','plannedExercises','completedExercises','skippedExercises','completionPercentage','durationSeconds','activeDurationSeconds','estimatedCaloriesBurned','xpEarned','starsEarned','difficultyFeedback','feelingFeedback','discomfortReported','firstCompletion','totalXpAfter','weeklyCompleted','weeklyTarget','unlocked','localDay','localWeek','timeZone','category','xpBreakdown','completedExerciseIds'])
     && d.pathId == s.pathId && d.lessonId == s.lessonId
     && d.lessonName is string && d.startedAt == s.startedAt && d.completedAt == request.time && d.startedAt <= d.completedAt
     && d.plannedExercises == s.plannedExercises
@@ -406,6 +406,9 @@ service cloud.firestore {
     && d.completionPercentage >= d.completedExercises * 100.0 / d.plannedExercises - 0.001
     && d.completionPercentage <= d.completedExercises * 100.0 / d.plannedExercises + 0.001
     && d.durationSeconds is int && d.durationSeconds >= 0 && d.durationSeconds <= 86400
+    && (!('completedExerciseIds' in d) || (d.completedExerciseIds is list
+      && d.completedExerciseIds.size() <= d.completedExercises
+      && d.completedExerciseIds.toSet().size() == d.completedExerciseIds.size()))
     && d.activeDurationSeconds is int && d.activeDurationSeconds >= 0 && d.activeDurationSeconds <= d.durationSeconds
     && d.estimatedCaloriesBurned is number && d.estimatedCaloriesBurned >= 0 && d.estimatedCaloriesBurned <= 100000
     && d.xpEarned is int && d.xpEarned >= 0 && d.xpEarned <= 77

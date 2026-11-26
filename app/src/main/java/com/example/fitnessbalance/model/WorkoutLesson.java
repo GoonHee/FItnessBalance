@@ -117,6 +117,26 @@ public class WorkoutLesson {
     standalone = value;
   }
 
+  private List<String> exerciseIds = Collections.emptyList();
+
+  public List<String> getExerciseIds() {
+    return exerciseIds;
+  }
+
+  public void setExerciseIds(List<String> value) {
+    exerciseIds = value == null ? Collections.emptyList() : value;
+  }
+
+  private String dailyChallenge = "";
+
+  public String getDailyChallenge() {
+    return dailyChallenge;
+  }
+
+  public void setDailyChallenge(String value) {
+    dailyChallenge = value == null ? "" : value;
+  }
+
   private String category = "";
 
   public String getCategory() {

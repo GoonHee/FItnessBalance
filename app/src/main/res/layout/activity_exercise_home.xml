@@ -85,13 +85,14 @@
                     <TextView
                         android:id="@+id/exRecommended"
                         style="@style/RewardHeading"
-                        android:text="@string/gm_recommendation" />
+                        android:text="@string/challenge_main" />
                     <TextView
                         android:id="@+id/exRecommendationTitle"
                         style="@style/RewardBody" />
                     <TextView
                         android:id="@+id/exRecommendationMeta"
                         style="@style/RewardBody" />
+                    <TextView android:id="@+id/exMainChallengeState" style="@style/RewardBody" />
                     <TextView
                         android:id="@+id/exRecommendationReason"
                         style="@style/RewardBody" />
@@ -132,6 +133,20 @@
                             android:minHeight="48dp" android:text="@string/cmab_enable" android:textColor="@color/gm_ink" />
                         <TextView style="@style/RewardBody" android:text="@string/cmab_note" />
                     </LinearLayout>
+                </LinearLayout>
+                <LinearLayout style="@style/RewardPanel">
+                    <TextView style="@style/RewardHeading" android:text="@string/challenge_quick" />
+                    <TextView android:id="@+id/exQuickChallenge" style="@style/RewardBody" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/exQuickChallengeAction" style="@style/ExerciseButton"
+                        android:text="@string/challenge_review" android:visibility="gone" />
+                </LinearLayout>
+                <LinearLayout style="@style/RewardPanel">
+                    <TextView style="@style/RewardHeading" android:text="@string/challenge_wellness" />
+                    <TextView android:id="@+id/exWellnessChallenge" style="@style/RewardBody" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/exWellnessChallengeAction" style="@style/ExerciseButton"
+                        android:text="@string/challenge_review" android:visibility="gone" />
                 </LinearLayout>
                 <com.google.android.material.button.MaterialButton android:id="@+id/exMoreOptions"
                     style="@style/ExerciseButton" android:text="@string/gm_more" />

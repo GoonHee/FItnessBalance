@@ -38,6 +38,14 @@ public final class RecommendationPreferences {
     }
     if (!recent.isEmpty()) p.tired = "tired".equals(recent.get(0).get("feelingFeedback"));
     for (Map<String, Object> r : recent) {
+      if (p.rotationCategories.size() < 2 && DailyChallengeService.eligible(r)) {
+        String category = Values.text(r.get("category"), "");
+        if (p.rotationCategories.isEmpty()) {
+          p.lastLesson = Values.text(r.get("lessonId"), "");
+          p.lastCategory = category;
+        }
+        p.rotationCategories.add(category);
+      }
       if (p.lastDifficulties.size() < 2)
         p.lastDifficulties.add(Values.text(r.get("difficultyFeedback"), ""));
       Object time = r.get("completedDate");

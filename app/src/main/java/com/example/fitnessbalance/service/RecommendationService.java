@@ -8,11 +8,12 @@ public final class RecommendationService {
   public static final class Preferences {
     public int inactiveDays, minutes = 10, lastSequence = -1;
     public boolean discomfort, recoveryDay, durationPreferenceKnown, tired;
-    public String fitnessLevel = "beginner", goal = "";
+    public String fitnessLevel = "beginner", goal = "", lastCategory = "", lastLesson = "";
     public List<String> equipment = new ArrayList<>(),
         categories = new ArrayList<>(),
         lastDifficulties = new ArrayList<>(),
-        recentCategories = new ArrayList<>();
+        recentCategories = new ArrayList<>(),
+        rotationCategories = new ArrayList<>();
   }
 
   public static final class Recommendation {
@@ -58,7 +59,9 @@ public final class RecommendationService {
       Collections.sort(normal, (a, b) -> Integer.compare(a.getSequence(), b.getSequence()));
       return new Recommendation(normal.get(0), "beginner");
     }
-    Collections.sort(normal, (a, b) -> Integer.compare(score(p, a), score(p, b)));
+    normal.sort(Comparator.comparingInt((WorkoutLesson l) -> l.getId().equals(p.lastLesson) ? 1 : 0)
+        .thenComparingInt(l -> Collections.frequency(p.rotationCategories, l.getCategory()) >= 2 ? 1 : 0)
+        .thenComparingInt(l -> score(p, l)));
     return new Recommendation(normal.get(0), p.minutes <= 5 ? "micro" : "preference");
   }
 
@@ -72,6 +75,7 @@ public final class RecommendationService {
   private int score(Preferences p, WorkoutLesson l) {
     int score = Math.abs(p.minutes - l.getEstimatedMinutes()) * 10 + l.getSequence();
     if (!l.getDifficulty().equalsIgnoreCase(p.fitnessLevel)) score += 10;
+    if (l.getCategory().equals(p.lastCategory)) score += 8;
     if (p.categories.contains(l.getCategory())
         || p.goal.toLowerCase(Locale.ROOT).contains(l.getCategory())) score -= 5;
     return score;

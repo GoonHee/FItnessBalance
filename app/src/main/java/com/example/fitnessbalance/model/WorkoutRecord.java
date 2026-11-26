@@ -118,6 +118,16 @@ public class WorkoutRecord {
     durationSeconds = value;
   }
 
+  private List<String> completedExerciseIds = Collections.emptyList();
+
+  public List<String> getCompletedExerciseIds() {
+    return completedExerciseIds;
+  }
+
+  public void setCompletedExerciseIds(List<String> value) {
+    completedExerciseIds = value == null ? Collections.emptyList() : value;
+  }
+
   private int activeDurationSeconds = 0;
 
   public int getActiveDurationSeconds() {

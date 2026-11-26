@@ -7,7 +7,7 @@
     <string name="prefs_days">Preferred workout days. Leave all unchecked for no fixed schedule. Other days can receive recovery suggestions; the weekly target is a session count.</string>
     <string name="prefs_equipment">Available equipment. Choose “No equipment” or the items you have. Recommendations still depend on the available workout catalogue.</string>
     <string-array name="prefs_days"><item>Monday</item><item>Tuesday</item><item>Wednesday</item><item>Thursday</item><item>Friday</item><item>Saturday</item><item>Sunday</item></string-array>
-    <string-array name="prefs_equipment"><item>No equipment</item><item>Stable chair</item><item>Exercise mat</item><item>Dumbbells</item><item>Resistance band</item></string-array>
+    <string-array name="prefs_equipment"><item>No equipment</item><item>Stable chair</item><item>Exercise mat</item><item>Dumbbells</item><item>Resistance band</item><item>Stable wall</item><item>Bicycle or stationary bike</item><item>Low step with handrail</item></string-array>
     <string name="prefs_nutrition">Daily nutrition goals</string>
     <string name="prefs_goal_note">Enter targets you have chosen or agreed with a qualified professional. The app does not calculate a personalised diet prescription here. Leave a goal blank to keep it unset or clear it. Calories and macro targets are independent and are not automatically balanced.</string>
     <string name="prefs_calories">Daily calorie goal (kcal)</string>

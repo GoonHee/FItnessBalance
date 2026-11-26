@@ -4,6 +4,7 @@ import static com.example.fitnessbalance.util.FirestoreCollections.*;
 
 import com.example.fitnessbalance.model.*;
 import com.example.fitnessbalance.service.GamificationService;
+import com.example.fitnessbalance.service.AchievementProgress;
 import com.example.fitnessbalance.util.*;
 import com.google.android.gms.tasks.*;
 import com.google.firebase.auth.*;
@@ -52,6 +53,33 @@ public final class WorkoutRepository {
         .whereGreaterThanOrEqualTo("day", firstDay)
         .whereLessThanOrEqualTo("day", lastDay)
         .get();
+  }
+
+  public Task<Map<AchievementProgress.Metric, Integer>> achievementProgress() {
+    DocumentReference account = user();
+    Task<QuerySnapshot> guided = account.collection(RECORDS).get();
+    Task<QuerySnapshot> wearable = account.collection("wearableWorkoutRewards").get();
+    Task<QuerySnapshot> weeks = account.collection(WEEKS).get();
+    Task<QuerySnapshot> food = account.collection("foodLogs").get();
+    Task<DocumentSnapshot> profile = account.get();
+    return Tasks.whenAll(guided, wearable, weeks, food, profile).continueWith(loaded -> {
+      if (!loaded.isSuccessful()) throw loaded.getException();
+      Map<String, Map<String, Object>> foodDays = new HashMap<>();
+      for (QueryDocumentSnapshot row : food.getResult()) foodDays.put(row.getId(), row.getData());
+      return AchievementProgress.calculate(achievementRows(guided.getResult()),
+          achievementRows(wearable.getResult()), achievementRows(weeks.getResult()), foodDays,
+          Values.strings(profile.getResult().get("metGoalWeeks")));
+    });
+  }
+
+  private static List<Map<String, Object>> achievementRows(QuerySnapshot result) {
+    List<Map<String, Object>> rows = new ArrayList<>();
+    for (QueryDocumentSnapshot row : result) {
+      Map<String, Object> data = new HashMap<>(row.getData());
+      data.put("id", row.getId());
+      rows.add(data);
+    }
+    return rows;
   }
 
   public Task<QuerySnapshot> achievements() {

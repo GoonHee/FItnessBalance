@@ -643,5 +643,985 @@
     "name": "Balanced Week",
     "description": "Complete strength, mobility and recovery activities within one week.",
     "active": true
+  },
+  "exercises/EX009": {
+    "name": "Glute Bridge",
+    "category": "strength",
+    "muscleGroup": "hips",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Lie on your back, knees bent.",
+      "Lift your hips gently and lower slowly."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "mat"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX010": {
+    "name": "Bird-Dog",
+    "category": "strength",
+    "muscleGroup": "core",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Begin on hands and knees.",
+      "Extend one arm or leg at a time while keeping your trunk steady."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "mat"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX011": {
+    "name": "Supported Wall Sit",
+    "category": "strength",
+    "muscleGroup": "legs",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Lean against a wall and bend your knees slightly.",
+      "Keep the bend shallow, breathing normally."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "wall"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX012": {
+    "name": "Brisk Walk",
+    "category": "cardio",
+    "muscleGroup": "full_body",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Choose a level, clear route.",
+      "Walk at a pace where you can still talk comfortably."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX013": {
+    "name": "Low-Impact Jacks",
+    "category": "cardio",
+    "muscleGroup": "full_body",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Step to one side and lift your arms comfortably.",
+      "Return to centre and alternate sides without jumping."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX014": {
+    "name": "Easy Cycling",
+    "category": "cardio",
+    "muscleGroup": "legs",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Set a comfortable low resistance.",
+      "Pedal steadily and stop gently when finished."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "bike"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX015": {
+    "name": "Low Step-Ups",
+    "category": "cardio",
+    "muscleGroup": "legs",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Use a low, stable step with a handrail.",
+      "Step up and down slowly, alternating your lead foot."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "step"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX016": {
+    "name": "Gentle Movement Intervals",
+    "category": "cardio",
+    "muscleGroup": "full_body",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Alternate easy marching with relaxed walking.",
+      "Keep the pace conversational throughout."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX017": {
+    "name": "Shoulder Mobility",
+    "category": "mobility",
+    "muscleGroup": "shoulders",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Relax your shoulders.",
+      "Make small, comfortable arm circles and change direction."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX018": {
+    "name": "Standing Hip Mobility",
+    "category": "mobility",
+    "muscleGroup": "hips",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Stand near stable support.",
+      "Make small, slow hip circles within a comfortable range."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX019": {
+    "name": "Seated Spinal Rotation",
+    "category": "mobility",
+    "muscleGroup": "trunk",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Sit tall with feet flat.",
+      "Turn gently to each side without pulling or forcing."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "chair"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX020": {
+    "name": "Gentle Cooldown",
+    "category": "mobility",
+    "muscleGroup": "full_body",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Slow to an easy walk.",
+      "Relax your shoulders and let your breathing settle."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX021": {
+    "name": "Supported Single-Leg Stand",
+    "category": "balance",
+    "muscleGroup": "legs",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Hold a stable chair or rail.",
+      "Lift one foot slightly and switch sides when ready."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "chair"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX022": {
+    "name": "Heel-to-Toe Walk",
+    "category": "balance",
+    "muscleGroup": "legs",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Stand next to a wall or handrail.",
+      "Walk slowly with one heel near the toes of the other foot."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX023": {
+    "name": "Supported Side Leg Raise",
+    "category": "balance",
+    "muscleGroup": "hips",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Hold a stable chair and stand tall.",
+      "Lift one leg gently sideways, then switch sides."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "chair"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX024": {
+    "name": "Controlled Knee Lifts",
+    "category": "balance",
+    "muscleGroup": "legs",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Stand close to a stable support.",
+      "Lift and lower one knee slowly, alternating sides."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX025": {
+    "name": "Sit-to-Stand Practice",
+    "category": "strength",
+    "muscleGroup": "legs",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Use a stable chair against a wall.",
+      "Stand and sit slowly, using your hands for support if needed."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "chair"
+    ],
+    "metValue": 2.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX026": {
+    "name": "Gentle Walk",
+    "category": "recovery",
+    "muscleGroup": "full_body",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Choose a clear, level route.",
+      "Walk slowly enough to breathe comfortably."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 1.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX027": {
+    "name": "Guided Breathing",
+    "category": "recovery",
+    "muscleGroup": "breathing",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Sit or stand comfortably.",
+      "Breathe naturally and let each exhale be relaxed."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 1.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX028": {
+    "name": "Desk-Break Mobility",
+    "category": "recovery",
+    "muscleGroup": "upper_body",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Take a comfortable standing break.",
+      "Gently roll your shoulders and move your hands and wrists."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 1.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX029": {
+    "name": "Posture Reset",
+    "category": "recovery",
+    "muscleGroup": "trunk",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Stand or sit comfortably with feet supported.",
+      "Relax your shoulders and breathe without holding a rigid pose."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 1.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "exercises/EX030": {
+    "name": "Optional After-Meal Walk",
+    "category": "recovery",
+    "muscleGroup": "full_body",
+    "difficulty": "beginner",
+    "estimatedMinutes": 1,
+    "description": "Work within a comfortable range and stop if you feel pain.",
+    "instructions": [
+      "Take an easy walk if it feels comfortable.",
+      "Use a conversational pace and stop whenever you need a break."
+    ],
+    "targetType": "duration",
+    "defaultTarget": 60,
+    "targetUnit": "seconds",
+    "equipment": [
+      "none"
+    ],
+    "metValue": 1.5,
+    "imageUrl": "",
+    "active": true
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_cardio": {
+    "name": "Easy movement break",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 10,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "cardio",
+    "equipment": [
+      "none"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX012",
+      "EX016"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_cardio/workoutExercises/item_01": {
+    "exerciseId": "EX012",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_cardio/workoutExercises/item_02": {
+    "exerciseId": "EX016",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_strength": {
+    "name": "Supported strength break",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 11,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "strength",
+    "equipment": [
+      "chair"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX025",
+      "EX006"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_strength/workoutExercises/item_01": {
+    "exerciseId": "EX025",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_strength/workoutExercises/item_02": {
+    "exerciseId": "EX006",
+    "sequence": 2,
+    "targetType": "repetitions",
+    "targetValue": 8,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_balance": {
+    "name": "Steady steps",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 12,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "balance",
+    "equipment": [
+      "none"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX022",
+      "EX024"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_balance/workoutExercises/item_01": {
+    "exerciseId": "EX022",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_balance/workoutExercises/item_02": {
+    "exerciseId": "EX024",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_low_impact": {
+    "name": "Low-impact movement",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 13,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "cardio",
+    "equipment": [
+      "none"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX001",
+      "EX013"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_low_impact/workoutExercises/item_01": {
+    "exerciseId": "EX001",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_low_impact/workoutExercises/item_02": {
+    "exerciseId": "EX013",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_mobility": {
+    "name": "Shoulder and hip mobility",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 14,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "mobility",
+    "equipment": [
+      "none"
+    ],
+    "dailyChallenge": "wellness",
+    "exerciseIds": [
+      "EX017",
+      "EX018"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_mobility/workoutExercises/item_01": {
+    "exerciseId": "EX017",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_mobility/workoutExercises/item_02": {
+    "exerciseId": "EX018",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_walk": {
+    "name": "Gentle walking break",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 15,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "recovery",
+    "equipment": [
+      "none"
+    ],
+    "dailyChallenge": "wellness",
+    "exerciseIds": [
+      "EX026",
+      "EX020"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_walk/workoutExercises/item_01": {
+    "exerciseId": "EX026",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_walk/workoutExercises/item_02": {
+    "exerciseId": "EX020",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_breathe": {
+    "name": "Breathing and posture",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 16,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "recovery",
+    "equipment": [
+      "none"
+    ],
+    "dailyChallenge": "wellness",
+    "exerciseIds": [
+      "EX027",
+      "EX029"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_breathe/workoutExercises/item_01": {
+    "exerciseId": "EX027",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_breathe/workoutExercises/item_02": {
+    "exerciseId": "EX029",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_desk": {
+    "name": "Desk-break reset",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 17,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "recovery",
+    "equipment": [
+      "none"
+    ],
+    "dailyChallenge": "wellness",
+    "exerciseIds": [
+      "EX028",
+      "EX030"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_desk/workoutExercises/item_01": {
+    "exerciseId": "EX028",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_desk/workoutExercises/item_02": {
+    "exerciseId": "EX030",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_seated": {
+    "name": "Seated mobility",
+    "description": "Move comfortably and pause whenever you need to.",
+    "stageName": "Daily challenges",
+    "sequence": 18,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "mobility",
+    "equipment": [
+      "chair"
+    ],
+    "dailyChallenge": "wellness",
+    "exerciseIds": [
+      "EX019",
+      "EX008"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_seated/workoutExercises/item_01": {
+    "exerciseId": "EX019",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/wellness_seated/workoutExercises/item_02": {
+    "exerciseId": "EX008",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_floor": {
+    "name": "Gentle floor strength",
+    "description": "Move comfortably and take breaks as needed.",
+    "stageName": "Daily challenges",
+    "sequence": 19,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "strength",
+    "equipment": [
+      "mat"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX009",
+      "EX010"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_floor/workoutExercises/item_01": {
+    "exerciseId": "EX009",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_floor/workoutExercises/item_02": {
+    "exerciseId": "EX010",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_cycle": {
+    "name": "Easy cycling and cooldown",
+    "description": "Move comfortably and take breaks as needed.",
+    "stageName": "Daily challenges",
+    "sequence": 20,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "cardio",
+    "equipment": [
+      "bike"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX014",
+      "EX020"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_cycle/workoutExercises/item_01": {
+    "exerciseId": "EX014",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_cycle/workoutExercises/item_02": {
+    "exerciseId": "EX020",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_step": {
+    "name": "Steady step practice",
+    "description": "Move comfortably and take breaks as needed.",
+    "stageName": "Daily challenges",
+    "sequence": 21,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "cardio",
+    "equipment": [
+      "step"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX015",
+      "EX005"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_step/workoutExercises/item_01": {
+    "exerciseId": "EX015",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_step/workoutExercises/item_02": {
+    "exerciseId": "EX005",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_wall": {
+    "name": "Supported wall strength",
+    "description": "Move comfortably and take breaks as needed.",
+    "stageName": "Daily challenges",
+    "sequence": 22,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "strength",
+    "equipment": [
+      "wall"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX011",
+      "EX003"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_wall/workoutExercises/item_01": {
+    "exerciseId": "EX011",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_wall/workoutExercises/item_02": {
+    "exerciseId": "EX003",
+    "sequence": 2,
+    "targetType": "repetitions",
+    "targetValue": 8,
+    "restAfterSeconds": 0,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_support": {
+    "name": "Supported balance",
+    "description": "Move comfortably and take breaks as needed.",
+    "stageName": "Daily challenges",
+    "sequence": 23,
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "baseXp": 5,
+    "prerequisiteLessonId": null,
+    "active": true,
+    "standalone": true,
+    "category": "balance",
+    "equipment": [
+      "chair"
+    ],
+    "dailyChallenge": "quick",
+    "exerciseIds": [
+      "EX021",
+      "EX023"
+    ]
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_support/workoutExercises/item_01": {
+    "exerciseId": "EX021",
+    "sequence": 1,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 15,
+    "optional": false
+  },
+  "workoutPaths/beginner_foundation/lessons/quick_support/workoutExercises/item_02": {
+    "exerciseId": "EX023",
+    "sequence": 2,
+    "targetType": "duration",
+    "targetValue": 75,
+    "restAfterSeconds": 0,
+    "optional": false
   }
 }
