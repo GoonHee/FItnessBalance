@@ -13,17 +13,18 @@ public final class DailyChestRepository {
   public enum Action { CHECK, REST, REFLECT, OPEN }
 
   public static final class Chest {
-    public final boolean movement, meal, reflection, restAvailable, earned, opened;
+    public final boolean movement, meal, reflection, restAvailable, earned, opened, newlyOpened;
     public final String accent;
 
     Chest(boolean movement, boolean meal, boolean reflection, boolean restAvailable,
-        boolean earned, boolean opened, String accent) {
+        boolean earned, boolean opened, boolean newlyOpened, String accent) {
       this.movement = movement;
       this.meal = meal;
       this.reflection = reflection;
       this.restAvailable = restAvailable;
       this.earned = earned;
       this.opened = opened;
+      this.newlyOpened = newlyOpened;
       this.accent = accent;
     }
   }
@@ -46,7 +47,7 @@ public final class DailyChestRepository {
       DocumentSnapshot saved = tx.get(receipt);
       String storedAccent = saved.getString("accent");
       String accent = storedAccent == null ? accent(date) : storedAccent;
-      if (flag(saved, "opened")) return opened(accent);
+      if (flag(saved, "opened")) return restoredOpen(accent);
 
       DocumentSnapshot workout = tx.get(user.collection("questProgress").document(day + "_planned"));
       DocumentSnapshot feedback = tx.get(user.collection("questProgress").document(day + "_feedback"));
@@ -69,7 +70,7 @@ public final class DailyChestRepository {
         tx.set(receipt, Values.of("rest", rest, "reflection", reflected, "earned", earned,
             "opened", opened, "accent", accent, "updatedAt", FieldValue.serverTimestamp()));
       }
-      return new Chest(moved, meal, reflection, plannedRest && !moved, earned, opened, accent);
+      return new Chest(moved, meal, reflection, plannedRest && !moved, earned, opened, opened, accent);
     });
     if (action != Action.OPEN) return update;
     return update.continueWithTask(outcome -> {
@@ -77,7 +78,7 @@ public final class DailyChestRepository {
       // A concurrent open can make a pending transaction fail the immutable receipt rule.
       return receipt.get(Source.SERVER).continueWith(confirmed -> {
         if (confirmed.isSuccessful() && flag(confirmed.getResult(), "opened")) {
-          return opened(confirmed.getResult().getString("accent"));
+          return restoredOpen(confirmed.getResult().getString("accent"));
         }
         throw outcome.getException() == null
             ? new IllegalStateException("Chest open failed") : outcome.getException();
@@ -85,8 +86,8 @@ public final class DailyChestRepository {
     });
   }
 
-  private static Chest opened(String accent) {
-    return new Chest(false, false, false, false, true, true, accent);
+  static Chest restoredOpen(String accent) {
+    return new Chest(false, false, false, false, true, true, false, accent);
   }
 
   public static boolean qualifies(boolean movement, boolean meal, boolean reflection) {

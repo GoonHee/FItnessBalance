@@ -10,6 +10,8 @@
     <string name="dc_reflection_prompt">What helped you feel supported today? Think it over privately and tap Done when ready.</string>
     <string name="dc_done">Done</string>
     <string name="dc_reward">Reward preview: %1$s weekly ring</string>
+    <string name="dc_reward_unlocked">%1$s weekly ring</string>
+    <string name="dc_sound">Play chest sounds</string>
     <string name="dc_open">Open chest</string>
     <string name="dc_apply">Use this accent</string>
     <string name="dc_applied">Accent applied to your weekly ring.</string>

@@ -1,8 +1,13 @@
 package com.example.fitnessbalance.ui.exercise;
 
+import android.animation.ValueAnimator;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
@@ -24,9 +29,12 @@ final class DailyChestDialog {
   private final SharedPreferences preferences;
   private LocalDate date = LocalDate.now();
   private AlertDialog dialog;
+  private Dialog secondaryDialog;
   private Button dateButton, rest, reflect, open, apply;
   private TextView goals, status, reward;
   private CircularProgressIndicator preview;
+  private ChestIllustrationView illustration;
+  private MediaPlayer chime;
   private String unlockedAccent;
   private int homeRefreshVersion;
 
@@ -53,19 +61,32 @@ final class DailyChestDialog {
     ScrollView scroll = new ScrollView(activity);
     LinearLayout body = new LinearLayout(activity);
     body.setOrientation(LinearLayout.VERTICAL);
-    int padding = Math.round(24 * activity.getResources().getDisplayMetrics().density);
+    int padding = dp(24);
     body.setPadding(padding, 0, padding, padding);
     scroll.addView(body);
     dateButton = button(body, R.string.dc_pick_date, this::pickDate);
+    illustration = new ChestIllustrationView(activity);
+    body.addView(illustration, new LinearLayout.LayoutParams(-1, dp(136)));
     goals = text(body);
     rest = button(body, R.string.dc_check_rest, () -> load(Action.REST));
     reflect = button(body, R.string.dc_reflect, this::confirmReflection);
-    reward = text(body);
+    LinearLayout rewardRow = new LinearLayout(activity);
+    rewardRow.setGravity(Gravity.CENTER_VERTICAL);
+    rewardRow.setPadding(dp(12), dp(8), dp(12), dp(8));
+    rewardRow.setBackgroundResource(R.drawable.reward_panel_gold);
+    body.addView(rewardRow, new LinearLayout.LayoutParams(-1, -2));
     preview = new CircularProgressIndicator(activity);
+    preview.setIndicatorSize(dp(40));
+    preview.setTrackThickness(dp(5));
     preview.setIndeterminate(false);
     preview.setProgress(100);
     preview.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-    body.addView(preview, new LinearLayout.LayoutParams(-1, -2));
+    rewardRow.addView(preview, new LinearLayout.LayoutParams(dp(48), dp(48)));
+    reward = new TextView(activity);
+    reward.setTextSize(16);
+    reward.setTextColor(ContextCompat.getColor(activity, R.color.gm_ink));
+    reward.setPaddingRelative(dp(8), 0, 0, 0);
+    rewardRow.addView(reward, new LinearLayout.LayoutParams(0, -2, 1));
     status = text(body);
     status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     open = button(body, R.string.dc_open, () -> load(Action.OPEN));
@@ -75,13 +96,25 @@ final class DailyChestDialog {
       applyAccent(unlockedAccent);
       status.setText(R.string.dc_applied);
     });
+    CheckBox sound = new CheckBox(activity);
+    sound.setText(R.string.dc_sound);
+    sound.setMinHeight(dp(48));
+    sound.setChecked(preferences.getBoolean(soundPreference(), false));
+    sound.setOnCheckedChangeListener((view, checked) -> {
+      preferences.edit().putBoolean(soundPreference(), checked).apply();
+      if (!checked) stopChime();
+    });
+    body.addView(sound, new LinearLayout.LayoutParams(-1, -2));
+
     dialog = new AlertDialog.Builder(activity).setTitle(R.string.dc_title)
-        .setView(scroll).setPositiveButton(android.R.string.ok, null).show();
+        .setView(scroll).setPositiveButton(android.R.string.ok, null).create();
+    dialog.setOnDismissListener(d -> stopEffects());
+    dialog.show();
     load(Action.CHECK);
   }
 
   private void confirmReflection() {
-    new AlertDialog.Builder(activity).setTitle(R.string.dc_reflect)
+    secondaryDialog = new AlertDialog.Builder(activity).setTitle(R.string.dc_reflect)
         .setMessage(R.string.dc_reflection_prompt)
         .setNegativeButton(android.R.string.cancel, null)
         .setPositiveButton(R.string.dc_done, (d, w) -> load(Action.REFLECT)).show();
@@ -93,6 +126,7 @@ final class DailyChestDialog {
       load(Action.CHECK);
     }, date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
     picker.getDatePicker().setMaxDate(System.currentTimeMillis());
+    secondaryDialog = picker;
     picker.show();
   }
 
@@ -110,7 +144,12 @@ final class DailyChestDialog {
     apply.setVisibility(View.GONE);
     open.setVisibility(View.GONE);
     unlockedAccent = null;
-    showPreview(DailyChestRepository.accent(date));
+    stopEffects();
+    String accent = DailyChestRepository.accent(date);
+    showPreview(accent);
+    if (action != Action.OPEN) {
+      illustration.show(ChestIllustrationView.State.LOCKED, accentColor(accent), false);
+    }
     repository.update(date, action).addOnSuccessListener(activity, chest -> {
       if (!currentAccount() || dialog != active || !active.isShowing() || !requested.equals(date)) return;
       dateButton.setEnabled(true);
@@ -118,8 +157,21 @@ final class DailyChestDialog {
         homeRefreshVersion++;
         showHomeState(chest);
       }
+      boolean celebrate = action == Action.OPEN && chest.newlyOpened;
+      boolean animate = celebrate && ValueAnimator.areAnimatorsEnabled();
+      ChestIllustrationView.State art = chest.opened ? ChestIllustrationView.State.OPENED
+          : chest.earned ? ChestIllustrationView.State.READY : ChestIllustrationView.State.LOCKED;
+      illustration.show(art, accentColor(chest.accent), animate);
       showPreview(chest.accent);
-      if (chest.opened) unlockedAccent = chest.accent;
+      if (chest.opened) {
+        unlockedAccent = chest.accent;
+        reward.setText(activity.getString(R.string.dc_reward_unlocked, activity.getString(label(chest.accent))));
+      }
+      if (animate) {
+        preview.setAlpha(0f);
+        preview.animate().alpha(1f).setStartDelay(180).setDuration(240).start();
+      }
+      if (celebrate && preferences.getBoolean(soundPreference(), false)) playChime();
       if (!chest.opened) {
         goals.setText(activity.getString(R.string.dc_goals,
             state(chest.movement), state(chest.meal), state(chest.reflection)));
@@ -137,8 +189,66 @@ final class DailyChestDialog {
   }
 
   private void showPreview(String accent) {
-    preview.setIndicatorColor(ContextCompat.getColor(activity, color(accent)));
+    preview.setIndicatorColor(accentColor(accent));
     reward.setText(activity.getString(R.string.dc_reward, activity.getString(label(accent))));
+  }
+
+  void onHostStop() {
+    if (secondaryDialog != null) {
+      secondaryDialog.dismiss();
+      secondaryDialog = null;
+    }
+    if (dialog != null && dialog.isShowing()) dialog.dismiss();
+    stopEffects();
+  }
+
+  private void stopEffects() {
+    if (illustration != null) illustration.stopAnimation();
+    if (preview != null) {
+      preview.animate().cancel();
+      preview.setAlpha(1f);
+    }
+    stopChime();
+  }
+
+  private void playChime() {
+    stopChime();
+    AudioAttributes attributes = new AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_GAME)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+        .build();
+    try {
+      chime = MediaPlayer.create(activity, R.raw.daily_chest_chime, attributes, 0);
+      if (chime == null) return;
+      chime.setOnCompletionListener(player -> {
+        if (chime == player) stopChime();
+      });
+      chime.setOnErrorListener((player, what, extra) -> {
+        if (chime == player) stopChime();
+        return true;
+      });
+      chime.start();
+    } catch (RuntimeException unavailable) {
+      stopChime();
+    }
+  }
+
+  private void stopChime() {
+    if (chime == null) return;
+    chime.release();
+    chime = null;
+  }
+
+  private String soundPreference() {
+    return uid + ".chest_sound";
+  }
+
+  private int dp(int value) {
+    return Math.round(value * activity.getResources().getDisplayMetrics().density);
+  }
+
+  private int accentColor(String accent) {
+    return ContextCompat.getColor(activity, color(accent));
   }
 
   private void showHomeState(Chest chest) {
@@ -157,7 +267,7 @@ final class DailyChestDialog {
 
   private void applyAccent(String accent) {
     CircularProgressIndicator ring = activity.findViewById(R.id.exWeeklyRing);
-    ring.setIndicatorColor(ContextCompat.getColor(activity, color(accent)));
+    ring.setIndicatorColor(accentColor(accent));
   }
 
   private static int color(String accent) {
@@ -179,6 +289,7 @@ final class DailyChestDialog {
   private TextView text(LinearLayout body) {
     TextView view = new TextView(activity);
     view.setTextSize(16);
+    view.setPadding(0, dp(5), 0, dp(5));
     body.addView(view, new LinearLayout.LayoutParams(-1, -2));
     return view;
   }
