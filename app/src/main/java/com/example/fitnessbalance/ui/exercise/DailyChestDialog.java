@@ -16,14 +16,30 @@ import com.example.fitnessbalance.R;
 import com.example.fitnessbalance.repository.DailyChestRepository;
 import com.example.fitnessbalance.repository.DailyChestRepository.Action;
 import com.example.fitnessbalance.repository.DailyChestRepository.Chest;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.auth.FirebaseAuth;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.function.Function;
 
 final class DailyChestDialog {
-  private final ExerciseHomeActivity activity;
+  enum Quest {
+    PLANNED("planned", R.string.ex_quest_planned),
+    MINUTES("minutes", R.string.ex_quest_minutes),
+    FEEDBACK("feedback", R.string.ex_quest_feedback);
+
+    final String id;
+    final int label;
+
+    Quest(String id, int label) {
+      this.id = id;
+      this.label = label;
+    }
+  }
+
+  private final ExerciseBaseActivity activity;
   private final String uid;
   private final DailyChestRepository repository;
   private final SharedPreferences preferences;
@@ -37,8 +53,10 @@ final class DailyChestDialog {
   private MediaPlayer chime;
   private String unlockedAccent;
   private int homeRefreshVersion;
+  private Function<Action, Task<Chest>> milestoneRequest;
+  private String milestoneAccent;
 
-  DailyChestDialog(ExerciseHomeActivity activity, String uid) {
+  DailyChestDialog(ExerciseBaseActivity activity, String uid) {
     this.activity = activity;
     this.uid = uid;
     repository = new DailyChestRepository(uid);
@@ -56,8 +74,25 @@ final class DailyChestDialog {
   }
 
   void show() {
+    show(activity.getString(R.string.dc_title), null, null, null);
+  }
+
+  void showQuest(LocalDate day, Quest quest) {
+    show(activity.getString(R.string.dc_quest_title), activity.getString(quest.label),
+        DailyChestRepository.milestoneAccent(day + "_" + quest.id),
+        action -> repository.quest(day, quest.id, action));
+  }
+
+  void showAchievement(String id, String label) {
+    show(activity.getString(R.string.dc_achievement_title), label,
+        DailyChestRepository.milestoneAccent(id), action -> repository.achievement(id, action));
+  }
+
+  private void show(String title, String label, String accent, Function<Action, Task<Chest>> request) {
     if (!currentAccount() || (dialog != null && dialog.isShowing())) return;
     date = LocalDate.now();
+    milestoneRequest = request;
+    milestoneAccent = accent;
     ScrollView scroll = new ScrollView(activity);
     LinearLayout body = new LinearLayout(activity);
     body.setOrientation(LinearLayout.VERTICAL);
@@ -65,6 +100,12 @@ final class DailyChestDialog {
     body.setPadding(padding, 0, padding, padding);
     scroll.addView(body);
     dateButton = button(body, R.string.dc_pick_date, this::pickDate);
+    if (request != null) {
+      dateButton.setVisibility(View.GONE);
+      TextView milestone = text(body);
+      milestone.setText(label);
+      milestone.setGravity(Gravity.CENTER);
+    }
     illustration = new ChestIllustrationView(activity);
     body.addView(illustration, new LinearLayout.LayoutParams(-1, dp(136)));
     goals = text(body);
@@ -96,21 +137,29 @@ final class DailyChestDialog {
       applyAccent(unlockedAccent);
       status.setText(R.string.dc_applied);
     });
-    CheckBox sound = new CheckBox(activity);
-    sound.setText(R.string.dc_sound);
-    sound.setMinHeight(dp(48));
-    sound.setChecked(preferences.getBoolean(soundPreference(), false));
-    sound.setOnCheckedChangeListener((view, checked) -> {
-      preferences.edit().putBoolean(soundPreference(), checked).apply();
-      if (!checked) stopChime();
-    });
-    body.addView(sound, new LinearLayout.LayoutParams(-1, -2));
+    if (request == null) button(body, R.string.dc_quest_chests, this::chooseQuest);
 
-    dialog = new AlertDialog.Builder(activity).setTitle(R.string.dc_title)
+    dialog = new AlertDialog.Builder(activity).setTitle(title)
         .setView(scroll).setPositiveButton(android.R.string.ok, null).create();
-    dialog.setOnDismissListener(d -> stopEffects());
+    dialog.setOnDismissListener(d -> {
+      if (dialog == d) stopEffects();
+    });
     dialog.show();
     load(Action.CHECK);
+  }
+
+  private void chooseQuest() {
+    LocalDate selected = date;
+    Quest[] quests = Quest.values();
+    String[] choices = new String[quests.length];
+    for (int i = 0; i < quests.length; i++) choices[i] = activity.getString(quests[i].label);
+    secondaryDialog = new AlertDialog.Builder(activity).setTitle(R.string.dc_quest_chests)
+        .setItems(choices, (picker, index) -> {
+          dialog.dismiss();
+          showQuest(selected, quests[index]);
+        })
+        .setNegativeButton(android.R.string.cancel, null)
+        .show();
   }
 
   private void confirmReflection() {
@@ -134,6 +183,7 @@ final class DailyChestDialog {
     if (!currentAccount() || date.isAfter(LocalDate.now())) return;
     AlertDialog active = dialog;
     LocalDate requested = date;
+    boolean daily = milestoneRequest == null;
     dateButton.setEnabled(false);
     dateButton.setText(activity.getString(R.string.dc_date,
         date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))));
@@ -145,15 +195,16 @@ final class DailyChestDialog {
     open.setVisibility(View.GONE);
     unlockedAccent = null;
     stopEffects();
-    String accent = DailyChestRepository.accent(date);
+    String accent = daily ? DailyChestRepository.accent(date) : milestoneAccent;
     showPreview(accent);
     if (action != Action.OPEN) {
       illustration.show(ChestIllustrationView.State.LOCKED, accentColor(accent), false);
     }
-    repository.update(date, action).addOnSuccessListener(activity, chest -> {
+    Task<Chest> request = daily ? repository.update(date, action) : milestoneRequest.apply(action);
+    request.addOnSuccessListener(activity, chest -> {
       if (!currentAccount() || dialog != active || !active.isShowing() || !requested.equals(date)) return;
       dateButton.setEnabled(true);
-      if (requested.equals(LocalDate.now())) {
+      if (daily && requested.equals(LocalDate.now())) {
         homeRefreshVersion++;
         showHomeState(chest);
       }
@@ -171,20 +222,22 @@ final class DailyChestDialog {
         preview.setAlpha(0f);
         preview.animate().alpha(1f).setStartDelay(180).setDuration(240).start();
       }
-      if (celebrate && preferences.getBoolean(soundPreference(), false)) playChime();
-      if (!chest.opened) {
+      if (celebrate) playChime();
+      if (daily && !chest.opened) {
         goals.setText(activity.getString(R.string.dc_goals,
             state(chest.movement), state(chest.meal), state(chest.reflection)));
         rest.setVisibility(chest.restAvailable ? View.VISIBLE : View.GONE);
         reflect.setVisibility(requested.equals(LocalDate.now()) && !chest.reflection ? View.VISIBLE : View.GONE);
       }
-      status.setText(chest.opened ? R.string.dc_opened : chest.earned ? R.string.dc_earned : R.string.dc_locked);
+      if (chest.opened) status.setText(R.string.dc_opened);
+      else if (daily) status.setText(chest.earned ? R.string.dc_earned : R.string.dc_locked);
+      else status.setText(chest.earned ? R.string.dc_milestone_ready : R.string.dc_milestone_locked);
       open.setVisibility(chest.earned && !chest.opened ? View.VISIBLE : View.GONE);
       apply.setVisibility(chest.opened ? View.VISIBLE : View.GONE);
     }).addOnFailureListener(activity, error -> {
       if (!currentAccount() || dialog != active || !active.isShowing()) return;
       dateButton.setEnabled(true);
-      status.setText(R.string.dc_error);
+      status.setText(daily ? R.string.dc_error : R.string.dc_milestone_error);
     });
   }
 
@@ -239,10 +292,6 @@ final class DailyChestDialog {
     chime = null;
   }
 
-  private String soundPreference() {
-    return uid + ".chest_sound";
-  }
-
   private int dp(int value) {
     return Math.round(value * activity.getResources().getDisplayMetrics().density);
   }
@@ -267,7 +316,7 @@ final class DailyChestDialog {
 
   private void applyAccent(String accent) {
     CircularProgressIndicator ring = activity.findViewById(R.id.exWeeklyRing);
-    ring.setIndicatorColor(accentColor(accent));
+    if (ring != null) ring.setIndicatorColor(accentColor(accent));
   }
 
   private static int color(String accent) {

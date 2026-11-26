@@ -72,7 +72,40 @@ public final class DailyChestRepository {
       }
       return new Chest(moved, meal, reflection, plannedRest && !moved, earned, opened, opened, accent);
     });
-    if (action != Action.OPEN) return update;
+    return action == Action.OPEN ? confirmOpen(receipt, update) : update;
+  }
+
+  public Task<Chest> quest(LocalDate date, String id, Action action) {
+    return milestone(user.collection("questProgress").document(date + "_" + id), true, action);
+  }
+
+  public Task<Chest> achievement(String id, Action action) {
+    return milestone(user.collection("unlockedAchievements").document(id), false, action);
+  }
+
+  private Task<Chest> milestone(DocumentReference source, boolean quest, Action action) {
+    DocumentReference receipt = source.collection("chest").document("reward");
+    Task<Chest> update = db.runTransaction(tx -> {
+      DocumentSnapshot saved = tx.get(receipt);
+      if (flag(saved, "opened")) return restoredOpen(saved.getString("accent"));
+      DocumentSnapshot progress = tx.get(source);
+      boolean earned = quest ? flag(progress, "completed") : progress.exists();
+      String accent = milestoneAccent(source.getId());
+      boolean opened = earned && action == Action.OPEN;
+      if (opened) {
+        tx.set(receipt, Values.of("opened", true, "accent", accent,
+            "openedAt", FieldValue.serverTimestamp()));
+      }
+      return new Chest(false, false, false, false, earned, opened, opened, accent);
+    });
+    return action == Action.OPEN ? confirmOpen(receipt, update) : update;
+  }
+
+  public static String milestoneAccent(String id) {
+    return accentAt(id.hashCode());
+  }
+
+  private Task<Chest> confirmOpen(DocumentReference receipt, Task<Chest> update) {
     return update.continueWithTask(outcome -> {
       if (outcome.isSuccessful()) return Tasks.forResult(outcome.getResult());
       // A concurrent open can make a pending transaction fail the immutable receipt rule.
@@ -95,7 +128,11 @@ public final class DailyChestRepository {
   }
 
   public static String accent(LocalDate date) {
-    return new String[]{"teal", "purple", "amber"}[(int) Math.floorMod(date.toEpochDay(), 3L)];
+    return accentAt(date.toEpochDay());
+  }
+
+  private static String accentAt(long index) {
+    return new String[]{"teal", "purple", "amber"}[(int) Math.floorMod(index, 3L)];
   }
 
   static boolean plannedRest(Object days, LocalDate date) {

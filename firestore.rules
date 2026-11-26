@@ -313,6 +313,11 @@ service cloud.firestore {
      && request.resource.data.updatedAt == request.time && (freshRecord(uid,request.resource.data.lastRecordId) || wearableWeekUpdate(uid,request.resource.data.lastRecordId,week));
    }
    match /questProgress/{id} {
+    match /chest/reward {
+     allow read: if owner(uid);
+     allow create: if owner(uid) && validMilestoneChest()
+      && get(/databases/$(database)/documents/users/$(uid)/questProgress/$(id)).data.completed == true;
+    }
     allow read: if owner(uid);
     allow create: if owner(uid)
      && request.resource.data.keys().hasOnly(['day','questId','completed','xpEarned','recordId','completedAt'])
@@ -325,6 +330,11 @@ service cloud.firestore {
       && request.resource.data.day == getAfter(/databases/$(database)/documents/users/$(uid)/wearableWorkoutRewards/$(request.resource.data.recordId)).data.day));
    }
    match /unlockedAchievements/{id} {
+    match /chest/reward {
+     allow read: if owner(uid);
+     allow create: if owner(uid) && validMilestoneChest()
+      && exists(/databases/$(database)/documents/users/$(uid)/unlockedAchievements/$(id));
+    }
     allow read: if owner(uid);
     allow create: if owner(uid)
      && id in ['first_step','routine_builder','path_explorer','welcome_back','honest_reflection','balanced_week']
@@ -333,6 +343,11 @@ service cloud.firestore {
       && freshWearableReward(uid,request.resource.data.recordId)
       && wearableAchievement(uid,id,request.resource.data.recordId)));
    }
+  }
+  function validMilestoneChest() {
+   let d = request.resource.data;
+   return d.keys().hasOnly(['opened','accent','openedAt'])
+    && d.opened == true && d.accent in ['teal','purple','amber'] && d.openedAt == request.time;
   }
   function chestQuest(uid, day, quest) {
    let ref = /databases/$(database)/documents/users/$(uid)/questProgress/$(day + '_' + quest);

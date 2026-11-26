@@ -247,18 +247,15 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
                   }
                 }
               }
-              String[] ids = {"planned", "minutes", "feedback"};
-              int[] labels = {
-                R.string.ex_quest_planned, R.string.ex_quest_minutes, R.string.ex_quest_feedback
-              };
               List<ExerciseRowsAdapter.Row> rows = new ArrayList<>();
-              for (int n = 0; n < 3; n++)
-                rows.add(
-                    new ExerciseRowsAdapter.Row(
-                        getString(labels[n]),
-                        "",
-                        getString(done.contains(ids[n]) ? R.string.ex_done : R.string.ex_pending),
-                        null));
+              java.time.LocalDate questDate = java.time.LocalDate.parse(today);
+              for (DailyChestDialog.Quest quest : DailyChestDialog.Quest.values()) {
+                boolean complete = done.contains(quest.id);
+                rows.add(new ExerciseRowsAdapter.Row(getString(quest.label), "",
+                    complete ? getString(R.string.dc_chest_row, getString(R.string.ex_done))
+                        : getString(R.string.ex_pending),
+                    complete ? () -> dailyChest.showQuest(questDate, quest) : null));
+              }
               list(R.id.exQuests, new QuestAdapter(rows));
               loaded();
               try { banditStore.learn(recent); } catch(java.io.IOException error){status(R.string.cmab_error);}

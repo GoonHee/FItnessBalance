@@ -309,3 +309,43 @@ test('workout and reflection quests can earn the same dated chest', async () => 
   opened:true,accent:'teal',updatedAt:serverTimestamp()}));
  assert.equal((await getDoc(chest)).get('opened'), true);
 });
+
+test('every completed quest and earned achievement has one cosmetic chest', async () => {
+ const d = db();
+ await start(d);
+ await complete(d, 'session1', true);
+ const receipts = [
+  ...['planned','minutes','feedback'].map(id => ref(d, `questProgress/${DAY}_${id}/chest/reward`)),
+  ...achievements.map(id => ref(d, `unlockedAchievements/${id}/chest/reward`))
+ ];
+ const reward = {opened:true, accent:'teal', openedAt:serverTimestamp()};
+ for (const chest of receipts) {
+  await assertSucceeds(setDoc(chest, reward));
+  assert.equal((await getDoc(chest)).get('opened'), true);
+ }
+ await assertFails(updateDoc(receipts[0], {accent:'amber'}));
+ await assertFails(deleteDoc(receipts[3]));
+ assert.equal((await getDoc(doc(d,'users/alice'))).get('totalXp'), 22);
+});
+
+test('milestone chest claims require the matching goal and remain account-private', async () => {
+ const d = db(), quest = ref(d, `questProgress/${DAY}_planned/chest/reward`);
+ const achievement = ref(d, 'unlockedAchievements/first_step/chest/reward');
+ const reward = {opened:true, accent:'teal', openedAt:serverTimestamp()};
+ await assertFails(setDoc(quest, reward));
+ await assertFails(setDoc(achievement, reward));
+ await start(d);
+ await complete(d);
+ const open = () => runTransaction(d, async tx => {
+  const saved = await tx.get(quest);
+  if (saved.exists()) return false;
+  tx.set(quest, reward);
+  return true;
+ }).catch(async error => {
+  if ((await getDocFromServer(quest)).get('opened')) return false;
+  throw error;
+ });
+ assert.deepEqual((await Promise.all([open(), open()])).sort(), [false, true]);
+ await assertFails(getDoc(ref(db('bob'), `questProgress/${DAY}_planned/chest/reward`)));
+ await assertSucceeds(setDoc(achievement, reward));
+});
