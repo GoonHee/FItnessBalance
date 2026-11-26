@@ -16,7 +16,7 @@
 
     <string name="fs_manual">Enter calories myself</string>
     <string name="fs_manual_calories">Calories in ONE selected serving (kcal)</string>
-    <string name="fs_manual_note">User-entered calories will be logged. Other nutrients are unavailable; the database values will not be scaled.</string>
+    <string name="fs_manual_note">Enter calories for one serving. Available source nutrients are still scaled when the serving unit matches the confirmed reference.</string>
 
     <string name="fs_basis_unknown">The reference amount is unknown. Select “Enter calories myself” and supply calories for one serving to log this food.</string>
     <string name="fs_basis_known">Reference: per 100 %1$s. Source values have not been independently verified.</string>

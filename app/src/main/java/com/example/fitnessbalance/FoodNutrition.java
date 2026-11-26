@@ -184,6 +184,19 @@ public final class FoodNutrition {
                 && number(withEstimatedEnergy(nutrition).get("energy_kcal")) != null;
     }
 
+    /** Overrides energy only. Source nutrients need a confirmed, matching reference unit. */
+    public static Map<String, Object> manualServingNutrition(
+            Map<String, Object> nutrition, String basis, String unit,
+            double amount, double servings, double calories
+    ) {
+        double total = totalAmount(amount, servings);
+        String reference = portionUnit(basis);
+        Map<String, Object> result = reference != null && reference.equals(unit)
+                ? scale(nutrition, total) : new HashMap<>();
+        result.putAll(manualNutrition(calories, servings));
+        return result;
+    }
+
     public static Map<String, Object> manualNutrition(
             double calories,
             double servings

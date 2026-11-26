@@ -45,6 +45,28 @@ public class CalorieFallbackTest {
     @Test(expected=IllegalArgumentException.class) public void cannotConvertVolumeToMass() {
         FoodNutrition.servingNutrition(macros(), "per_100g", "ml", 100, 1);
     }
+    @Test public void manualCaloriesPreserveKnownNutrientsWithMatchingUnits() {
+        Map<String, Object> source = macros();
+        source.remove("fat_g");
+        source.put("sodium_mg", 0.0);
+        Map<String, Object> logged = FoodNutrition.manualServingNutrition(
+                source, "per_100ml", "ml", 75, 2, 80);
+        assertEquals(160.0, (Double) logged.get("energy_kcal"), 0);
+        assertEquals(15.0, (Double) logged.get("protein_g"), 0);
+        assertEquals(30.0, (Double) logged.get("carbohydrate_g"), 0);
+        assertEquals(0.0, (Double) logged.get("sodium_mg"), 0);
+        assertFalse(logged.containsKey("fat_g"));
+        assertFalse(source.containsKey("energy_kcal"));
+    }
+
+    @Test public void manualCaloriesDoNotInferMissingOrMismatchedReferenceUnits() {
+        Map<String, Object> manual = FoodNutrition.manualNutrition(80, 2);
+        assertEquals(manual, FoodNutrition.manualServingNutrition(
+                macros(), "unknown", "g", 75, 2, 80));
+        assertEquals(manual, FoodNutrition.manualServingNutrition(
+                macros(), "per_100ml", "g", 75, 2, 80));
+    }
+
     @Test public void volumeBasisAndManualFallbackWorkIndependently() {
         assertEquals(330.0, (Double) FoodNutrition.servingNutrition(
                 macros(), "per_100ml", "ml", 100, 2).get("energy_kcal"), 0);
