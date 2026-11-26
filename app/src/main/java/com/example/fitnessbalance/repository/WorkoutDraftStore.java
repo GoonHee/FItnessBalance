@@ -60,6 +60,7 @@ public final class WorkoutDraftStore {
             .put("feeling", d.feeling)
             .put("index", s.index)
             .put("completed", s.completed)
+            .put("completedExercises", new JSONArray(s.completedExercises))
             .put("skipped", s.skipped)
             .put("remaining", s.remainingMs)
             .put("elapsed", s.elapsedMs)
@@ -98,6 +99,11 @@ public final class WorkoutDraftStore {
     SessionState s = d.state;
     s.index = j.getInt("index");
     s.completed = j.getInt("completed");
+    JSONArray completedExercises = j.optJSONArray("completedExercises");
+    if (completedExercises != null) {
+      for (int i = 0; i < completedExercises.length(); i++)
+        s.completedExercises.add(completedExercises.getString(i));
+    }
     s.skipped = j.getInt("skipped");
     s.remainingMs = j.getLong("remaining");
     s.elapsedMs = j.getLong("elapsed");

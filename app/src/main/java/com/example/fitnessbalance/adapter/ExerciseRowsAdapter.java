@@ -11,8 +11,18 @@ public class  ExerciseRowsAdapter extends RecyclerView.Adapter<ExerciseRowsAdapt
   public static final class Row {
     public final String title, body, state;
     public final Runnable action;
+    private final boolean heading;
 
     public Row(String title, String body, String state, Runnable action) {
+      this(title, body, state, action, false);
+    }
+
+    public static Row heading(String title) {
+      return new Row(title, "", "", null, true);
+    }
+
+    private Row(String title, String body, String state, Runnable action, boolean heading) {
+      this.heading = heading;
       this.title = title;
       this.body = body;
       this.state = state;
@@ -48,6 +58,7 @@ public class  ExerciseRowsAdapter extends RecyclerView.Adapter<ExerciseRowsAdapt
   public void onBindViewHolder(@NonNull Holder h, int position) {
     Row row = rows.get(position);
     h.title.setText(row.title);
+    androidx.core.view.ViewCompat.setAccessibilityHeading(h.title, row.heading);
     h.body.setText(row.body);
     h.state.setText(row.state);
     h.body.setVisibility(row.body.isEmpty() ? View.GONE : View.VISIBLE);

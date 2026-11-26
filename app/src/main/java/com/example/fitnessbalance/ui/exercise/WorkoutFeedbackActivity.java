@@ -116,6 +116,7 @@ public final class WorkoutFeedbackActivity extends ExerciseBaseActivity {
               draft.sessionId,
               draft.state.completed,
               draft.state.skipped,
+              draft.state.completedExercises,
               (int) (draft.state.elapsedMs / 1000),
               (int) (draft.state.activeMs / 1000),
               draft.calories,

@@ -6,7 +6,7 @@ import java.util.*;
 final class UserPreferences {
     static final String[] GOALS = {"dailyCalorieGoal", "dailyProteinGoalG",
             "dailyCarbohydrateGoalG", "dailyFatGoalG"};
-    static final List<String> EQUIPMENT = Arrays.asList("none", "chair", "mat", "dumbbells", "resistance_band");
+    static final List<String> EQUIPMENT = Arrays.asList("none", "chair", "mat", "dumbbells", "resistance_band", "wall", "bike", "step");
     static final List<String> DIETS = Arrays.asList("halal", "vegetarian", "vegan", "avoid_pork", "avoid_alcohol");
     private UserPreferences() {}
 

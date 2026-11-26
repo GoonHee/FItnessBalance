@@ -27,6 +27,14 @@ public class Exercise {
     name = value == null ? "" : value;
   }
 
+  private String muscleGroup = "";
+  private int estimatedMinutes;
+
+  public String getMuscleGroup() { return muscleGroup; }
+  public void setMuscleGroup(String value) { muscleGroup = value == null ? "" : value; }
+  public int getEstimatedMinutes() { return estimatedMinutes; }
+  public void setEstimatedMinutes(int value) { estimatedMinutes = value; }
+
   private String category = "";
 
   public String getCategory() {

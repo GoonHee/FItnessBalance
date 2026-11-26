@@ -19,6 +19,7 @@ public final class GamificationRepository {
       String session,
       int completed,
       int skipped,
+      Set<String> completedExercises,
       int duration,
       int activeDuration,
       double calories,
@@ -27,6 +28,9 @@ public final class GamificationRepository {
     if (!Arrays.asList("too_easy", "suitable", "too_difficult").contains(difficulty)
         || !Arrays.asList("energized", "normal", "tired", "discomfort").contains(feeling))
       return Tasks.forException(new IllegalArgumentException("Feedback required"));
+    List<String> exerciseIds = new ArrayList<>(completedExercises);
+    if (exerciseIds.size() > completed || exerciseIds.stream().anyMatch(id -> id == null || id.isEmpty()))
+      return Tasks.forException(new IllegalArgumentException("Invalid exercise history"));
     DocumentReference user = repository.user(), record = user.collection(RECORDS).document(session);
     Date now = new Date();
     TimeZone zone = TimeZone.getDefault();
@@ -280,6 +284,7 @@ public final class GamificationRepository {
                       percentage,
                       "durationSeconds",
                       duration,
+                      "completedExerciseIds", exerciseIds,
                       "activeDurationSeconds",
                       activeDuration,
                       "estimatedCaloriesBurned",

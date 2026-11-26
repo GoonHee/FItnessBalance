@@ -12,7 +12,7 @@ after(async()=>{if(env)await env.cleanup()});
 beforeEach(async()=>{await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{const db=c.firestore(),b=writeBatch(db);const seed=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../exercise-seed.json'),'utf8'));for(const [key,value]of Object.entries(seed))b.set(doc(db,key),value);for(const uid of ['alice','bob'])b.set(doc(db,`users/${uid}`),{fullName:uid,totalXp:0,level:1});await b.commit()});});
 const db=(uid='alice')=>env.authenticatedContext(uid,{email_verified:true,email:`${uid}@example.test`}).firestore();
 const ref=(d,s)=>doc(d,`users/alice/${s}`);
-async function start(d,id='session1',lessonId='lesson_01') {return setDoc(ref(d,`workoutSessions/${id}`),{pathId:PATH,lessonId,plannedExercises:4,startedAt:serverTimestamp()})}
+async function start(d,id='session1',lessonId='lesson_01',plannedExercises=4) {return setDoc(ref(d,`workoutSessions/${id}`),{pathId:PATH,lessonId,plannedExercises,startedAt:serverTimestamp()})}
 // This exercises the same server-side atomic/idempotency contract, without claiming to run Android UI code.
 async function complete(d,id='session1',allAchievements=false,legacy=false){
  return runTransaction(d,async tx=>{
@@ -21,20 +21,22 @@ async function complete(d,id='session1',allAchievements=false,legacy=false){
   const manual=await tx.get(ref(d,`exerciseLogs/${DAY}`)),daily=await tx.get(ref(d,`dailyData/${DAY}`));
   const qids=['planned','minutes','feedback'];const quests=[];for(const q of qids)quests.push(await tx.get(ref(d,`questProgress/${DAY}_${q}`)));
   const owned=[];for(const a of achievements)owned.push(await tx.get(ref(d,`unlockedAchievements/${a}`)));
-  const u=user.data()||{},p=progress.data()||{},w=week.data()||{};const attempts=(p.completionCounts||{}).lesson_01||0,count=(w.completed||0)+1;
+  const {lessonId,plannedExercises}=session.data(), quick=lessonId==='quick_cardio';
+  const active=quick?150:300, name=quick?'Easy movement break':'Basic Movement';
+  const u=user.data()||{},p=progress.data()||{},w=week.data()||{};const attempts=(p.completionCounts||{})[lessonId]||0,count=(w.completed||0)+1;
   const bonus=count>=3&&!w.bonusAwarded?30:0;
-  const xpBreakdown={lesson:Math.round(10*(attempts===0?1:attempts===1?.5:.25)),feedback:2,
-    planned:quests[0].exists()?0:5,minutes:quests[1].exists()?0:5,weekly:bonus};
+  const xpBreakdown={lesson:Math.round((quick?5:10)*(attempts===0?1:attempts===1?.5:.25)),feedback:2,
+    planned:quests[0].exists()?0:5,minutes:quick||quests[1].exists()?0:5,weekly:bonus};
   const xp=Object.values(xpBreakdown).reduce((sum,value)=>sum+value,0),total=(u.totalXp||0)+xp;
   const unlocks=allAchievements?achievements:!owned[0].exists()?['first_step']:[];
-  const contributions={...(daily.data()?.structuredExerciseContributions||{})};contributions[id]={calories:25,activeSeconds:300};
+  const contributions={...(daily.data()?.structuredExerciseContributions||{})};contributions[id]={calories:25,activeSeconds:active};
   const manualItems=manualRows(manual.data(),daily.data());tx.set(ref(d,`dailyData/${DAY}`),dayTotals(manualItems,contributions),{merge:true});
-  for(let n=0;n<3;n++)if(!quests[n].exists())tx.set(quests[n].ref,{day:DAY,questId:qids[n],completed:true,xpEarned:n===2?0:5,recordId:id,completedAt:serverTimestamp()});
+  for(let n=0;n<3;n++)if(!quests[n].exists()&&(!quick||n!==1))tx.set(quests[n].ref,{day:DAY,questId:qids[n],completed:true,xpEarned:n===2?0:5,recordId:id,completedAt:serverTimestamp()});
   for(const a of unlocks)if(!owned[achievements.indexOf(a)].exists())tx.set(ref(d,`unlockedAchievements/${a}`),{recordId:id,unlockedAt:serverTimestamp()});
-  tx.set(ref(d,`pathProgress/${PATH}`),{completionCounts:{lesson_01:attempts+1},bestPercent:{lesson_01:100},bestStars:{lesson_01:3},updatedAt:serverTimestamp()});
+  tx.set(ref(d,`pathProgress/${PATH}`),{completionCounts:{[lessonId]:attempts+1},bestPercent:{[lessonId]:100},bestStars:{[lessonId]:3},updatedAt:serverTimestamp()});
   tx.set(ref(d,`exerciseWeeks/${WEEK}`),{completed:count,categories:['mixed'],bonusAwarded:!!w.bonusAwarded||bonus>0,target:3,lastRecordId:id,updatedAt:serverTimestamp()});
   tx.set(doc(d,'users/alice'),{totalXp:total,level:Math.floor(total/100)+1,lastRecordId:id,feedbackCount:(u.feedbackCount||0)+1,achievementIds:[...new Set([...(u.achievementIds||[]),...unlocks])],metGoalWeeks:bonus?[WEEK]:u.metGoalWeeks||[],lastWorkoutAt:serverTimestamp()},{merge:true});
-  tx.set(record,{pathId:PATH,lessonId:'lesson_01',lessonName:'Basic Movement',startedAt:session.data().startedAt,completedAt:serverTimestamp(),plannedExercises:4,completedExercises:4,skippedExercises:0,completionPercentage:100,durationSeconds:380,activeDurationSeconds:300,estimatedCaloriesBurned:25,xpEarned:xp,starsEarned:3,difficultyFeedback:'suitable',feelingFeedback:'normal',discomfortReported:false,firstCompletion:attempts===0,totalXpAfter:total,weeklyCompleted:count,weeklyTarget:3,unlocked:unlocks,localDay:DAY,localWeek:WEEK,timeZone:'Asia/Kuala_Lumpur',category:'mixed',...(legacy?{}:{xpBreakdown})});
+  tx.set(record,{pathId:PATH,lessonId,lessonName:name,startedAt:session.data().startedAt,completedAt:serverTimestamp(),plannedExercises,completedExercises:plannedExercises,skippedExercises:0,completionPercentage:100,durationSeconds:quick?165:380,activeDurationSeconds:active,estimatedCaloriesBurned:25,xpEarned:xp,starsEarned:3,difficultyFeedback:'suitable',feelingFeedback:'normal',discomfortReported:false,firstCompletion:attempts===0,totalXpAfter:total,weeklyCompleted:count,weeklyTarget:3,unlocked:unlocks,localDay:DAY,localWeek:WEEK,timeZone:'Asia/Kuala_Lumpur',category:'mixed',...(legacy?{}:{xpBreakdown,completedExerciseIds:quick?['EX012','EX016']:['EX001','EX002']})});
   return xp;
  }).catch(async error=>{const confirmed=await getDocFromServer(ref(d,`workoutRecords/${id}`));if(confirmed.exists())return confirmed.data().xpEarned;throw error;});
 }
@@ -59,6 +61,7 @@ test('new guided records retain the XP breakdown and older clients can still sav
  const saved=(await getDoc(ref(d,'workoutRecords/session1'))).data();
  assert.deepEqual(saved.xpBreakdown,{lesson:10,feedback:2,planned:5,minutes:5,weekly:0});
  assert.equal(saved.xpEarned,22);
+ assert.deepEqual(saved.completedExerciseIds,['EX001','EX002']);
  const weeklyQuests=await assertSucceeds(getDocs(query(collection(d,'users/alice/questProgress'),
    where('day','>=',WEEK),where('day','<=',DAY))));
  assert.equal(weeklyQuests.docs.filter(q=>q.data().questId==='planned'&&q.data().completed).length,1);
@@ -348,4 +351,18 @@ test('milestone chest claims require the matching goal and remain account-privat
  assert.deepEqual((await Promise.all([open(), open()])).sort(), [false, true]);
  await assertFails(getDoc(ref(db('bob'), `questProgress/${DAY}_planned/chest/reward`)));
  await assertSucceeds(setDoc(achievement, reward));
+});
+
+
+test('short challenge uses the standard single-session start receipt', async () => {
+ const d = db(), id = 'quick-day-session';
+ await assertSucceeds(start(d, id, 'quick_cardio', 2));
+ const saved = (await getDoc(ref(d, `workoutSessions/${id}`))).data();
+ assert.equal(saved.lessonId, 'quick_cardio');
+ await assertFails(start(d, id, 'wellness_breathe', 2));
+ assert.deepEqual(await assertSucceeds(Promise.all([complete(d,id),complete(d,id)])),[12,12]);
+ const record=(await getDoc(ref(d,`workoutRecords/${id}`))).data();
+ assert.equal(record.xpBreakdown.lesson,5);
+ assert.equal(record.xpBreakdown.minutes,0);
+ assert.equal((await getDoc(doc(d,'users/alice'))).get('totalXp'),12);
 });

@@ -199,7 +199,7 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
               List<WorkoutLesson> available = new ArrayList<>(), repeatable = new ArrayList<>();
               Map<String, Object> best = Values.map(progress.getResult().get("bestPercent"));
               for (WorkoutLesson lesson : lessons.getResult())
-                if (repository.unlocked(lesson, progress.getResult())) {
+                if (lesson.getDailyChallenge().isEmpty() && repository.unlocked(lesson, progress.getResult())) {
                   if (lesson.getStandalone() || Values.decimal(best.get(lesson.getId()), 0) < 50)
                     available.add(lesson);
                   if (!lesson.getStandalone()) repeatable.add(lesson);
@@ -257,6 +257,20 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
                     complete ? () -> dailyChest.showQuest(questDate, quest) : null));
               }
               list(R.id.exQuests, new QuestAdapter(rows));
+              boolean mainDone = false;
+              for (Map<String, Object> record : recent) {
+                if (!today.equals(record.get("localDay")) || !DailyChallengeService.eligible(record)) continue;
+                String id = Values.text(record.get("lessonId"), "");
+                if (!id.startsWith("quick_") && !id.startsWith("wellness_")) {
+                  mainDone = true;
+                  break;
+                }
+              }
+              text(R.id.exMainChallengeState, getString(mainDone ? R.string.ex_done : R.string.ex_pending));
+              renderChallenge("quick", R.id.exQuickChallenge, R.id.exQuickChallengeAction,
+                  questDate, preferences, lessons.getResult(), recent);
+              renderChallenge("wellness", R.id.exWellnessChallenge, R.id.exWellnessChallengeAction,
+                  questDate, preferences, lessons.getResult(), recent);
               loaded();
               try { banditStore.learn(recent); } catch(java.io.IOException error){status(R.string.cmab_error);}
               banditPreferences=preferences;banditAvailable=new ArrayList<>(available);
@@ -270,6 +284,23 @@ public final class ExerciseHomeActivity extends ExerciseBaseActivity {
             e -> {
               if (version == loadVersion && activityDay.equals(LocalDayObserver.today())) error(e);
             });
+  }
+
+  private void renderChallenge(String slot, int description, int action, java.time.LocalDate date,
+      RecommendationService.Preferences preferences, List<WorkoutLesson> lessons,
+      List<Map<String, Object>> records) {
+    DailyChallengeService.Challenge result = new DailyChallengeService().select(slot, date, preferences, lessons, records);
+    WorkoutLesson lesson = result.lesson;
+    View button = findViewById(action);
+    button.setVisibility(lesson != null && !result.completed ? View.VISIBLE : View.GONE);
+    button.setOnClickListener(lesson == null ? null : v -> open(WorkoutDetailsActivity.class, lesson.getId()));
+    int unavailable = preferences.discomfort ? R.string.challenge_rest
+        : "quick".equals(slot) && (preferences.tired || preferences.recoveryDay
+            || preferences.lastDifficulties.contains("too_difficult")) ? R.string.challenge_optional
+        : R.string.challenge_unavailable;
+    text(description, lesson == null ? getString(unavailable) : getString(R.string.challenge_details,
+        lesson.getName(), lesson.getEstimatedMinutes(), lesson.getBaseXp(),
+        getString(result.completed ? R.string.ex_done : R.string.ex_pending)));
   }
 
   private boolean currentRecommendation(int version) {
